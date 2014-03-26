@@ -1,0 +1,34 @@
+global {
+  usage-count no;
+}
+
+common {
+  startup {
+    degr-wfc-timeout 0;
+  }
+
+net {
+    protocol C;
+    cram-hmac-alg sha1;
+    shared-secret 65d93e3f3649052539b85a3cef469121e9856a77f0e60b94ad8820fef22f;
+    sndbuf-size 0;
+    rcvbuf-size 0;
+    after-sb-0pri discard-younger-primary;
+    after-sb-1pri discard-secondary;
+    after-sb-2pri call-pri-lost-after-sb;
+  }
+
+  disk {
+    on-io-error detach;
+  }
+ 
+  syncer {
+    rate 40M;
+  }
+ 
+  handlers {
+    split-brain "/opt/opscode/embedded/lib/drbd/notify-split-brain.sh pc-default@opscode.com";
+  }
+}
+
+include "/var/opt/opscode/drbd/etc/*.res";

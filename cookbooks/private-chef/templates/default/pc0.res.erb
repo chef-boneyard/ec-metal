@@ -1,0 +1,15 @@
+resource pc0 {
+  syncer {
+    rate 40M;
+  }
+
+<% @backends.each_pair do |name, options| -%>
+  on <%= options[:hostname] || "#{name}.opscode.piab" %> {
+    device /dev/drbd0;
+    disk /dev/opscode/drbd;
+    flexible-meta-disk  internal;
+    address <%= options[:cluster_ipaddress] || options[:ipaddress] %>:7788;
+  }
+<% end -%>
+
+}
