@@ -88,3 +88,11 @@ file '/root/.ssh/authorized_keys' do
   mode '0600'
   content node['root_ssh']['pubkey']
 end
+
+file '/root/.ssh/config' do
+  action :create
+  owner 'root'
+  group 'root'
+  mode '0600'
+  content "Host *\n  StrictHostKeyChecking no\n"
+end
