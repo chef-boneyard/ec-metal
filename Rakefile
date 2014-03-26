@@ -22,3 +22,9 @@ task :ssh, [:machine] do |t,arg|
     system("vagrant ssh #{arg.machine}")
   }
 end
+
+task :keypair do
+  keydir = 'keys'
+  Dir.mkdir keydir unless Dir.exists? keydir
+  system("ssh-keygen -t rsa -P '' -q -f #{File.dirname(__FILE__)}/#{keydir}/id_rsa")
+end
