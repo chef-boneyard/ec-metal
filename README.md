@@ -22,11 +22,11 @@ Usage
 
 TODO
 ----
-* This cookbook is still a WIP under heavy development, so far it only proves that chef-metal works :)
+* This cookbook is still a WIP under heavy development, so far it can establish a working backend (w/ DRBD) cluster
 * Figure out a nice way to assist with EC package downloads and caching
-* Dynamic configuration of environment (OS platform, IPs, storage backends, etc) via config file
-* Replication of `/etc/opscode` directory from the bootstrap to the other nodes
-* SSH key management inter-node
+* Improve the capabilities and usefulness of the config file (config.json)
+* /etc/hostsfile management on the nodes and on the host/orchestrator machine
+* Frontends
 * pluggable storage backends
 * UPGRADES
 * ADDONS

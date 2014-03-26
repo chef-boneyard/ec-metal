@@ -1,9 +1,6 @@
 # encoding: utf-8
 HOST_CACHE_PATH = node['harness']['host_cache_path']
 
-# grossness to inject vagrant/virtualbox config settings
-
-
 node['harness']['vm_config']['backends'].each do |backend,config|
 
   vm_disk2 = ::File.join(node['harness']['vms_dir'], backend, 'disk2.vmdk')
@@ -47,7 +44,8 @@ node['harness']['vm_config']['backends'].each do |backend,config|
   #   not sure if there's any actual benefit for ext4
 
   node_attributes = {
-    'private-chef' => node['harness']['vm_config']
+    'private-chef' => node['harness']['vm_config'],
+    'root_ssh' => node['harness']['root_ssh'].to_hash
   }
 
 
@@ -64,6 +62,8 @@ node['harness']['vm_config']['backends'].each do |backend,config|
 
     recipe 'private-chef::provision'
     recipe 'private-chef::drbd'
+    recipe 'private-chef::provision_phase2'
+
     if node['harness']['vm_config']['backends'][backend]['bootstrap'] == true
       puts "***** Configuring node #{backend} as the bootstrap and primary backend"
     else
