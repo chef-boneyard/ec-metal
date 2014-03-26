@@ -1,0 +1,33 @@
+topology "<%= node['private-chef']['topology'] %>"
+
+<% @backends.each_pair do |name, options| -%>
+server "<%= options[:hostname] || "#{name}.opscode.piab" %>",
+  :ipaddress => "<%= options[:ipaddress] %>",
+  <% if options[:cluster_ipaddress] -%>
+  :cluster_ipaddress => "<%= options[:cluster_ipaddress] %>",
+  <% end -%>
+  :role => "backend",
+  :bootstrap => <%= options[:bootstrap] || false %>
+<% end -%>
+
+<% @frontends.each_pair do |name, options| -%>
+server "<%= options[:hostname] || "#{name}.opscode.piab" %>",
+  :ipaddress => "<%= options[:ipaddress] %>",
+  :role => "frontend"
+<% end -%>
+
+<% if @backend_vip -%>
+backend_vip "<%= @backend_vip[:hostname] || "backend.opscode.piab" %>",
+ :ipaddress => "<%= @backend_vip[:ipaddress] %>",
+ :device => "<%= @backend_vip[:device] %>",
+ :heartbeat_device => "<%= @backend_vip[:heartbeat_device] %>"
+<% end -%>
+
+api_fqdn "<%= node['private-chef']['api_fqdn'] %>"
+
+<% node['private-chef']['configuration'].each_pair do |component, tunables| -%>
+<% tunables.each_pair do |name, value| -%>
+<% value = %Q["#{value}"] if value.kind_of?(String) %>
+<%= "#{component}['#{name}'] = #{value}" %>
+<% end -%>
+<% end -%>
