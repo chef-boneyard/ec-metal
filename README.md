@@ -17,6 +17,8 @@ Usage
 1. To tear down the environment: `rake destroy`
 1. Status: `rake status`
 1. SSH: `rake ssh[backend1]`
+1. the `clients`, `nodes`, and `vagramt_vms` subdirectories are created automatically
+1. Dowload the private-chef installer RPM to /oc/EC/Downloads or specify your own directory in `cookbooks/ec-harness/attributes/default.rb`
 
 TODO
 ----
@@ -48,6 +50,7 @@ default['harness']['vagrant']['box_url'] = 'http://opscode-vm-bento.s3.amazonaws
 default['harness']['vagrant']['disk2_size'] = 2
 
 default['harness']['vm_config'] = {
+      installer_file: '/tmp/cache/private-chef-11.1.2-1.el6.x86_64.rpm',
       topology: 'ha',
       api_fqdn: 'api.opscode.piab',
       analytics_fqdn: 'analytics.opscode.piab',
