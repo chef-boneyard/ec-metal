@@ -64,3 +64,27 @@ end
     not_if "grep -q #{fqdn} /etc/hosts" # entry exists
   end
 end
+
+# SSH key management for inter-node trust
+directory '/root/.ssh' do
+  owner 'root'
+  group 'root'
+  mode '0700'
+  action :create
+end
+
+file '/root/.ssh/id_rsa' do
+  action :create
+  owner 'root'
+  group 'root'
+  mode '0600'
+  content node['root_ssh']['privkey']
+end
+
+file '/root/.ssh/authorized_keys' do
+  action :create
+  owner 'root'
+  group 'root'
+  mode '0600'
+  content node['root_ssh']['pubkey']
+end

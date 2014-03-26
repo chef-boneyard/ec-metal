@@ -47,7 +47,8 @@ node['harness']['vm_config']['backends'].each do |backend,config|
   #   not sure if there's any actual benefit for ext4
 
   node_attributes = {
-    'private-chef' => node['harness']['vm_config']
+    'private-chef' => node['harness']['vm_config'],
+    'root_ssh' => node['harness']['root_ssh'].to_hash
   }
 
 
