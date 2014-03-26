@@ -2,26 +2,10 @@ ec-harness Cookbook
 ================
 This cookbook uses chef-metal to provision, install and upgrade Enterprise Chef HA clusters.
 
-Requirements
-------------
-This cookbook depends on the community `yum` cookbook, version 3.x
-
-Usage
------
-1. Ensure you have a working recent Vagrant and Virtualbox (tested on Vagrant 1.4.x and 1.5.x)
-1. Install chef-metal: https://github.com/opscode/chef-metal
-1. create a `~/chef-repo/cookbooks` directory
-1. Download this cookbook and the yum cookbook into your cookbooks directory
-  * `git clone https://github.com/irvingpop/ec-harness.git`
-  * `git clone https://github.com/opscode-cookbooks/yum.git`
-1. Execute this recipe using chef-zero from your machine: `chef-client -z -o harness::default`
-
 TODO
 ----
 * This cookbook is still a WIP under heavy development, so far it only proves that chef-metal works :)
-* The full configuration of EC/HA isn't working yet.  The only recipe known to work on the VMs so far is `ec-harness::drbd`
-* probably import the private-chef cookbook from opscode-dev-vm
-* Get cookbook dependency management (yum, etc)
+* Dynamic configuration of environment (OS platform, IPs, storage backends, etc) via config file
 * Figure out a nice way to assist with EC package downloads and caching
 
 Attributes
