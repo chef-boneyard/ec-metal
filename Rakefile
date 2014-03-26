@@ -23,8 +23,10 @@ task :ssh, [:machine] do |t,arg|
   }
 end
 
-task :keypair do
-  keydir = 'keys'
+task :keygen do
+  keydir = "#{File.dirname(__FILE__)}/keys"
   Dir.mkdir keydir unless Dir.exists? keydir
-  system("ssh-keygen -t rsa -P '' -q -f #{File.dirname(__FILE__)}/#{keydir}/id_rsa")
+  if Dir["#{keydir}/*"].empty?
+    system("ssh-keygen -t rsa -P '' -q -f #{keydir}/id_rsa")
+  end
 end
