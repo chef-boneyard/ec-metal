@@ -3,7 +3,7 @@ task :default => [:up]
 # Environment variables to be consumed by ec-harness and friends
 ENV['HARNESS_DIR'] = File.dirname(__FILE__)
 
-task :up do
+task :up => [:keygen] do
   system('chef-client -z -o ec-harness::default')
 end
 
