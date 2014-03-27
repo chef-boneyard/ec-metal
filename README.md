@@ -26,7 +26,6 @@ TODO
 * Figure out a nice way to assist with EC package downloads and caching
 * Improve the capabilities and usefulness of the config file (config.json)
 * /etc/hostsfile management on the nodes and on the host/orchestrator machine
-* Frontends
 * pluggable storage backends
 * UPGRADES
 * ADDONS
