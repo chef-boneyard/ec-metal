@@ -1,7 +1,9 @@
 
+# HARNESS_DIR is set by the Rakefile to the project root directory
 default['harness']['repo_path'] = ENV['HARNESS_DIR']
 default['harness']['vms_dir'] = File.join(ENV['HARNESS_DIR'], 'vagrant_vms')
-default['harness']['host_cache_path'] = ENV['CACHE_PATH'] || '/oc/EC/Downloads'
+# host_cache_path is mapped to /tmp/cache on the VMs
+default['harness']['host_cache_path'] = ENV['CACHE_PATH'] || File.join(ENV['HARNESS_DIR'], 'cache')
 
 default['harness']['vagrant']['box'] = 'opscode-centos-6.5'
 default['harness']['vagrant']['box_url'] = 'http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.5_chef-provisionerless.box'

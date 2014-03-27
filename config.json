@@ -2,6 +2,7 @@
   "installer_file": "/tmp/cache/private-chef-11.1.2-1.el6.x86_64.rpm",
   "topology": "ha",
   "api_fqdn": "api.opscode.piab",
+  "manage_fqdn": "manage.opscode.piab",
   "analytics_fqdn": "analytics.opscode.piab",
   "backend_vip": {
     "hostname": "backend.opscode.piab",
