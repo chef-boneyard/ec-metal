@@ -9,6 +9,8 @@
 bootstrap_node_name =
   node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.keys.first
 
+package 'rsync'
+
 # NOTE: order-of-operations!  This assumes that the machine resource for the bootstrap is running first
 if node.name == bootstrap_node_name
 
