@@ -55,15 +55,15 @@ execute "reconfigure-private-chef" do
   not_if { node['private-chef']['topology'] =~ /ha/ }
 end
 
-# ensure the node can resolve the FQDNs locally
-[ node['private-chef']['api_fqdn'],
-  node['private-chef']['manage_fqdn'] ].each do |fqdn|
+# # ensure the node can resolve the FQDNs locally
+# [ node['private-chef']['api_fqdn'],
+#   node['private-chef']['manage_fqdn'] ].each do |fqdn|
 
-  execute "echo 127.0.0.1 #{fqdn} >> /etc/hosts" do
-    not_if "host #{fqdn}" # host resolves
-    not_if "grep -q #{fqdn} /etc/hosts" # entry exists
-  end
-end
+#   execute "echo 127.0.0.1 #{fqdn} >> /etc/hosts" do
+#     not_if "host #{fqdn}" # host resolves
+#     not_if "grep -q #{fqdn} /etc/hosts" # entry exists
+#   end
+# end
 
 # SSH key management for inter-node trust
 directory '/root/.ssh' do
