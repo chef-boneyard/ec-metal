@@ -70,6 +70,7 @@ node['harness']['vm_config']['backends'].merge(
 
     attributes node_attributes
 
+    recipe 'private-chef::hostsfile'
     recipe 'private-chef::provision'
     recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname)
     recipe 'private-chef::provision_phase2'
