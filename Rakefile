@@ -38,7 +38,7 @@ EOH
 end
 
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
-task :up => [:keygen] do
+task :up => [:keygen, :cachedir] do
   system('chef-client -z -o ec-harness::default')
   create_hosts_entries(get_config)
   print_final_message(get_config)
@@ -70,4 +70,14 @@ task :keygen do
   if Dir["#{keydir}/*"].empty?
     system("ssh-keygen -t rsa -P '' -q -f #{keydir}/id_rsa")
   end
+end
+
+task :cachedir do
+  if ENV['CACHE_PATH'] && Dir.exists?(ENV['CACHE_PATH'])
+    cachedir = ENV['CACHE_PATH']
+  else
+    cachedir = File.join(File.dirname(__FILE__), 'cache')
+    Dir.mkdir cachedir unless Dir.exists?(cachedir)
+  end
+  puts "Using package cache directory #{cachedir}"
 end
