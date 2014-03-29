@@ -1,5 +1,8 @@
+Berksfile.lock
+Gemfile.lock
 clients
 nodes
 vagrant_vms
 keys
 cache
+vendor
