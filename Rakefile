@@ -38,7 +38,7 @@ EOH
 end
 
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
-task :up => [:keygen, :cachedir] do
+task :up => [:keygen, :cachedir, :berks_install] do
   system('chef-client -z -o ec-harness::default')
   create_hosts_entries(get_config)
   print_final_message(get_config)
