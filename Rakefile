@@ -39,7 +39,7 @@ end
 
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
 task :up => [:keygen, :cachedir] do
-  system('chef-client -z -o ec-harness::default')
+  system('chef-client -z -l debug -o ec-harness::default')
   create_hosts_entries(get_config)
   print_final_message(get_config)
 end
