@@ -64,8 +64,15 @@ task :ssh, [:machine] do |t,arg|
   }
 end
 
+desc 'Halt the environment'
+task :halt do
+  Dir.chdir('vagrant_vms') {
+    system("vagrant halt")
+  }
+end
+
 task :keygen do
-  keydir = "#{File.dirname(__FILE__)}/keys"
+  keydir = File.join(File.dirname(__FILE__), 'keys')
   Dir.mkdir keydir unless Dir.exists? keydir
   if Dir["#{keydir}/*"].empty?
     system("ssh-keygen -t rsa -P '' -q -f #{keydir}/id_rsa")
@@ -80,4 +87,9 @@ task :cachedir do
     Dir.mkdir cachedir unless Dir.exists?(cachedir)
   end
   puts "Using package cache directory #{cachedir}"
+end
+
+task :berks_install do
+  cookbooks_path = File.join(File.dirname(__FILE__), 'vendor/cookbooks')
+  system("berks install --path #{cookbooks_path}")
 end
