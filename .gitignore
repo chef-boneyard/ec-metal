@@ -1,5 +1,6 @@
 Berksfile.lock
 Gemfile.lock
+config.json
 clients
 nodes
 vagrant_vms
