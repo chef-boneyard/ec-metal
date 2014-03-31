@@ -1,4 +1,5 @@
 require 'json'
+require 'fileutils'
 Dir["lib/tasks/*.rake"].each { |t| load t }
 
 task :default => [:up]
@@ -38,37 +39,43 @@ EOH
 end
 
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
-task :up => [:keygen, :cachedir, :berks_install] do
+task :up => [:keygen, :cachedir, :berks_install, :config_copy] do
   system('chef-client -z -o ec-harness::default')
-  create_hosts_entries(get_config)
-  print_final_message(get_config)
+  create_hosts_entries(get_config['layout'])
+  print_final_message(get_config['layout'])
 end
+task :start => :up
 
 desc 'Destroy all VMs'
 task :destroy do
   system('chef-client -z -o ec-harness::cleanup')
-  remove_hosts_entries(get_config)
+  remove_hosts_entries(get_config['layout'])
 end
-
-desc 'Show the Vagrant/VM status'
-task :status do
-  Dir.chdir('vagrant_vms') {
-    system('vagrant status')
-  }
-end
+task :cleanup => :destroy
 
 desc 'SSH to a machine like so: rake ssh[backend1]'
 task :ssh, [:machine] do |t,arg|
-  Dir.chdir('vagrant_vms') {
+  Dir.chdir(File.join(File.dirname(__FILE__), 'vagrant_vms')) {
     system("vagrant ssh #{arg.machine}")
   }
 end
 
-desc 'Halt the environment'
-task :halt do
-  Dir.chdir('vagrant_vms') {
-    system("vagrant halt")
-  }
+# Vagrant standard but useful commands
+%w(status halt suspend resume).each do |command|
+  desc "Equivalent to running: vagrant #{command}"
+  task :"#{command}" do
+    Dir.chdir(File.join(File.dirname(__FILE__), 'vagrant_vms')) {
+      system("vagrant #{command}")
+    }
+  end
+end
+
+task :config_copy do
+  config_file = File.join(File.dirname(__FILE__), 'config.json')
+  config_ex_file = File.join(File.dirname(__FILE__), 'config.json.example')
+  unless File.exists?(config_file)
+    FileUtils.cp(config_ex_file, config_file)
+  end
 end
 
 task :keygen do
