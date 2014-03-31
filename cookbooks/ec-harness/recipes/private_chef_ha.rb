@@ -14,7 +14,7 @@ def generate_vagrant_config(vmname, config)
   vagrant_config = <<-ENDCONFIG
     config.vm.network 'private_network', ip: "#{config['ipaddress']}"
     config.vm.hostname = "#{config['hostname']}"
-    config.vm.synced_folder "#{node['harness']['host_cache_path']}", '/tmp/cache'
+    config.vm.synced_folder "#{node['harness']['host_cache_path']}", "#{node['harness']['vm_mountpoint']}"
     config.vm.provider 'virtualbox' do |v|
       v.customize [
         'modifyvm', :id,
