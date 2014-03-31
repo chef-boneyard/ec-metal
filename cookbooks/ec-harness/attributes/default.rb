@@ -9,6 +9,11 @@ default['harness']['vms_dir'] = File.join(ENV['HARNESS_DIR'], 'vagrant_vms')
 
 # host_cache_path is mapped to /tmp/cache on the VMs
 default['harness']['host_cache_path'] = ENV['CACHE_PATH'] || File.join(ENV['HARNESS_DIR'], 'cache')
+default['harness']['vm_mountpoint'] = '/tmp/cache'
+
+# Installer file, we depend on the Rakefile to pass us OPC_INSTALL_PKG
+installer_file = File.join(node['harness']['vm_mountpoint'], ENV['OPC_INSTALL_PKG'])
+default['harness']['vm_config']['installer_file'] = installer_file
 
 # SSH key distribution for inter-machine trust
 default['harness']['root_ssh']['privkey'] = File.read(File.join(ENV['HARNESS_DIR'], 'keys', 'id_rsa'))

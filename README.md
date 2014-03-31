@@ -25,7 +25,6 @@ TODO
 ----
 NOTE: This is still a WIP under heavy development
 * Figure out a nice way to assist with EC package downloads and caching (dendrite?)
-* Improve the capabilities and usefulness of the config file (config.json)
 * Testing
 * UPGRADES
 * ADDONS

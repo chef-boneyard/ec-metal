@@ -7,6 +7,11 @@ task :default => [:up]
 # Environment variables to be consumed by ec-harness and friends
 ENV['HARNESS_DIR'] = File.dirname(__FILE__)
 
+# Simple package version passing, TODO make this *much* smarter
+ENV['OPC_INSTALL_PKG'] = 'private-chef-11.1.2-1.el6.x86_64.rpm' unless
+  ENV['OPC_INSTALL_PKG'].is_a?(String) &&
+  ENV['OPC_INSTALL_PKG'].length > 5
+
 def get_config
   JSON.parse(File.read('config.json'))
 end
