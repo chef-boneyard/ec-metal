@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 
-gem 'chef-metal'
+gem 'chef-metal', ">= 0.4.0"
 gem 'berkshelf'
