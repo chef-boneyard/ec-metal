@@ -66,7 +66,22 @@ template File.join(drbd_etc_dir, 'drbd.conf') do
   not_if { File.exists?(File.join(drbd_etc_dir, 'drbd.conf')) }
 end
 
-# This is cheating
+# Opscode-omnibus wants hostname == fqdn, so we have to do this grossness
+execute 'force-hostname-fqdn' do
+  command "hostname #{node.fqdn}"
+  action :run
+  not_if { node.fqdn == `/bin/hostname` }
+end
+
+file '/etc/hostname' do
+  action :create
+  owner 'root'
+  group 'root'
+  mode '0644'
+  content "#{node.fqdn}\n"
+end
+
+
 template File.join(drbd_etc_dir, 'pc0.res') do
   source 'pc0.res.erb'
   mode '0655'
