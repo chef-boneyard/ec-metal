@@ -1,9 +1,9 @@
 
-case node['platform']
-when 'ubuntu'
+case node['platform_family']
+when 'debian'
   include_recipe 'apt'
   package 'drbd8-utils'
-when 'centos'
+when 'rhel'
   include_recipe 'yum'
 
   yum_key 'RPM-GPG-KEY-elrepo' do
@@ -60,12 +60,6 @@ drbd_data_dir = File.join(drbd_dir, 'data')
   end
 end
 
-template File.join(drbd_etc_dir, 'drbd.conf') do
-  source 'drbd.conf.erb'
-  mode '0655'
-  not_if { File.exists?(File.join(drbd_etc_dir, 'drbd.conf')) }
-end
-
 # Opscode-omnibus wants hostname == fqdn, so we have to do this grossness
 execute 'force-hostname-fqdn' do
   command "hostname #{node.fqdn}"
@@ -81,6 +75,11 @@ file '/etc/hostname' do
   content "#{node.fqdn}\n"
 end
 
+template File.join(drbd_etc_dir, 'drbd.conf') do
+  source 'drbd.conf.erb'
+  mode '0655'
+  not_if { File.exists?(File.join(drbd_etc_dir, 'drbd.conf')) }
+end
 
 template File.join(drbd_etc_dir, 'pc0.res') do
   source 'pc0.res.erb'
@@ -107,12 +106,14 @@ template File.join(drbd_etc_dir, 'drbd.conf') do
   not_if { ::File.exists?(File.join(drbd_etc_dir, 'drbd.conf')) }
 end
 
-# service 'drbd' do
-#   supports :status => true, :restart => true, :reload => true
-#   action [ :enable, :start ]
-#   subscribes :reload, "template[/var/opt/opscode/drbd/etc/drbd.conf]"
-#   subscribes :reload, "template[/var/opt/opscode/drbd/etc/pc0.res]"
-# end
+# Debian/Ubuntu defaults to *not* starting the service by default
+if node['platform_family'] == 'debian'
+  execute 'start-drbd-service-with-timeout' do
+    command 'timeout 20 service drbd start; exit 0'
+    action :run
+    not_if "lsmod | grep drbd"
+  end
+end
 
 execute 'create-md' do
   command 'drbdadm create-md pc0'
@@ -129,7 +130,11 @@ end
 
 # TODO: more reliably detect if we are an unconfigured bootstrap node
 execute 'drbd-primary-force' do
-  command 'drbdadm primary --force pc0'
+  if node['platform_family'] == 'debian'
+    command 'drbdadm -- --overwrite-data-of-peer primary pc0'
+  else
+    command 'drbdadm primary --force pc0'
+  end
   action :run
   notifies :run, 'execute[mkfs-drbd-volume]', :immediately
   only_if { node['private-chef']['backends'][node.name]['bootstrap'] == true }
