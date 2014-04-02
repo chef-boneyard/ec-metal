@@ -7,7 +7,7 @@
 #
 
 bootstrap_node_name =
-  node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.keys.first
+  node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.values.first['hostname']
 
 package 'rsync'
 
