@@ -1,5 +1,8 @@
 # encoding: utf-8
 
+bootstrap_node_name =
+  node['harness']['vm_config']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.keys.first
+
 # Bring the backends and frontends online
 node['harness']['vm_config']['backends'].merge(
   node['harness']['vm_config']['frontends']).each do |vmname, config|
@@ -20,6 +23,7 @@ node['harness']['vm_config']['backends'].merge(
     recipe 'private-chef::provision'
     recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname)
     recipe 'private-chef::provision_phase2'
+    recipe 'private-chef::users' if vmname == bootstrap_node_name
 
     action :create
   end
