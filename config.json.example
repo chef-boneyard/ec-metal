@@ -20,7 +20,7 @@
         "hostname": "backend1.opscode.piab",
         "ipaddress": "33.33.33.21",
         "cluster_ipaddress": "33.33.34.5",
-        "memory": "2048",
+        "memory": "3072",
         "cpus": "2",
         "bootstrap": true
       },
@@ -28,7 +28,7 @@
         "hostname": "backend2.opscode.piab",
         "ipaddress": "33.33.33.22",
         "cluster_ipaddress": "33.33.34.6",
-        "memory": "2048",
+        "memory": "3072",
         "cpus": "2"
       }
     },
