@@ -6,7 +6,7 @@ Requirements
 ------------
 * rake
 * chef-metal
-* Vagrant 1.4 or higher
+* Vagrant 1.5 or higher
 * Virtualbox
 
 Usage
