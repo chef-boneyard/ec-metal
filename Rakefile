@@ -17,6 +17,16 @@ def get_config
 end
 
 def print_final_message(private_chef_config)
+  backend1 = backend2 = nil
+  private_chef_config['backends'].each do |node,attrs|
+    if attrs['bootstrap'] == true
+      backend1 = node
+    else
+      backend2 = node
+    end
+  end
+  frontend1 = private_chef_config['frontends'].keys.first
+
   final_message = <<-EOH
 
     _/_/_/              _/                          _/
@@ -34,10 +44,10 @@ _/        _/    _/  _/          _/          _/    _/  _/    _/
 Web UI...............https://#{private_chef_config['manage_fqdn']}
 API FQDN.............https://#{private_chef_config['api_fqdn']}
 Servers:
-  Backend Server 1.....#{private_chef_config['backends']['backend1']['hostname']}  (bootstrap)
-  Backend Server 2.....#{private_chef_config['backends']['backend2']['hostname']}
+  Backend Server 1.....#{private_chef_config['backends'][backend1]['hostname']}  (bootstrap)
+  Backend Server 2.....#{private_chef_config['backends'][backend2]['hostname']}
   Backend VIP..........#{private_chef_config['backend_vip']['hostname']}
-  Frontend Server 1....#{private_chef_config['frontends']['frontend1']['hostname']}
+  Frontend Server 1....#{private_chef_config['frontends'][frontend1]['hostname']}
 
 EOH
   puts final_message
@@ -45,6 +55,7 @@ end
 
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
 task :up => [:keygen, :cachedir, :berks_install, :config_copy] do
+  create_users_directory
   system('chef-client -z -o ec-harness::default')
   create_hosts_entries(get_config['layout'])
   print_final_message(get_config['layout'])
