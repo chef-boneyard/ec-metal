@@ -6,9 +6,15 @@ common {
   startup {
     degr-wfc-timeout 0;
   }
+<%- if DrbdHelper.get_drbdadm_version =~ /^8\.3/ -%>
+
+  protocol C;
+<%- end -%>
 
 net {
+<%- if DrbdHelper.get_drbdadm_version =~ /^8\.4/ %>
     protocol C;
+<%- end -%>
     cram-hmac-alg sha1;
     shared-secret 65d93e3f3649052539b85a3cef469121e9856a77f0e60b94ad8820fef22f;
     sndbuf-size 0;

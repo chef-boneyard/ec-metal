@@ -6,7 +6,7 @@ Requirements
 ------------
 * rake
 * chef-metal
-* Vagrant 1.4 or higher
+* Vagrant 1.5 or higher
 * Virtualbox
 
 Usage
@@ -31,6 +31,7 @@ NOTE: This is still a WIP under heavy development
 * UPGRADES
 * ADDONS
 * Support for additiional providers (EC2, etc)
+* Ubuntu support (12.04 and 14.04)
 * Ability to drive installation, upgrade and restore-from-backup on already-provisioned servers (ex: customer environments)
 
 
