@@ -31,6 +31,7 @@ NOTE: This is still a WIP under heavy development
 * UPGRADES
 * ADDONS
 * Support for additiional providers (EC2, etc)
+* Ubuntu support (12.04 and 14.04)
 * Ability to drive installation, upgrade and restore-from-backup on already-provisioned servers (ex: customer environments)
 
 
