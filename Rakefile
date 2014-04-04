@@ -56,9 +56,10 @@ end
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
 task :up => [:keygen, :cachedir, :berks_install, :config_copy] do
   create_users_directory
-  system('chef-client -z -o ec-harness::default')
-  create_hosts_entries(get_config['layout'])
-  print_final_message(get_config['layout'])
+  if system('chef-client -z -o ec-harness::private_chef_ha')
+    create_hosts_entries(get_config['layout'])
+    print_final_message(get_config['layout'])
+  end
 end
 task :start => :up
 
