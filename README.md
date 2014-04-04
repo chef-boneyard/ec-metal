@@ -12,16 +12,16 @@ Requirements
 Usage
 -----
 1. Ensure you have a working recent Vagrant and Virtualbox (tested on Vagrant 1.4.x and 1.5.x)
-1. Install chef-metal: https://github.com/opscode/chef-metal
-1. Adjust the `config.json` and `cookbooks/ec-harness/attributes/default.rb` as needed for your desired topology and platform
-1. Download the private-chef packages to the ec-ha/cache directory or point to your own installer cache with `$CACHE_PATH`
-1. Set the environment variable `OPC_INSTALL_PKG` to the name of your installer package like so:
+2. Install chef-metal: https://github.com/opscode/chef-metal
+3. Adjust the `config.json` and `cookbooks/ec-harness/attributes/default.rb` as needed for your desired topology and platform
+4. Download the private-chef packages to the ec-ha/cache directory or point to your own installer cache with `$CACHE_PATH`
+5. Set the environment variable `OPC_INSTALL_PKG` to the name of your installer package like so:
     `export OPC_INSTALL_PKG=private-chef-11.1.2-1.el6.x86_64.rpm`
-1. To bring up the environment: `rake up`
-1. To tear down the environment: `rake destroy`
-1. Status: `rake status`
-1. SSH: `rake ssh[backend1]`
-1. the `clients`, `nodes`, `keys` and `vagramt_vms` subdirectories are created automatically
+6. To bring up the environment: `rake up`
+7. To tear down the environment: `rake destroy`
+8. Status: `rake status`
+9. SSH: `rake ssh[backend1]`
+10. the `clients`, `nodes`, `keys` and `vagramt_vms` subdirectories are created automatically
 
 TODO
 ----
