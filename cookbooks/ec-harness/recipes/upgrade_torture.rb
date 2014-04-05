@@ -11,7 +11,6 @@ node['harness']['packages'].each do |name, packagefile|
     end
   end
 
-
   ec_harness_private_chef_ha "install_#{packagefile}_on_#{node['harness']['provider']}" do
     ec_package packagefile
     action :install

@@ -60,7 +60,10 @@ action :stop_all_but_master do
     select { |vmname, config| config['bootstrap'] != true }.merge(
     node['harness']['vm_config']['frontends']).each do |vmname, config|
 
-    recipe 'private-chef::stop_services'
+    ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
+    machine vmname do
+      recipe 'private-chef::stop_services'
+    end
 
   end
 end
