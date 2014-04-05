@@ -19,11 +19,13 @@ if node.name == bootstrap_node_name
     action :run
   end
 
-  execute 'fix-migration-state' do
-    command '/opt/opscode/embedded/bin/bundle exec bin/partybus init'
-    cwd '/opt/opscode/embedded/service/partybus'
-    action :run
-    not_if { File.exists?('/var/opt/opscode/upgrades/migration-level') }
+  unless node['private_chef']['perform_upgrade'] == true
+    execute 'fix-migration-state' do
+      command '/opt/opscode/embedded/bin/bundle exec bin/partybus init'
+      cwd '/opt/opscode/embedded/service/partybus'
+      action :run
+      not_if { File.exists?('/var/opt/opscode/upgrades/migration-level') }
+    end
   end
 
 else
@@ -38,4 +40,11 @@ else
     action :run
   end
 
+end
+
+if node['private_chef']['perform_upgrade'] == true
+  execute 'p-c-c-upgrade' do
+    command '/opt/opscode/bin/private-chef-ctl upgrade'
+    action :run
+  end
 end

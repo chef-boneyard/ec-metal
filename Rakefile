@@ -66,7 +66,7 @@ task :upgrade_torture => [:keygen, :cachedir, :berks_install, :config_copy] do
     print_final_message(get_config['layout'])
   end
 end
-task :start => :up
+task :upgrade => :upgrade_torture
 
 desc 'Destroy all VMs'
 task :destroy do

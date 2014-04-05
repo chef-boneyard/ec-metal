@@ -21,14 +21,27 @@ else
   installer_path = installer_file
 end
 
-package installer_name do
-  source installer_path
-  provider Chef::Provider::Package::Dpkg if platform?("ubuntu","debian")
-  action :install
+node.set['private_chef']['perform_upgrade'] = false
+
+if PackageHelper.private_chef_installed_version > PackageHelper.pc_version(installer_name)
+  log "Installed package #{PackageHelper.private_chef_installed} is newer than installer #{installer_name}"
+else
+  package installer_name do
+    source installer_path
+    provider Chef::Provider::Package::Dpkg if platform_family?('debian')
+    if PackageHelper.private_chef_installed_version < PackageHelper.pc_version(installer_name)
+      action :upgrade
+    else
+      action :install
+    end
+  end
+
+  if PackageHelper.private_chef_installed_version < PackageHelper.pc_version(installer_name)
+    node.set['private_chef']['perform_upgrade'] = true
+  end
 end
 
 # configure
-
 directory "/etc/opscode" do
   owner "root"
   group "root"
@@ -46,14 +59,8 @@ template "/etc/opscode/private-chef.rb" do
     :backend_vip => (node['private-chef']['backend_vip'] || nil)
   )
   action :create
-  notifies :run, "execute[reconfigure-private-chef]", :immediately
 end
 
-execute "reconfigure-private-chef" do
-  command "private-chef-ctl reconfigure"
-  action :nothing
-  not_if { node['private-chef']['topology'] =~ /ha/ }
-end
 
 # # ensure the node can resolve the FQDNs locally
 # [ node['private-chef']['api_fqdn'],

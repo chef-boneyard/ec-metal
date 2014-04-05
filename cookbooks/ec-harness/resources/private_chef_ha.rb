@@ -1,4 +1,4 @@
-actions [:install, :upgrade, :stop_all_but_master, :destroy]
+actions [:install, :stop_all_but_master, :destroy]
 
 default_action :install
 

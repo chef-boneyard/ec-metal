@@ -54,10 +54,15 @@ action :install do
 
 end
 
-action :upgrade do
-end
-
 action :stop_all_but_master do
+  # all backends minus bootstrap
+  node['harness']['vm_config']['backends'].
+    select { |vmname, config| config['bootstrap'] != true }.merge(
+    node['harness']['vm_config']['frontends']).each do |vmname, config|
+
+    recipe 'private-chef::stop_services'
+
+  end
 end
 
 action :destroy do
