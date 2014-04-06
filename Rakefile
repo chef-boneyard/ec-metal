@@ -66,7 +66,15 @@ task :upgrade_torture => [:keygen, :cachedir, :berks_install, :config_copy] do
     print_final_message(get_config['layout'])
   end
 end
-task :upgrade => :upgrade_torture
+
+desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
+task :upgrade => [:keygen, :cachedir, :berks_install, :config_copy] do
+  create_users_directory
+  if system('chef-client -z -o ec-harness::upgrade')
+    create_hosts_entries(get_config['layout'])
+    print_final_message(get_config['layout'])
+  end
+end
 
 desc 'Destroy all VMs'
 task :destroy do
