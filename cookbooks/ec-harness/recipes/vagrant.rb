@@ -1,5 +1,5 @@
 require 'cheffish'
-require 'chef_metal/vagrant'
+require 'chef_metal_vagrant'
 
 repo_path = node['harness']['repo_path']
 vms_dir = node['harness']['vms_dir']
