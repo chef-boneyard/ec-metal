@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+require 'chef_metal'
+
 def whyrun_supported?
   true
 end
@@ -61,8 +63,9 @@ action :stop_all_but_master do
     node['harness']['vm_config']['frontends']).each do |vmname, config|
 
     ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
-    machine vmname do
-      recipe 'private-chef::stop_services'
+    machine_execute "p-c-c_stop_on_#{vmname}" do
+      command '/opt/opscode/bin/private-chef-ctl stop'
+      machine vmname
     end
 
   end
