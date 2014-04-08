@@ -64,7 +64,7 @@ end
 task :start => :up
 
 desc 'Bring the VMs online and then UPGRADE TORTURE'
-task :upgrade_torture => [:keygen, :cachedir, :berks_install, :config_copy] do
+task :upgrade_torture => [:keygen, :cachedir, :berks_install, :config_copy, :bundle] do
   create_users_directory
   if system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade_torture")
     create_hosts_entries(get_config['layout'])
@@ -73,7 +73,7 @@ task :upgrade_torture => [:keygen, :cachedir, :berks_install, :config_copy] do
 end
 
 desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
-task :upgrade => [:keygen, :cachedir, :berks_install, :config_copy] do
+task :upgrade => [:keygen, :cachedir, :berks_install, :config_copy, :bundle] do
   create_users_directory
   if system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
     create_hosts_entries(get_config['layout'])
