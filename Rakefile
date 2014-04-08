@@ -54,7 +54,7 @@ task :bundle do
 end
 
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
-task :up => [:keygen, :cachedir, :berks_install, :config_copy, :bundle] do
+task :up => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
   if system("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha")
     create_hosts_entries(get_config['layout'])
@@ -64,7 +64,7 @@ end
 task :start => :up
 
 desc 'Bring the VMs online and then UPGRADE TORTURE'
-task :upgrade_torture => [:keygen, :cachedir, :berks_install, :config_copy, :bundle] do
+task :upgrade_torture => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
   if system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade_torture")
     create_hosts_entries(get_config['layout'])
@@ -73,7 +73,7 @@ task :upgrade_torture => [:keygen, :cachedir, :berks_install, :config_copy, :bun
 end
 
 desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
-task :upgrade => [:keygen, :cachedir, :berks_install, :config_copy, :bundle] do
+task :upgrade => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
   if system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
     create_hosts_entries(get_config['layout'])
@@ -133,5 +133,5 @@ end
 
 task :berks_install do
   cookbooks_path = File.join(harness_dir, 'vendor/cookbooks')
-  system("berks install --path #{cookbooks_path}")
+  system("#{harness_dir}/bin/berks install --path #{cookbooks_path}")
 end
