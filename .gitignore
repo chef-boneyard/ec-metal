@@ -1,6 +1,7 @@
 Berksfile.lock
 Gemfile.lock
 .bundle
+bin
 config.json
 clients
 nodes
