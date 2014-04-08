@@ -1,14 +1,7 @@
 # encoding: utf-8
-include_recipe "ec-harness::vagrant"
 
-node['harness']['vm_config']['backends'].merge(
-  node['harness']['vm_config']['frontends']).each do |vmname, config|
+include_recipe "ec-harness::#{node['harness']['provider']}"
 
-  # Bring up our backend machines
-  machine vmname do
-
-    action :delete
-  end
-
+ec_harness_private_chef_ha "destroy_#{node['harness']['default_package']}_on_#{node['harness']['provider']}" do
+  action :destroy
 end
-

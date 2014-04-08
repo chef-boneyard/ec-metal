@@ -5,12 +5,7 @@ Dir["lib/tasks/*.rake"].each { |t| load t }
 task :default => [:up]
 
 # Environment variables to be consumed by ec-harness and friends
-ENV['HARNESS_DIR'] = File.dirname(__FILE__)
-
-# Simple package version passing, TODO make this *much* smarter
-ENV['OPC_INSTALL_PKG'] = 'private-chef-11.1.2-1.el6.x86_64.rpm' unless
-  ENV['OPC_INSTALL_PKG'].is_a?(String) &&
-  ENV['OPC_INSTALL_PKG'].length > 5
+harness_dir = ENV['HARNESS_DIR'] = File.dirname(__FILE__)
 
 def get_config
   JSON.parse(File.read('config.json'))
@@ -56,11 +51,30 @@ end
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
 task :up => [:keygen, :cachedir, :berks_install, :config_copy] do
   create_users_directory
-  system('chef-client -z -o ec-harness::default')
-  create_hosts_entries(get_config['layout'])
-  print_final_message(get_config['layout'])
+  if system('chef-client -z -o ec-harness::private_chef_ha')
+    create_hosts_entries(get_config['layout'])
+    print_final_message(get_config['layout'])
+  end
 end
 task :start => :up
+
+desc 'Bring the VMs online and then UPGRADE TORTURE'
+task :upgrade_torture => [:keygen, :cachedir, :berks_install, :config_copy] do
+  create_users_directory
+  if system('chef-client -z -o ec-harness::upgrade_torture')
+    create_hosts_entries(get_config['layout'])
+    print_final_message(get_config['layout'])
+  end
+end
+
+desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
+task :upgrade => [:keygen, :cachedir, :berks_install, :config_copy] do
+  create_users_directory
+  if system('chef-client -z -o ec-harness::upgrade')
+    create_hosts_entries(get_config['layout'])
+    print_final_message(get_config['layout'])
+  end
+end
 
 desc 'Destroy all VMs'
 task :destroy do
@@ -71,7 +85,7 @@ task :cleanup => :destroy
 
 desc 'SSH to a machine like so: rake ssh[backend1]'
 task :ssh, [:machine] do |t,arg|
-  Dir.chdir(File.join(File.dirname(__FILE__), 'vagrant_vms')) {
+  Dir.chdir(File.join(harness_dir, 'vagrant_vms')) {
     system("vagrant ssh #{arg.machine}")
   }
 end
@@ -80,22 +94,22 @@ end
 %w(status halt suspend resume).each do |command|
   desc "Equivalent to running: vagrant #{command}"
   task :"#{command}" do
-    Dir.chdir(File.join(File.dirname(__FILE__), 'vagrant_vms')) {
+    Dir.chdir(File.join(harness_dir, 'vagrant_vms')) {
       system("vagrant #{command}")
     }
   end
 end
 
 task :config_copy do
-  config_file = File.join(File.dirname(__FILE__), 'config.json')
-  config_ex_file = File.join(File.dirname(__FILE__), 'config.json.example')
+  config_file = File.join(harness_dir, 'config.json')
+  config_ex_file = File.join(harness_dir, 'config.json.example')
   unless File.exists?(config_file)
     FileUtils.cp(config_ex_file, config_file)
   end
 end
 
 task :keygen do
-  keydir = File.join(File.dirname(__FILE__), 'keys')
+  keydir = File.join(harness_dir, 'keys')
   Dir.mkdir keydir unless Dir.exists? keydir
   if Dir["#{keydir}/*"].empty?
     system("ssh-keygen -t rsa -P '' -q -f #{keydir}/id_rsa")
@@ -106,13 +120,13 @@ task :cachedir do
   if ENV['CACHE_PATH'] && Dir.exists?(ENV['CACHE_PATH'])
     cachedir = ENV['CACHE_PATH']
   else
-    cachedir = File.join(File.dirname(__FILE__), 'cache')
+    cachedir = File.join(harness_dir, 'cache')
     Dir.mkdir cachedir unless Dir.exists?(cachedir)
   end
   puts "Using package cache directory #{cachedir}"
 end
 
 task :berks_install do
-  cookbooks_path = File.join(File.dirname(__FILE__), 'vendor/cookbooks')
+  cookbooks_path = File.join(harness_dir, 'vendor/cookbooks')
   system("berks install --path #{cookbooks_path}")
 end
