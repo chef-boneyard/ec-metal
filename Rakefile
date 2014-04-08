@@ -48,10 +48,15 @@ EOH
   puts final_message
 end
 
+desc 'Install required Gems into the vendor/bundle directory'
+task :bundle do
+  system('bundle install --path vendor/bundle --binstubs')
+end
+
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
-task :up => [:keygen, :cachedir, :berks_install, :config_copy] do
+task :up => [:keygen, :cachedir, :berks_install, :config_copy, :bundle] do
   create_users_directory
-  if system('chef-client -z -o ec-harness::private_chef_ha')
+  if system("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha")
     create_hosts_entries(get_config['layout'])
     print_final_message(get_config['layout'])
   end
@@ -61,7 +66,7 @@ task :start => :up
 desc 'Bring the VMs online and then UPGRADE TORTURE'
 task :upgrade_torture => [:keygen, :cachedir, :berks_install, :config_copy] do
   create_users_directory
-  if system('chef-client -z -o ec-harness::upgrade_torture')
+  if system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade_torture")
     create_hosts_entries(get_config['layout'])
     print_final_message(get_config['layout'])
   end
@@ -70,7 +75,7 @@ end
 desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
 task :upgrade => [:keygen, :cachedir, :berks_install, :config_copy] do
   create_users_directory
-  if system('chef-client -z -o ec-harness::upgrade')
+  if system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
     create_hosts_entries(get_config['layout'])
     print_final_message(get_config['layout'])
   end
@@ -78,7 +83,7 @@ end
 
 desc 'Destroy all VMs'
 task :destroy do
-  system('chef-client -z -o ec-harness::cleanup')
+  system("#{harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
   remove_hosts_entries(get_config['layout'])
 end
 task :cleanup => :destroy
