@@ -64,7 +64,7 @@ action :stop_all_but_master do
 
     ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
     machine_execute "p-c-c_stop_on_#{vmname}" do
-      command '/opt/opscode/bin/private-chef-ctl stop'
+      command '/opt/opscode/bin/private-chef-ctl stop ; exit 0'
       machine vmname
     end
 

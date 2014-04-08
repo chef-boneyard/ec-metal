@@ -21,24 +21,24 @@ else
   installer_path = installer_file
 end
 
-node.set['private_chef']['perform_upgrade'] = false
-
 if PackageHelper.private_chef_installed_version > PackageHelper.pc_version(installer_name)
   log "Installed package #{PackageHelper.private_chef_installed} is newer than installer #{installer_name}"
 else
   package installer_name do
     source installer_path
     provider Chef::Provider::Package::Dpkg if platform_family?('debian')
-    # if PackageHelper.private_chef_installed_version < PackageHelper.pc_version(installer_name) &&
-    #   PackageHelper.private_chef_installed_version != '0.0.0'
-    #   action :upgrade
-    # else
-      action :install
-    # end
+    action :install
   end
 
-  if PackageHelper.private_chef_installed_version < PackageHelper.pc_version(installer_name)
-    node.set['private_chef']['perform_upgrade'] = true
+  if PackageHelper.private_chef_installed_version < PackageHelper.pc_version(installer_name) &&
+    PackageHelper.private_chef_installed_version != '0.0.0'
+    file '/tmp/private-chef-perform-upgrade' do
+      action :create
+      owner 'root'
+      group 'root'
+      mode '0644'
+      content "Running upgrade of #{installer_name} at #{Time.now}"
+    end
   end
 end
 
@@ -61,17 +61,6 @@ template "/etc/opscode/private-chef.rb" do
   )
   action :create
 end
-
-
-# # ensure the node can resolve the FQDNs locally
-# [ node['private-chef']['api_fqdn'],
-#   node['private-chef']['manage_fqdn'] ].each do |fqdn|
-
-#   execute "echo 127.0.0.1 #{fqdn} >> /etc/hosts" do
-#     not_if "host #{fqdn}" # host resolves
-#     not_if "grep -q #{fqdn} /etc/hosts" # entry exists
-#   end
-# end
 
 # SSH key management for inter-node trust
 directory '/root/.ssh' do

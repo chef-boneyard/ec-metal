@@ -9,10 +9,17 @@ Requirements
 * Vagrant 1.5 or higher
 * Virtualbox
 
+Goals of this project
+---------------------
+1. Demonstrate the capabilities and (hopefully) best practices of chef-metal
+1. Enable Chef QA and Dev teams to test various EC topologies and packages in installed and upgrade scenarios
+1. (Future) Enable Chef customers to deploy and upgrade Enterprise Chef without runbooks
+
+
 Usage
 -----
-1. Ensure you have a working recent Vagrant and Virtualbox (tested on Vagrant 1.4.x and 1.5.x)
-1. Install chef-metal: https://github.com/opscode/chef-metal
+1. Ensure you have a working recent Vagrant and Virtualbox (tested on Vagrant 1.5.x)
+1. Install dependencies: `bundle install`
 1. Copy `config.json.example` to `config.json` and adjust as needed
 1. Download the private-chef packages to the ec-ha/cache directory or point to your own installer cache with `$CACHE_PATH`
 1. To bring up the environment: `rake up`
@@ -24,9 +31,10 @@ Usage
 TODO
 ----
 NOTE: This is still a WIP under heavy development
+* UPGRADES
+* Vendoring rubygems
 * Figure out a nice way to assist with EC package downloads and caching (dendrite?)
 * Testing
-* UPGRADES
 * ADDONS
 * Support for additiional providers (EC2, etc)
 * Ubuntu support (12.04 and 14.04)
