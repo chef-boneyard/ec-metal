@@ -18,7 +18,7 @@ hosts_invert.each do |ip,names|
   hostsfile_entry ip do
     hostname firstname
     aliases names + shortnames
-    comment "Chef private-chef::hostsfile at #{Time.now}"
+    comment "Chef private-chef::hostsfile"
     unique true
   end
 end
