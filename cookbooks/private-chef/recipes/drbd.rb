@@ -160,5 +160,5 @@ file File.join(drbd_dir, 'drbd_ready') do
   owner 'root'
   group 'root'
   mode '0644'
-  content "Created by ec-harness at #{Time.now.to_s}"
+  content "Created by ec-harness"
 end
