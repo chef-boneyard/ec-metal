@@ -18,7 +18,8 @@ package 'rsync'
 if node.name == bootstrap_node_name
 
   execute 'initial-p-c-c-reconfigure' do
-    command '/opt/opscode/bin/private-chef-ctl reconfigure'
+    # Retry the reconfigure step, often caused by service restart timeouts during upgrades
+    command '/opt/opscode/bin/private-chef-ctl reconfigure || sleep 30 ; /opt/opscode/bin/private-chef-ctl reconfigure'
     action :run
   end
 
