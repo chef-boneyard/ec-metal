@@ -16,12 +16,8 @@ package installer_name do
   action :install
 end
 
-ruby_block "add-manage-to-darklaunch" do
-  block do
-    file = Chef::Util::FileEdit.new("/etc/opscode/private-chef.rb")
-    file.insert_line_if_no_match("opscode_webui\['enable'\]", "opscode_webui['enable'] = false")
-    file.write_file
-  end
+file '/opt/opscode/sv/opscode-webui/keepalive_me' do
+  action :delete
 end
 
 # assumes non-ha setting. if this is ha, manage is going to have issues

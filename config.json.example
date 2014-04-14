@@ -5,12 +5,13 @@
     "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.5_chef-provisionerless.box",
     "disk2_size": "2"
   },
-  "default_package": "private-chef-11.1.2-1.el6.x86_64.rpm",
+  "default_package": "private-chef-11.1.3-1.el6.x86_64.rpm",
+  "manage_package": "opscode-manage-1.3.0-1.el6.x86_64.rpm",
   "packages": {
     "PC1.2": "private-chef-1.2.8.2-1.el6.x86_64.rpm",
     "PC1.4": "private-chef-1.4.6-1.el6.x86_64.rpm",
     "EC11.0": "private-chef-11.0.2-1.el6.x86_64.rpm",
-    "EC11.1": "private-chef-11.1.2-1.el6.x86_64.rpm"
+    "EC11.1": "private-chef-11.1.3-1.el6.x86_64.rpm"
   },
   "layout": {
     "topology": "ha",
