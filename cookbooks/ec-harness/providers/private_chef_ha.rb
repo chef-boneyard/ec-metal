@@ -68,8 +68,9 @@ action :install do
       recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname)
       recipe 'private-chef::provision_phase2'
       recipe 'private-chef::users' if vmname == bootstrap_node_name
-      recipe 'private-chef::manage' if node['harness']['manage_package']
       recipe 'private-chef::reporting' if node['harness']['reporting_package']
+      recipe 'private-chef::manage' if node['harness']['manage_package'] &&
+        node['harness']['vm_config']['frontends'].include?(vmname)
       recipe 'private-chef::pushy' if node['harness']['pushy_package']
 
       action :create
