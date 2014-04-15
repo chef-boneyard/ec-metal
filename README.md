@@ -15,7 +15,6 @@ Goals of this project
 1. Enable Chef QA and Dev teams to test various EC topologies and packages in install and upgrade scenarios
 1. Enable Chef customers to deploy and upgrade Enterprise Chef without runbooks
 
-
 Usage
 -----
 1. Ensure you have a working recent Vagrant and Virtualbox (tested on Vagrant 1.5.x)
@@ -38,7 +37,6 @@ TODO
 NOTE: This is still a WIP under heavy development
 * Figure out a nice way to assist with EC package downloads and caching (dendrite?)
 * Testing
-* ADDONS
 * Support for additiional providers (EC2, etc)
 * Ubuntu support (12.04 and 14.04)
 * Ability to drive installation, upgrade and restore-from-backup on already-provisioned servers (ex: customer environments) possibly using: https://github.com/double-z/chef-metal-ssh
@@ -58,6 +56,9 @@ All relevant attributes should now be controlled through the config.json file
     "disk2_size": "2"
   },
   "default_package": "private-chef-11.1.2-1.el6.x86_64.rpm",
+  "manage_package": "opscode-manage-1.3.0-1.el6.x86_64.rpm",
+  "reporting_package": "opscode-reporting-1.1.0-1.el6.x86_64.rpm",
+  "pushy_package": "opscode-push-jobs-server-1.1.0-1.el6.x86_64.rpm",
   "packages": {
     "PC1.2": "private-chef-1.2.8.2-1.el6.x86_64.rpm",
     "PC1.4": "private-chef-1.4.6-1.el6.x86_64.rpm",
