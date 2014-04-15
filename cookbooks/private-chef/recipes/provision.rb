@@ -93,3 +93,10 @@ file '/root/.ssh/config' do
   mode '0600'
   content "Host *\n  StrictHostKeyChecking no\n"
 end
+
+# OC-11490 bug fix
+directory '/var/log/opscode/keepalived' do
+  owner 'opscode'
+  recursive true
+  mode "0700"
+end
