@@ -6,6 +6,11 @@ default['harness']['default_package'] = config_json['default_package']
 default['harness']['packages'] = config_json['packages']
 default['harness']['provider'] = config_json['provider']
 
+# addon packages
+default['harness']['manage_package'] = config_json['manage_package']
+default['harness']['reporting_package'] = config_json['reporting_package']
+default['harness']['pushy_package'] = config_json['pushy_package']
+
 # HARNESS_DIR is set by the Rakefile to the project root directory
 default['harness']['repo_path'] = ENV['HARNESS_DIR']
 default['harness']['vms_dir'] = File.join(ENV['HARNESS_DIR'], 'vagrant_vms')
