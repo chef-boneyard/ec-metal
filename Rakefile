@@ -57,7 +57,7 @@ desc 'Bring the VMs online and install+configure Enterprise Chef HA'
 task :up => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
   if system("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha")
-    create_hosts_entries(get_config['layout'])
+    Rake::Task['add_hosts'].execute
     print_final_message(get_config['layout'])
   end
 end
@@ -67,7 +67,7 @@ desc 'Bring the VMs online and then UPGRADE TORTURE'
 task :upgrade_torture => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
   if system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade_torture")
-    create_hosts_entries(get_config['layout'])
+    Rake::Task['add_hosts'].execute
     print_final_message(get_config['layout'])
   end
 end
@@ -76,7 +76,7 @@ desc 'Simple upgrade step, installs the package from default_package. Machines m
 task :upgrade => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
   if system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
-    create_hosts_entries(get_config['layout'])
+    Rake::Task['add_hosts'].execute
     print_final_message(get_config['layout'])
   end
 end
@@ -84,7 +84,7 @@ end
 desc 'Destroy all VMs'
 task :destroy do
   system("#{harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
-  remove_hosts_entries(get_config['layout'])
+  Rake::Task['remove_hosts'].execute
 end
 task :cleanup => :destroy
 
@@ -119,6 +119,14 @@ task :keygen do
   if Dir["#{keydir}/*"].empty?
     system("ssh-keygen -t rsa -P '' -q -f #{keydir}/id_rsa")
   end
+end
+
+task :add_hosts do
+  create_hosts_entries(get_config['layout'])
+end
+
+task :remove_hosts do
+  remove_hosts_entries(get_config['layout'])
 end
 
 task :cachedir do
