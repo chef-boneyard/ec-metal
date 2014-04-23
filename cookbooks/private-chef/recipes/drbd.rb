@@ -29,22 +29,23 @@ when 'rhel'
   end
 end
 
-execute 'pvcreate /dev/sdb' do
-  action :run
-  not_if 'pvs |grep /dev/sdb'
-end
+# execute 'pvcreate /dev/sdb' do
+#   action :run
+#   not_if 'pvs |grep /dev/sdb'
+# end
 
-execute 'vgcreate opscode /dev/sdb' do
-  action :run
-  not_if 'vgs | grep opscode'
-end
+# execute 'vgcreate opscode /dev/sdb' do
+#   action :run
+#   not_if 'vgs | grep opscode'
+# end
 
-# The size of our LV will be dependent upon the VG size,
-# which is depdent upon the VM's disk2 size
-execute 'lvcreate -l 80%VG -n drbd opscode' do
-  action :run
-  not_if 'lvs |grep drbd'
-end
+# # The size of our LV will be dependent upon the VG size,
+# # which is depdent upon the VM's disk2 size
+# execute 'lvcreate -l 80%VG -n drbd opscode' do
+#   action :run
+#   not_if 'lvs |grep drbd'
+# end
+
 
 # Charge ahead with a mocked-up drbd config to get us started
 
@@ -60,19 +61,18 @@ drbd_data_dir = File.join(drbd_dir, 'data')
   end
 end
 
-# Opscode-omnibus wants hostname == fqdn, so we have to do this grossness
-execute 'force-hostname-fqdn' do
-  command "hostname #{node.fqdn}"
-  action :run
-  not_if { node.fqdn == `/bin/hostname` }
-end
+# LVM setup for DRBD volume
+include_recipe 'lvm::default'
 
-file '/etc/hostname' do
-  action :create
-  owner 'root'
-  group 'root'
-  mode '0644'
-  content "#{node.fqdn}\n"
+lvm_volume_group 'opscode' do
+  physical_volumes node['private-chef']['drbd_disks']
+
+  logical_volume 'drbd' do
+    size        '80%VG'
+    # filesystem  'ext4'
+    # mount_point :location => drbd_data_dir, :options => 'noauto,noatime'
+    stripes     node['private-chef']['drbd_disks'].length
+  end
 end
 
 template File.join(drbd_etc_dir, 'drbd.conf') do

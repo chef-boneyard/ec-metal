@@ -23,3 +23,11 @@ default['harness']['vm_mountpoint'] = '/tmp/cache'
 # SSH key distribution for inter-machine trust
 default['harness']['root_ssh']['privkey'] = File.read(File.join(ENV['HARNESS_DIR'], 'keys', 'id_rsa'))
 default['harness']['root_ssh']['pubkey'] = File.read(File.join(ENV['HARNESS_DIR'], 'keys', 'id_rsa.pub'))
+
+# DRBD/LVM disk configuration
+case node['harness']['provider']
+when 'vagrant'
+  default['harness']['vm_config']['drbd_disks'] = ['/dev/sdb']
+when 'ec2'
+  default['harness']['vm_config']['drbd_disks'] = ['/dev/xvdf']
+end
