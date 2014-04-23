@@ -8,7 +8,7 @@
 # install
 
 installer_file = node['private-chef']['installer_file']
-installer_name = ::File.basename(installer_file)
+installer_name = ::File.basename(installer_file.split('?').first)
 installer_path = "#{Chef::Config[:file_cache_path]}/#{installer_name}"
 
 if ::URI.parse(installer_file).absolute?

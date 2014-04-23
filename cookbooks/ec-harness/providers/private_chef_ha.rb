@@ -13,6 +13,7 @@ def bootstrap_node_name
 end
 
 def installer_path(ec_package)
+  return ec_package if ::URI.parse(ec_package).absolute?
   ::File.join(node['harness']['vm_mountpoint'], ec_package)
 end
 
@@ -53,14 +54,24 @@ action :install do
     packages['pushy'] = installer_path(node['harness']['pushy_package'])
   end
 
+  # Dumb hack to populate all of our machines first, for dynamic name/IP provisioners
+  if node['harness']['provider'] == 'ec2'
+    node['harness']['vm_config']['backends'].each do |vmname, config|
+      ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
+
+      machine vmname do
+        attributes machine_attributes(packages)
+        recipe 'private-chef::hostname'
+      end
+    end
+  end
+
   node['harness']['vm_config']['backends'].merge(
     node['harness']['vm_config']['frontends']).each do |vmname, config|
-
     # provisoner_options is set by your provisioner recipe (ex: vagrant.rb)
     ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
 
     machine vmname do
-
       attributes machine_attributes(packages)
 
       recipe 'private-chef::hostsfile'
@@ -72,8 +83,6 @@ action :install do
       recipe 'private-chef::manage' if node['harness']['manage_package'] &&
         node['harness']['vm_config']['frontends'].include?(vmname)
       recipe 'private-chef::pushy' if node['harness']['pushy_package']
-
-      action :create
     end
   end
 
