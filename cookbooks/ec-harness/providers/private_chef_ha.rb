@@ -32,6 +32,17 @@ def machine_attributes(packages)
   machine_attributes
 end
 
+def privatechef_attributes(packages)
+  attributes = node['harness']['vm_config'].to_hash
+  attributes['installer_file'] = packages['ec']
+  unless packages['manage'] == nil
+    attributes['manage_installer_file'] = packages['manage']
+    attributes['configuration'] = { opscode_webui: { enable: false } }
+  end
+  attributes['reporting_installer_file'] = packages['reporting']
+  attributes['pushy_installer_file'] = packages['pushy']
+  attributes
+end
 
 action :install do
 
@@ -60,7 +71,8 @@ action :install do
       ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
 
       machine vmname do
-        attributes machine_attributes(packages)
+        attribute 'private-chef', privatechef_attributes(packages)
+        attribute 'root_ssh', node['harness']['root_ssh'].to_hash
         recipe 'private-chef::hostname'
       end
     end
@@ -72,7 +84,8 @@ action :install do
     ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
 
     machine vmname do
-      attributes machine_attributes(packages)
+      attribute 'private-chef', privatechef_attributes(packages)
+      attribute 'root_ssh', node['harness']['root_ssh'].to_hash
 
       recipe 'private-chef::hostsfile'
       recipe 'private-chef::provision'
