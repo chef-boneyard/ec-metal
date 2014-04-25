@@ -1,5 +1,5 @@
 def ipaddresses_prepopulated(private_chef_attributes)
-  true if private_chef_attributes['topology'] == 'ha' &&
+  return true if private_chef_attributes['topology'] == 'ha' &&
     private_chef_attributes['backends'].map { |k,v| v['ipaddress'] }.length == 2 &&
     private_chef_attributes['virtual_hosts'].is_a?(Hash)
   false
@@ -66,6 +66,20 @@ action :create do
       node['private-chef']['backend_vip']['ipaddress']
     node.set['private-chef']['virtual_hosts']["localhost.#{mydomainname}"] = '127.0.0.1'
 
+    hosts_invert(node['private-chef']['virtual_hosts']).each do |ip,names|
+      shortnames = names.map {|name| name.split('.').first }
+      firstname = names.pop
+
+      hostsfile_entry ip do
+        hostname firstname
+        aliases names + shortnames
+        comment "Chef private-chef::hostsfile"
+        unique true
+      end
+    end
+
+  else
+    # Vagrant/prepopulated case
     hosts_invert(node['private-chef']['virtual_hosts']).each do |ip,names|
       shortnames = names.map {|name| name.split('.').first }
       firstname = names.pop
