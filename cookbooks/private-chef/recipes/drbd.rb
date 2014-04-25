@@ -29,23 +29,6 @@ when 'rhel'
   end
 end
 
-# execute 'pvcreate /dev/sdb' do
-#   action :run
-#   not_if 'pvs |grep /dev/sdb'
-# end
-
-# execute 'vgcreate opscode /dev/sdb' do
-#   action :run
-#   not_if 'vgs | grep opscode'
-# end
-
-# # The size of our LV will be dependent upon the VG size,
-# # which is depdent upon the VM's disk2 size
-# execute 'lvcreate -l 80%VG -n drbd opscode' do
-#   action :run
-#   not_if 'lvs |grep drbd'
-# end
-
 
 # Charge ahead with a mocked-up drbd config to get us started
 
@@ -78,16 +61,11 @@ end
 template File.join(drbd_etc_dir, 'drbd.conf') do
   source 'drbd.conf.erb'
   mode '0655'
-  not_if { File.exists?(File.join(drbd_etc_dir, 'drbd.conf')) }
 end
 
 template File.join(drbd_etc_dir, 'pc0.res') do
   source 'pc0.res.erb'
   mode '0655'
-  variables(
-    :backends => (node['private-chef']['backends'] || {}),
-    )
-  not_if { File.exists?(File.join(drbd_etc_dir, 'pc0.res')) }
 end
 
 execute 'mv /etc/drbd.conf /etc/drbd.conf.orig' do
@@ -116,7 +94,7 @@ if node['platform_family'] == 'debian'
 end
 
 execute 'create-md' do
-  command 'drbdadm create-md pc0'
+  command 'yes yes | drbdadm create-md pc0'
   action :run
   only_if 'drbdadm dump-md pc0 2>&1 | grep "No valid meta data"'
   notifies :run, 'execute[drbdadm-up]', :immediately
