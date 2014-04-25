@@ -61,11 +61,13 @@ end
 template File.join(drbd_etc_dir, 'drbd.conf') do
   source 'drbd.conf.erb'
   mode '0655'
+  not_if { ::File.exists?(File.join(drbd_etc_dir, 'drbd.conf')) }
 end
 
 template File.join(drbd_etc_dir, 'pc0.res') do
   source 'pc0.res.erb'
   mode '0655'
+  not_if { ::File.exists?(File.join(drbd_etc_dir, 'pc0.res')) }
 end
 
 execute 'mv /etc/drbd.conf /etc/drbd.conf.orig' do
@@ -74,14 +76,6 @@ end
 
 link '/etc/drbd.conf' do
   to File.join(drbd_etc_dir, 'drbd.conf')
-end
-
-template File.join(drbd_etc_dir, 'drbd.conf') do
-  source 'drbd.conf.erb'
-  owner 'root'
-  group 'root'
-  mode '0644'
-  not_if { ::File.exists?(File.join(drbd_etc_dir, 'drbd.conf')) }
 end
 
 # Debian/Ubuntu defaults to *not* starting the service by default
