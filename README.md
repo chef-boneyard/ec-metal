@@ -116,6 +116,71 @@ All relevant attributes should now be controlled through the config.json file
 ```
 
 
+Running at AWS
+---------------
+
+
+Prerequisites:
+* Write out an .aws/config file as described here: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#d0e726
+* Get yourself a CentOS 6.5 AMI https://aws.amazon.com/marketplace/ordering?productId=f4325b48-37b0-405a-9847-236c64622e3e&ref_=dtl_psb_continue&region=us-east-1
+  * HIGHLY RECOMMENDED: Build your own AMI based off the CentOS image with patches applied (heartbleed) and chef package installed
+* Get yourself a VPC that has a "Public" Subnet with an Internet Gateway, and VPC security groups that allow inbound SSH and HTTPS
+  * Note that you'll need to plug the vpc subnet ID and backend_vip ipaddress into your config.json
+* WARNING NOTE:  This doesn't 100% work yet.  We need to build a different IP failover method into the system because keepalived (using ARP) doesn't work right in clouds
+* SCARY WARNING: The current EC2 configuration uses ephemeral disks which ARE LOST WHEN YOU SHUT DOWN THE NODE
+
+#### config.json.ec2.example - Amazon EC2 Provisioning
+```
+{
+  "provider": "ec2",
+  "ec2_options": {
+    "region": "us-east-1",
+    "vpc_subnet": "subnet-c13410e9",
+    "ami_id": "ami-e7e7fc8e",
+    "ssh_username": "root"
+  },
+  "default_package": "http://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/private-chef-11.1.3-1.el6.x86_64.rpm?AWSAccessKeyId=getonefromsupport&Expires=thistoo&Signature=andthis",
+  "packages": {
+    "PC1.2": "private-chef-1.2.8.2-1.el6.x86_64.rpm",
+    "PC1.4": "private-chef-1.4.6-1.el6.x86_64.rpm",
+    "EC11.0": "private-chef-11.0.2-1.el6.x86_64.rpm",
+    "EC11.1": "private-chef-11.1.2-1.el6.x86_64.rpm"
+  },
+  "layout": {
+    "topology": "ha",
+    "api_fqdn": "api.opscode.piab",
+    "manage_fqdn": "manage.opscode.piab",
+    "analytics_fqdn": "analytics.opscode.piab",
+    "backend_vip": {
+      "hostname": "backend.opscode.piab",
+      "ipaddress": "33.33.33.20",
+      "device": "eth0",
+      "heartbeat_device": "eth0"
+    },
+    "backends": {
+      "backend1": {
+        "hostname": "backend1.opscode.piab",
+        "instance_type": "c3.xlarge",
+        "ebs_optimized": true,
+        "bootstrap": true
+      },
+      "backend2": {
+        "hostname": "backend2.opscode.piab",
+        "ebs_optimized": true,
+        "instance_type": "c3.xlarge"
+      }
+    },
+    "frontends": {
+      "frontend1": {
+        "hostname": "frontend1.opscode.piab",
+        "ebs_optimized": false,
+        "instance_type": "m3.medium"
+      }
+    }
+  }
+}
+
+```
 
 Contributing
 ------------
