@@ -96,6 +96,9 @@ action :install do
       recipe 'private-chef::manage' if node['harness']['manage_package'] &&
         node['harness']['vm_config']['frontends'].include?(vmname)
       recipe 'private-chef::pushy' if node['harness']['pushy_package']
+
+      action [:create, :converge]
+      # action :converge if node['harness']['provider'] == 'ec2'
     end
   end
 
