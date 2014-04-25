@@ -27,7 +27,8 @@ node['harness']['vm_config']['backends'].merge(
 
   local_provisioner_options = {
     'bootstrap_options' => {
-      'flavor_id' => config['instance_type'],
+      'flavor_id' => config['instance_type'] || 'c3.large',
+      'ebs_optimized' => config['ebs_optimized'] || false,
       'image_id' => node['harness']['ec2']['ami_id'],
       'subnet_id' => node['harness']['ec2']['vpc_subnet'],
       'associate_public_ip' => true,
