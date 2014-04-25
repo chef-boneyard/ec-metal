@@ -1,26 +1,26 @@
 topology "<%= node['private-chef']['topology'] %>"
 
-<% @backends.each_pair do |name, options| -%>
-server "<%= options[:hostname] || "#{name}.opscode.piab" %>",
-  :ipaddress => "<%= options[:ipaddress] %>",
-  <% if options[:cluster_ipaddress] -%>
-  :cluster_ipaddress => "<%= options[:cluster_ipaddress] %>",
+<% node['private-chef']['backends'].each_pair do |name, options| -%>
+server "<%= options['hostname'] || "#{name}.opscode.piab" %>",
+  :ipaddress => "<%= options['ipaddress'] %>",
+  <% if options['cluster_ipaddress'] -%>
+  :cluster_ipaddress => "<%= options['cluster_ipaddress'] %>",
   <% end -%>
   :role => "backend",
-  :bootstrap => <%= options[:bootstrap] || false %>
+  :bootstrap => <%= options['bootstrap'] || false %>
 <% end -%>
 
-<% @frontends.each_pair do |name, options| -%>
-server "<%= options[:hostname] || "#{name}.opscode.piab" %>",
-  :ipaddress => "<%= options[:ipaddress] %>",
+<% node['private-chef']['frontends'].each_pair do |name, options| -%>
+server "<%= options['hostname'] || "#{name}.opscode.piab" %>",
+  :ipaddress => "<%= options['ipaddress'] %>",
   :role => "frontend"
 <% end -%>
 
-<% if @backend_vip -%>
-backend_vip "<%= @backend_vip[:hostname] || "backend.opscode.piab" %>",
- :ipaddress => "<%= @backend_vip[:ipaddress] %>",
- :device => "<%= @backend_vip[:device] %>",
- :heartbeat_device => "<%= @backend_vip[:heartbeat_device] %>"
+<% if node['private-chef']['backend_vip'] -%>
+backend_vip "<%= node['private-chef']['backend_vip']['hostname'] || "backend.opscode.piab" %>",
+ :ipaddress => "<%= node['private-chef']['backend_vip']['ipaddress'] %>",
+ :device => "<%= node['private-chef']['backend_vip']['device'] %>",
+ :heartbeat_device => "<%= node['private-chef']['backend_vip']['heartbeat_device'] %>"
 <% end -%>
 
 api_fqdn "<%= node['private-chef']['api_fqdn'] %>"

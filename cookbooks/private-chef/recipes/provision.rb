@@ -54,11 +54,6 @@ template "/etc/opscode/private-chef.rb" do
   source "private-chef.rb.erb"
   owner "root"
   group "root"
-  variables(
-    :backends => (node['private-chef']['backends'] || {}),
-    :frontends => (node['private-chef']['frontends'] || {}),
-    :backend_vip => (node['private-chef']['backend_vip'] || nil)
-  )
   action :create
 end
 
@@ -99,4 +94,11 @@ directory '/var/log/opscode/keepalived' do
   owner 'opscode'
   recursive true
   mode "0700"
+end
+
+# Deal with RHEL-based boxes that may have their own firewalls up
+if node['platform_family'] == 'rhel'
+  service 'iptables' do
+    action [ :disable, :stop ]
+  end
 end

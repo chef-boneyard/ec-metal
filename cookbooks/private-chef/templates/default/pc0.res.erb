@@ -6,7 +6,7 @@ resource pc0 {
     rate 40M;
   }
 
-<% @backends.each_pair do |name, options| -%>
+<% node['private-chef']['backends'].each_pair do |name, options| -%>
   on <%= options[:hostname] || "#{name}.opscode.piab" %> {
     device /dev/drbd0;
     disk /dev/opscode/drbd;
