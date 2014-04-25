@@ -67,38 +67,41 @@ action :install do
 
   # Dumb hack to populate all of our machines first, for dynamic name/IP provisioners
   if node['harness']['provider'] == 'ec2'
-    node['harness']['vm_config']['backends'].each do |vmname, config|
+    %w(backends frontends).each do |whichend|
+      node['harness']['vm_config'][whichend].each do |vmname, config|
+        ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
+
+        machine vmname do
+          attribute 'private-chef', privatechef_attributes(packages)
+          attribute 'root_ssh', node['harness']['root_ssh'].to_hash
+          recipe 'private-chef::hostname'
+        end
+      end
+    end
+  end
+
+  %w(backends frontends).each do |whichend|
+    node['harness']['vm_config'][whichend].each do |vmname, config|
+      # provisoner_options is set by your provisioner recipe (ex: vagrant.rb)
       ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
 
       machine vmname do
         attribute 'private-chef', privatechef_attributes(packages)
         attribute 'root_ssh', node['harness']['root_ssh'].to_hash
-        recipe 'private-chef::hostname'
+
+        recipe 'private-chef::hostsfile'
+        recipe 'private-chef::provision'
+        recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname)
+        recipe 'private-chef::provision_phase2'
+        recipe 'private-chef::users' if vmname == bootstrap_node_name
+        recipe 'private-chef::reporting' if node['harness']['reporting_package']
+        recipe 'private-chef::manage' if node['harness']['manage_package'] &&
+          node['harness']['vm_config']['frontends'].include?(vmname)
+        recipe 'private-chef::pushy' if node['harness']['pushy_package']
+
+        action [:create, :converge]
+        # action :converge if node['harness']['provider'] == 'ec2'
       end
-    end
-  end
-
-  node['harness']['vm_config']['backends'].merge(
-    node['harness']['vm_config']['frontends']).each do |vmname, config|
-    # provisoner_options is set by your provisioner recipe (ex: vagrant.rb)
-    ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
-
-    machine vmname do
-      attribute 'private-chef', privatechef_attributes(packages)
-      attribute 'root_ssh', node['harness']['root_ssh'].to_hash
-
-      recipe 'private-chef::hostsfile'
-      recipe 'private-chef::provision'
-      recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname)
-      recipe 'private-chef::provision_phase2'
-      recipe 'private-chef::users' if vmname == bootstrap_node_name
-      recipe 'private-chef::reporting' if node['harness']['reporting_package']
-      recipe 'private-chef::manage' if node['harness']['manage_package'] &&
-        node['harness']['vm_config']['frontends'].include?(vmname)
-      recipe 'private-chef::pushy' if node['harness']['pushy_package']
-
-      action [:create, :converge]
-      # action :converge if node['harness']['provider'] == 'ec2'
     end
   end
 
