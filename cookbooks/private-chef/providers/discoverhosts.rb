@@ -19,7 +19,7 @@ def search_ipaddress(vmname)
   if result && result['ipaddress']
     return result['ipaddress']
   else
-    return '127.0.0.1'
+    return '127.0.0.2'
   end
 end
 
