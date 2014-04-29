@@ -5,10 +5,17 @@
 #
 
 installer_file = node['private-chef']['manage_installer_file']
-installer_name = ::File.basename(installer_file)
+installer_name = ::File.basename(installer_file.split('?').first)
+installer_path = "#{Chef::Config[:file_cache_path]}/#{installer_name}"
 
-# manage currently only works if the env var is specified
-installer_path = installer_file
+if ::URI.parse(installer_file).absolute?
+  remote_file installer_path do
+    source installer_file
+    action :create_if_missing
+  end
+else
+  installer_path = installer_file
+end
 
 package installer_name do
   source installer_path
