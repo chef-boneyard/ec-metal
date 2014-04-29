@@ -48,7 +48,6 @@ action :create do
           log "Discovered node #{vmname} IP: #{ipaddress}"
         end
         node.set['private-chef'][whichend][vmname]['ipaddress'] = ipaddress
-        node.set['private-chef']['virtual_hosts'][config['hostname']] = ipaddress
 
         # Hack until we have load balancers
         hostsfile_aliases = []
