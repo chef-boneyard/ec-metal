@@ -22,7 +22,7 @@ def privatechef_attributes(packages)
   attributes['installer_file'] = packages['ec']
   unless packages['manage'] == nil
     attributes['manage_installer_file'] = packages['manage']
-    attributes['configuration'] = { opscode_webui: { enable: false } }
+    attributes['configuration'] = { 'opscode_webui' => { 'enable' => false } }
   end
   attributes['reporting_installer_file'] = packages['reporting']
   attributes['pushy_installer_file'] = packages['pushy']
@@ -59,8 +59,9 @@ action :install do
         machine vmname do
           attribute 'private-chef', privatechef_attributes(packages)
           attribute 'root_ssh', node['harness']['root_ssh'].to_hash
+          attribute 'cloud', node['harness']['ec2'].to_hash
           recipe 'private-chef::hostname'
-          # recipe 'private-chef::ec2'
+          recipe 'private-chef::ec2'
         end
       end
     end
