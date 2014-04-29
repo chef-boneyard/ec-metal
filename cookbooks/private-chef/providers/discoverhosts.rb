@@ -48,34 +48,30 @@ action :create do
           log "Discovered node #{vmname} IP: #{ipaddress}"
         end
         node.set['private-chef'][whichend][vmname]['ipaddress'] = ipaddress
-
-        node.set['private-chef']['virtual_hosts'] = {} unless node['private-chef']['virtual_hosts']
         node.set['private-chef']['virtual_hosts'][config['hostname']] = ipaddress
 
         # Hack until we have load balancers
+        hostsfile_aliases = []
         if whichend == 'frontends'
-          %w(manage api).each do |vhost|
-              node.set['private-chef']['virtual_hosts']["#{vhost}.#{mydomainname}"] = ipaddress
-          end
+          hostsfile_aliases = ["manage.#{mydomainname}", "api.#{mydomainname}"]
         end
+
+        hostsfile_entry ipaddress do
+          hostname config['hostname']
+          aliases [config['hostname'].split('.').first] + hostsfile_aliases
+          comment "Chef private-chef::hostsfile"
+          unique true
+        end
+
       end
     end
 
-    # hostsfile singletons
-    node.set['private-chef']['virtual_hosts']["#{node['private-chef']['backend_vip']['hostname']}"] =
-      node['private-chef']['backend_vip']['ipaddress']
-    node.set['private-chef']['virtual_hosts']["localhost.#{mydomainname}"] = '127.0.0.1'
-
-    hosts_invert(node['private-chef']['virtual_hosts']).each do |ip,names|
-      shortnames = names.map {|name| name.split('.').first }
-      firstname = names.pop
-
-      hostsfile_entry ip do
-        hostname firstname
-        aliases names + shortnames
-        comment "Chef private-chef::hostsfile"
-        unique true
-      end
+    # Backend VIP
+    hostsfile_entry node['private-chef']['backend_vip']['ipaddress'] do
+      hostname node['private-chef']['backend_vip']['hostname']
+      aliases [node['private-chef']['backend_vip']['hostname'].split('.').first]
+      comment "Chef private-chef::hostsfile"
+      unique true
     end
 
   else

@@ -17,21 +17,6 @@ def installer_path(ec_package)
   ::File.join(node['harness']['vm_mountpoint'], ec_package)
 end
 
-def machine_attributes(packages)
-  machine_attributes = {
-    'private-chef' => node['harness']['vm_config'].to_hash,
-    'root_ssh' => node['harness']['root_ssh'].to_hash
-  }
-  machine_attributes['private-chef']['installer_file'] = packages['ec']
-  unless packages['manage'] == nil
-    machine_attributes['private-chef']['manage_installer_file'] = packages['manage']
-    machine_attributes['private-chef']['configuration'] = { opscode_webui: { enable: false } }
-  end
-  machine_attributes['private-chef']['reporting_installer_file'] = packages['reporting']
-  machine_attributes['private-chef']['pushy_installer_file'] = packages['pushy']
-  machine_attributes
-end
-
 def privatechef_attributes(packages)
   attributes = node['harness']['vm_config'].to_hash
   attributes['installer_file'] = packages['ec']
@@ -75,6 +60,7 @@ action :install do
           attribute 'private-chef', privatechef_attributes(packages)
           attribute 'root_ssh', node['harness']['root_ssh'].to_hash
           recipe 'private-chef::hostname'
+          # recipe 'private-chef::ec2'
         end
       end
     end
