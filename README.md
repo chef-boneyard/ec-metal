@@ -126,7 +126,6 @@ Prerequisites:
   * HIGHLY RECOMMENDED: Build your own AMI based off the CentOS image with patches applied (heartbleed) and chef package installed
 * Get yourself a VPC that has a "Public" Subnet with an Internet Gateway, and VPC security groups that allow inbound SSH and HTTPS
   * Note that you'll need to plug the vpc subnet ID and backend_vip ipaddress into your config.json
-* WARNING NOTE:  This doesn't 100% work yet.  We need to build a different IP failover method into the system because keepalived (using ARP) doesn't work right in clouds
 * SCARY WARNING: The current EC2 configuration uses ephemeral disks which ARE LOST WHEN YOU SHUT DOWN THE NODE
 
 #### config.json.ec2.example - Amazon EC2 Provisioning
@@ -140,12 +139,6 @@ Prerequisites:
     "ssh_username": "root"
   },
   "default_package": "http://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/private-chef-11.1.3-1.el6.x86_64.rpm?AWSAccessKeyId=getonefromsupport&Expires=thistoo&Signature=andthis",
-  "packages": {
-    "PC1.2": "private-chef-1.2.8.2-1.el6.x86_64.rpm",
-    "PC1.4": "private-chef-1.4.6-1.el6.x86_64.rpm",
-    "EC11.0": "private-chef-11.0.2-1.el6.x86_64.rpm",
-    "EC11.1": "private-chef-11.1.2-1.el6.x86_64.rpm"
-  },
   "layout": {
     "topology": "ha",
     "api_fqdn": "api.opscode.piab",
