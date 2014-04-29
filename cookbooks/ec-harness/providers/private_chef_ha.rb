@@ -14,6 +14,7 @@ def cloud_machine_created?(vmname)
   begin
     nodeinfo = rest.get("/nodes/#{vmname}")
   rescue Net::HTTPServerException
+    # Handle the 404 meaning the machine hasn't been created yet
     nodeinfo = {'normal' => {} }
   end
   provisioner_output = nodeinfo['normal']['provisioner_output']
@@ -62,7 +63,7 @@ action :install do
           node['harness']['vm_config']['frontends'].include?(vmname)
         recipe 'private-chef::pushy' if node['harness']['pushy_package']
 
-        action :converge if cloud_machine_created?(vmname)
+        converge true
       end
     end
   end
