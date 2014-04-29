@@ -122,11 +122,17 @@ task :keygen do
 end
 
 task :add_hosts do
-  create_hosts_entries(get_config['layout'])
+  config = get_config
+  unless config['provider'] == 'ec2'
+    create_hosts_entries(config['layout'])
+  end
 end
 
 task :remove_hosts do
-  remove_hosts_entries(get_config['layout'])
+  config = get_config
+  unless config['provider'] == 'ec2'
+    remove_hosts_entries(config['layout'])
+  end
 end
 
 task :cachedir do
