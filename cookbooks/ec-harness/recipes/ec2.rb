@@ -41,3 +41,8 @@ node['harness']['vm_config']['backends'].merge(
   node.set['harness']['provisioner_options'][vmname] = ChefMetal.enclosing_provisioner_options.merge(local_provisioner_options)
 
 end
+
+# Precreate cloud machines, for dynamic discovery later on
+ec_harness_private_chef_ha "cloud_create_for_EC2" do
+  action :cloud_create
+end
