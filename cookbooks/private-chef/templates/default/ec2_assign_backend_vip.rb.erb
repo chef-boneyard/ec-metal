@@ -1,0 +1,16 @@
+#!/opt/chef/embedded/bin/ruby
+# Reassigns a VPC secondary IP address to the other backend node
+# Created by Chef private-chef::ec2
+
+require 'fog'
+
+# Attributes from template
+aws_access_key_id = "<%= node['cloud']['aws_access_key_id'] %>""
+aws_secret_access_key = "<%= node['cloud']['aws_secret_access_key'] %>"
+server_id = "<%= node['provisioner_output']['server_id'] %>"
+ipaddress = "<%= node['private-chef']['backend_vip']['ipaddress'] %>"
+
+compute = Fog::Compute.new( :aws_access_key_id => aws_access_key_id, :aws_secret_access_key => aws_secret_access_key, :provider => 'AWS')
+backend1 = compute.servers.get(server_id)
+myeni = backend1.network_interfaces.first['networkInterfaceId']
+compute.assign_private_ip_addresses(myeni, 'PrivateIpAddresses' => [ipaddress], 'AllowReassignment' => true)

@@ -37,9 +37,15 @@ TODO
 NOTE: This is still a WIP under heavy development
 * Figure out a nice way to assist with EC package downloads and caching (dendrite?)
 * Testing
-* Support for additiional providers (EC2, etc)
 * Ubuntu support (12.04 and 14.04)
 * Ability to drive installation, upgrade and restore-from-backup on already-provisioned servers (ex: customer environments) possibly using: https://github.com/double-z/chef-metal-ssh
+* EC2 improvements
+  - Switch to using EC2 IAM roles to avoid slinging aws keys around.
+    + Rake Tasks to auto-create IAM Roles
+  - Rake Task to auto-create the VPC networking
+  - Creation of ELB (load balancers) and auto-add frontends to the ELB
+  - Optional use of EBS storage (without DRBD) that is handed over during backend node failover
+  - rake ssh to find and connect you to your AWS instances
 
 
 Attributes
