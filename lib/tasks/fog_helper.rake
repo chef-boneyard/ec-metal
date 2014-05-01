@@ -1,7 +1,7 @@
-require 'fog'
-require 'inifile'
+# encoding: utf-8
 
 def load_ini(credentials_ini_file)
+  require 'inifile'
   credentials = {}
   inifile = IniFile.load(File.expand_path(credentials_ini_file))
   inifile.each_section do |section|
@@ -18,6 +18,7 @@ def load_ini(credentials_ini_file)
 end
 
 def get_aws
+  require 'fog'
   aws_credentials = load_ini('~/.aws/config')
 
   Fog::Compute.new(:aws_access_key_id => aws_credentials['default'][:access_key_id],
