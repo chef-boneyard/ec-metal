@@ -45,4 +45,5 @@ end
 # Precreate cloud machines, for dynamic discovery later on
 ec_harness_private_chef_ha "cloud_create_for_EC2" do
   action :cloud_create
+  not_if { node['recipes'].include?('ec-harness::cleanup') }
 end
