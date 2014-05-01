@@ -88,13 +88,6 @@ file '/root/.ssh/config' do
   content "Host *\n  StrictHostKeyChecking no\n"
 end
 
-# OC-11490 bug fix
-directory '/var/log/opscode/keepalived' do
-  owner 'opscode'
-  recursive true
-  mode "0700"
-end
-
 # Deal with RHEL-based boxes that may have their own firewalls up
 if node['platform_family'] == 'rhel'
   service 'iptables' do
