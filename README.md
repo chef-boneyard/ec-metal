@@ -4,8 +4,15 @@ This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA c
 
 TOC
 ---
-{:toc}
+* [Requirements](#requirements)
+* [Goals](#goals)
+* [Usage](#usage)
+* [TODO](#todo)
+* [Attributes](#attributes)
+* [Running on AWS](#aws)
+* [Authors](#authors)
 
+<a name="requirements"/>
 Requirements
 ------------
 * rake
@@ -13,12 +20,14 @@ Requirements
 * Vagrant 1.5 or higher
 * Virtualbox
 
+<a name="goals"/>
 Goals of this project
 ---------------------
 1. Demonstrate the capabilities and (hopefully) best practices of chef-metal
 1. Enable Chef QA and Dev teams to test various EC topologies and packages in install and upgrade scenarios
 1. Enable Chef customers to deploy and upgrade Enterprise Chef without runbooks
 
+<a name="usage"/>
 Usage
 -----
 1. Ensure you have a working recent Vagrant and Virtualbox (tested on Vagrant 1.5.x)
@@ -36,6 +45,7 @@ Usage
 1. SSH: `rake ssh[backend1]`
 1. the `clients`, `nodes`, `keys` and `vagramt_vms` subdirectories are created automatically
 
+<a name="todo"/>
 TODO
 ----
 NOTE: This is still a WIP under heavy development
@@ -51,7 +61,7 @@ NOTE: This is still a WIP under heavy development
   - Optional use of EBS storage (without DRBD) that is handed over during backend node failover
   - rake ssh to find and connect you to your AWS instances
 
-
+<a name="attributes"/>
 Attributes
 ----------
 All relevant attributes should now be controlled through the config.json file
@@ -126,9 +136,9 @@ All relevant attributes should now be controlled through the config.json file
 ```
 
 
+<a name="aws"/>
 Running at AWS
 ---------------
-
 
 Prerequisites:
 * Write out an .aws/config file as described here: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#d0e726
@@ -195,6 +205,7 @@ Contributing
 5. Run the tests, ensuring they all pass
 6. Submit a Pull Request using Github
 
+<a name="authors"/>
 License and Authors
 -------------------
 Authors:
