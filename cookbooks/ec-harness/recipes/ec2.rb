@@ -16,7 +16,7 @@ with_provisioner_options 'bootstrap_options' => {
       'image_id' => node['harness']['ec2']['ami_id']
     }
 
-fog_key_pair "#{ENV['USER']}@ec-ha" do
+fog_key_pair "#{ENV['USER']}@ec-ha/#{node['harness']['harness_dir'].split('/').last}" do
   private_key_path File.join(repo_path, 'keys', 'id_rsa')
   public_key_path File.join(repo_path, 'keys', 'id_rsa.pub')
 end
