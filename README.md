@@ -2,6 +2,10 @@ ec-ha
 ================
 This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA clusters.
 
+TOC
+---
+{:toc}
+
 Requirements
 ------------
 * rake

@@ -36,3 +36,46 @@ def create_and_flush_hosts(hosts_file)
     %x{dscacheutil -flushcache}
   end
 end
+
+def print_cool_text
+   final_message = <<-EOH
+
+    _/_/_/              _/                          _/
+   _/    _/  _/  _/_/      _/      _/    _/_/_/  _/_/_/_/    _/_/
+  _/_/_/    _/_/      _/  _/      _/  _/    _/    _/      _/_/_/_/
+ _/        _/        _/    _/  _/    _/    _/    _/      _/
+_/        _/        _/      _/        _/_/_/      _/_/    _/_/_/
+
+     _/_/_/  _/                      _/_/      _/    _/    _/_/
+  _/        _/_/_/      _/_/      _/          _/    _/  _/    _/
+ _/        _/    _/  _/_/_/_/  _/_/_/_/      _/_/_/_/  _/_/_/_/
+_/        _/    _/  _/          _/          _/    _/  _/    _/
+ _/_/_/  _/    _/    _/_/_/    _/          _/    _/  _/    _/
+
+EOH
+  puts final_message
+end
+
+def print_final_message(private_chef_config, harness_dir)
+  print_cool_text
+  puts "Web UI...............https://#{private_chef_config['layout']['manage_fqdn']}"
+  puts "API FQDN.............https://#{private_chef_config['layout']['api_fqdn']}\n\n"
+
+  case private_chef_config['provider']
+  when 'ec2'
+    ssh_username = private_chef_config['ec2_options']['ssh_username'] || 'ec2-user'
+  when 'vagrant'
+    ssh_username = 'vagrant'
+  else
+    ssh_username = 'root'
+  end
+  keydir = File.join(harness_dir, 'keys')
+
+  %w(backends frontends).each do |whichend|
+    private_chef_config['layout'][whichend].each do |node,attrs|
+      puts "Bootstrap node is: #{node}" if attrs['bootstrap'] == true
+      puts "#{node}: https://#{attrs['hostname']} | ssh #{ssh_username}@#{attrs['ipaddress']} -i #{keydir}/id_rsa"
+    end
+  end
+  puts ""
+end

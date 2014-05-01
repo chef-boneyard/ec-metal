@@ -11,43 +11,6 @@ def get_config
   JSON.parse(File.read('config.json'))
 end
 
-def print_final_message(private_chef_config)
-  backend1 = backend2 = nil
-  private_chef_config['backends'].each do |node,attrs|
-    if attrs['bootstrap'] == true
-      backend1 = node
-    else
-      backend2 = node
-    end
-  end
-  frontend1 = private_chef_config['frontends'].keys.first
-
-  final_message = <<-EOH
-
-    _/_/_/              _/                          _/
-   _/    _/  _/  _/_/      _/      _/    _/_/_/  _/_/_/_/    _/_/
-  _/_/_/    _/_/      _/  _/      _/  _/    _/    _/      _/_/_/_/
- _/        _/        _/    _/  _/    _/    _/    _/      _/
-_/        _/        _/      _/        _/_/_/      _/_/    _/_/_/
-
-     _/_/_/  _/                      _/_/      _/    _/    _/_/
-  _/        _/_/_/      _/_/      _/          _/    _/  _/    _/
- _/        _/    _/  _/_/_/_/  _/_/_/_/      _/_/_/_/  _/_/_/_/
-_/        _/    _/  _/          _/          _/    _/  _/    _/
- _/_/_/  _/    _/    _/_/_/    _/          _/    _/  _/    _/
-
-Web UI...............https://#{private_chef_config['manage_fqdn']}
-API FQDN.............https://#{private_chef_config['api_fqdn']}
-Servers:
-  Backend Server 1.....#{private_chef_config['backends'][backend1]['hostname']}  (bootstrap)
-  Backend Server 2.....#{private_chef_config['backends'][backend2]['hostname']}
-  Backend VIP..........#{private_chef_config['backend_vip']['hostname']}
-  Frontend Server 1....#{private_chef_config['frontends'][frontend1]['hostname']}
-
-EOH
-  puts final_message
-end
-
 desc 'Install required Gems into the vendor/bundle directory'
 task :bundle do
   system('bundle install --path vendor/bundle --binstubs')
@@ -58,7 +21,6 @@ task :up => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
   if system("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha")
     Rake::Task['add_hosts'].execute
-    print_final_message(get_config['layout'])
   end
 end
 task :start => :up
@@ -68,7 +30,6 @@ task :upgrade_torture => [:keygen, :cachedir, :config_copy, :bundle, :berks_inst
   create_users_directory
   if system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade_torture")
     Rake::Task['add_hosts'].execute
-    print_final_message(get_config['layout'])
   end
 end
 
@@ -77,7 +38,6 @@ task :upgrade => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
   if system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
     Rake::Task['add_hosts'].execute
-    print_final_message(get_config['layout'])
   end
 end
 
@@ -123,16 +83,15 @@ end
 
 task :add_hosts do
   config = get_config
-  unless config['provider'] == 'ec2'
-    create_hosts_entries(config['layout'])
-  end
+  config = fog_populate_ips(config) if config['provider'] == 'ec2'
+  create_hosts_entries(config['layout'])
+  print_final_message(config, harness_dir)
 end
 
 task :remove_hosts do
   config = get_config
-  unless config['provider'] == 'ec2'
-    remove_hosts_entries(config['layout'])
-  end
+  config = fog_populate_ips(config) if config['provider'] == 'ec2'
+  remove_hosts_entries(config['layout'])
 end
 
 task :cachedir do
