@@ -55,6 +55,7 @@ action :install do
 
         recipe 'private-chef::hostsfile'
         recipe 'private-chef::provision'
+        recipe 'private-chef::bugfixes'
         recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname)
         recipe 'private-chef::provision_phase2'
         recipe 'private-chef::users' if vmname == bootstrap_node_name
