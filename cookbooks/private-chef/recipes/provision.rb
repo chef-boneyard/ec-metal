@@ -8,14 +8,13 @@
 # install
 
 installer_file = node['private-chef']['installer_file']
-installer_name = ::File.basename(installer_file)
+installer_name = ::File.basename(installer_file.split('?').first)
 installer_path = "#{Chef::Config[:file_cache_path]}/#{installer_name}"
 
 if ::URI.parse(installer_file).absolute?
   remote_file installer_path do
     source installer_file
-    checksum node['private-chef']['installer_checksum']
-    action :create
+    action :create_if_missing
   end
 else
   installer_path = installer_file
@@ -54,11 +53,6 @@ template "/etc/opscode/private-chef.rb" do
   source "private-chef.rb.erb"
   owner "root"
   group "root"
-  variables(
-    :backends => (node['private-chef']['backends'] || {}),
-    :frontends => (node['private-chef']['frontends'] || {}),
-    :backend_vip => (node['private-chef']['backend_vip'] || nil)
-  )
   action :create
 end
 
@@ -94,9 +88,9 @@ file '/root/.ssh/config' do
   content "Host *\n  StrictHostKeyChecking no\n"
 end
 
-# OC-11490 bug fix
-directory '/var/log/opscode/keepalived' do
-  owner 'opscode'
-  recursive true
-  mode "0700"
+# Deal with RHEL-based boxes that may have their own firewalls up
+if node['platform_family'] == 'rhel'
+  service 'iptables' do
+    action [ :disable, :stop ]
+  end
 end
