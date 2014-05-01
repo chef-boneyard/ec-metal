@@ -142,6 +142,12 @@ Running at AWS
 
 Prerequisites:
 * Write out an .aws/config file as described here: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#d0e726
+```
+[default]
+region = us-east-1
+aws_access_key_id = MYACCESSKEY
+aws_secret_access_key = MySecRetkEy
+```
 * Get yourself a CentOS 6.5 AMI https://aws.amazon.com/marketplace/ordering?productId=f4325b48-37b0-405a-9847-236c64622e3e&ref_=dtl_psb_continue&region=us-east-1
   * HIGHLY RECOMMENDED: Build your own AMI based off the CentOS image with patches applied (heartbleed) and chef package installed
 * Get yourself a VPC that has a "Public" Subnet with an Internet Gateway, and VPC security groups that allow inbound SSH and HTTPS
