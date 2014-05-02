@@ -148,8 +148,12 @@ region = us-east-1
 aws_access_key_id = MYACCESSKEY
 aws_secret_access_key = MySecRetkEy
 ```
-* Get yourself a CentOS 6.5 AMI https://aws.amazon.com/marketplace/ordering?productId=f4325b48-37b0-405a-9847-236c64622e3e&ref_=dtl_psb_continue&region=us-east-1
-  * HIGHLY RECOMMENDED: Build your own AMI based off the CentOS image with patches applied (heartbleed) and chef package installed
+* Get yourself a CentOS 6.5 AMI: defaults to using a CentOS-6.5 + Hearbleed patches + Chef 11.12.4 built from https://github.com/irvingpop/packer-chef-amazon
+| Region    | AMI ID       |
+| --------- | ------------ |
+| us-east-1 | ami-54ac4d3c |
+| us-west-1 | ami-c0152e85 |
+| us-west-2 | ami-937502a3 |
 * Get yourself a VPC that has a "Public" Subnet with an Internet Gateway, and VPC security groups that allow inbound SSH and HTTPS
   * Note that you'll need to plug the vpc subnet ID and backend_vip ipaddress into your config.json
 * SCARY WARNING: The current EC2 configuration uses ephemeral disks which ARE LOST WHEN YOU SHUT DOWN THE NODE
