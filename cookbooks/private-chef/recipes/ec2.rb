@@ -1,5 +1,12 @@
 # encoding: utf-8
 
+# Resize EBS root volume
+execute 'Resize root EBS volume' do
+  command 'resize2fs /dev/xvde && touch /.root_resized'
+  action :run
+  not_if { ::File.exists?('/.root_resized') }
+end
+
 case node['platform_family']
 when 'rhel'
   %w(gcc libxml2-devel libxslt-devel).each do |develpkg|
