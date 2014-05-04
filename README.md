@@ -148,7 +148,7 @@ region = us-east-1
 aws_access_key_id = MYACCESSKEY
 aws_secret_access_key = MySecRetkEy
 ```
-* Get yourself a CentOS 6.5 AMI: defaults to using a CentOS-6.5 + Hearbleed patches + Chef 11.12.4 built from https://github.com/irvingpop/packer-chef-amazon
+* Get yourself a CentOS 6.5 AMI: defaults to using a CentOS-6.5 + Heartbleed patches + Chef 11.12.4 built from https://github.com/irvingpop/packer-chef-amazon
 
 | Region    | AMI ID       |
 | --------- | ------------ |
