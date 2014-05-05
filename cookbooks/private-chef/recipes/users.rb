@@ -110,7 +110,7 @@ EOH
           case shell_out(cmd, opts).exitstatus
           when 53
             Chef::Log.info("...")
-            sleep 10
+            sleep 20
           when 0
             Chef::Log.info("#{orgname} created!")
             waiting = false
