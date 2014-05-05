@@ -9,6 +9,83 @@ action :drbd do
   new_resource.updated_by_last_action(true)
 end
 
+action :ebs_shared do
+  install_drbd_packages # Needed because of raise in opscode-omnibus drbd.rb
+  create_drbd_dirs
+  attach_ebs_volume if node['private-chef']['backends'][node.name]['bootstrap'] == true
+  create_lvm if node['private-chef']['backends'][node.name]['bootstrap'] == true
+  mount_ebs if node['private-chef']['backends'][node.name]['bootstrap'] == true
+  touch_drbd_ready
+  new_resource.updated_by_last_action(true)
+end
+
+action :ebs_save_databag do
+  save_ebs_volumes_db
+end
+
+def create_ebs_volumes_db
+  ebs_volumes_db_new = Chef::DataBag.new
+  ebs_volumes_db_new.name('ebs_volumes_db')
+  ebs_volumes_db_new.save
+end
+
+def save_ebs_volumes_db
+  log "Saving EBS volume id = #{node['aws']['ebs_volume'][node.hostname]['volume_id']}"
+  databag_item = Chef::DataBagItem.new
+  databag_item.data_bag('ebs_volumes_db')
+  databag_item.raw_data = {
+    'id' => node.hostname,
+    'volume_id' => node['aws']['ebs_volume'][node.hostname]['volume_id']
+  }
+  databag_item.save
+end
+
+def get_ebs_volumes_db
+  item = databag_item('ebs_volumes_db', node.hostname)
+  item['volume_id']
+end
+
+def create_ebs_volume
+  aws_ebs_volume node.hostname do
+    aws_access_key node['cloud']['aws_access_key_id']
+    aws_secret_access_key node['cloud']['aws_secret_access_key']
+    size node['cloud']['ebs_disk_size'].to_i
+    device '/dev/sdc'
+    if node['cloud']['ebs_use_piops'] == true
+      volume_type 'io1'
+      piops_val = node['cloud']['ebs_disk_size'].to_i * 30
+      piops_val = 4000 if piops_val > 4000
+      piops piops_val
+    end
+    action [ :create, :attach ]
+  end
+
+  # save_ebs_volumes_db
+end
+
+def attach_ebs_volume
+  begin
+    ebs_volumes_db = data_bag('ebs_volumes_db')
+  rescue Exception
+    create_ebs_volumes_db
+    ebs_volumes_db = data_bag('ebs_volumes_db')
+  end
+
+  unless ebs_volumes_db.include?(node.hostname)
+    create_ebs_volume
+  else
+    aws_ebs_volume node.hostname do
+      aws_access_key node['cloud']['aws_access_key_id']
+      aws_secret_access_key node['cloud']['aws_secret_access_key']
+      volume_id get_ebs_volumes_db
+      device '/dev/sdc'
+      action :attach
+    end
+  end
+
+  node.override['private-chef']['drbd_disks'] = ['/dev/xvdg']
+end
+
 def install_drbd_packages
   case node['platform_family']
   when 'debian'
@@ -29,12 +106,15 @@ def install_drbd_packages
       source '/tmp/elrepo.rpm'
     end
 
-    %w(drbd84-utils kmod-drbd84).each do |i|
-      package i
+    package 'drbd84-utils'
+    package 'kmod-drbd84' do
+      not_if { node['cloud'] &&
+        node['cloud']['provider'] == 'ec2' &&
+        node['cloud']['backend_storage_type'] == 'ebs' }
+      not_if { platform?('amazon', 'oracle') }
     end
   end
 end
-
 
 DRBD_DIR = '/var/opt/opscode/drbd'
 DRBD_ETC_DIR =  ::File.join(DRBD_DIR, 'etc')
@@ -55,6 +135,9 @@ def create_lvm
 
     logical_volume 'drbd' do
       size        '80%VG'
+      if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend_storage_type'] == 'ebs'
+        filesystem 'ext4'
+      end
       stripes     node['private-chef']['drbd_disks'].length
     end
   end
@@ -129,6 +212,14 @@ def setup_drbd
     command 'mount /dev/drbd0 /var/opt/opscode/drbd/data'
     action :nothing
     not_if 'mount | grep /dev/drbd0'
+  end
+end
+
+def mount_ebs
+  execute 'mount-ebs-volume' do
+    command 'mount /dev/mapper/opscode-drbd /var/opt/opscode/drbd/data'
+    action :run
+    not_if 'mount | grep /dev/mapper/opscode-drbd'
   end
 end
 
