@@ -42,11 +42,13 @@ end
 def save_ebs_volumes_db
   ruby_block 'save EBS volume_id to databag' do
     block do
+      bootstrap_host_name =
+        node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.values.first['hostname']
       Chef::Log.info "Saving EBS volume id = #{node['aws']['ebs_volume'][bootstrap_host_name]['volume_id']}"
       databag_item = Chef::DataBagItem.new
       databag_item.data_bag('ebs_volumes_db')
       databag_item.raw_data = {
-        'id' => node.hostname,
+        'id' => bootstrap_host_name,
         'volume_id' => node['aws']['ebs_volume'][bootstrap_host_name]['volume_id']
       }
       databag_item.save
@@ -60,7 +62,7 @@ def get_ebs_volumes_db
 end
 
 def create_ebs_volume
-  aws_ebs_volume node.hostname do
+  aws_ebs_volume bootstrap_host_name do
     aws_access_key node['cloud']['aws_access_key_id']
     aws_secret_access_key node['cloud']['aws_secret_access_key']
     size node['cloud']['ebs_disk_size'].to_i
@@ -83,10 +85,10 @@ def attach_ebs_volume
     ebs_volumes_db = data_bag('ebs_volumes_db')
   end
 
-  unless ebs_volumes_db.include?(node.hostname)
+  unless ebs_volumes_db.include?(bootstrap_host_name)
     create_ebs_volume
   else
-    aws_ebs_volume node.hostname do
+    aws_ebs_volume bootstrap_host_name do
       aws_access_key node['cloud']['aws_access_key_id']
       aws_secret_access_key node['cloud']['aws_secret_access_key']
       volume_id get_ebs_volumes_db
@@ -107,21 +109,6 @@ def install_drbd_packages
   when 'debian'
     package 'drbd8-utils'
   when 'rhel'
-    yum_key 'RPM-GPG-KEY-elrepo' do
-      url 'http://elrepo.org/RPM-GPG-KEY-elrepo.org'
-      action :add
-    end
-
-    maj = node['platform_version'].to_i
-    remote_file '/tmp/elrepo.rpm' do
-      source "http://elrepo.org/elrepo-release-#{maj}-#{maj}.el#{maj}.elrepo.noarch.rpm"
-      action :create_if_missing
-    end
-
-    rpm_package 'elrepo' do
-      source '/tmp/elrepo.rpm'
-    end
-
     package 'drbd84-utils'
     package 'kmod-drbd84' do
       not_if { node['cloud'] &&
@@ -242,9 +229,10 @@ end
 def touch_drbd_device
   file '/dev/drbd0' do
     action :create
-    owner "root"
-    group "root"
-    mode "0644"
+    owner 'root'
+    group 'root'
+    mode '0644'
+    not_if { ::File.exists?('/dev/drbd0') }
   end
 end
 
