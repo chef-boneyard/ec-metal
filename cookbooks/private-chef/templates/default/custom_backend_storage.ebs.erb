@@ -1,0 +1,131 @@
+#!/opt/chef/embedded/bin/ruby
+# Reassigns an EBS volume to me for EC failover
+# Created by Chef private-chef::ec2
+
+require 'fog'
+
+# Attributes from template
+REGION = "<%= node['cloud']['region'] %>"
+AWS_ACCESS_KEY_ID = "<%= node['cloud']['aws_access_key_id'] %>"
+AWS_SECRET_ACCESS_KEY = "<%= node['cloud']['aws_secret_access_key'] %>"
+SERVER_ID = "<%= node['provisioner_output']['server_id'] %>"
+VOLUME_ID = "<%= node['aws']['ebs_volume'][node.hostname]['volume_id'] %>"
+AWS_DEVICE = '/dev/sdc'
+LVM_VG = 'opscode'
+LVM_LV = 'drbd'
+LVM_DEVICE = "/dev/#{LVM_VG}/#{LVM_LV}"
+MOUNTPOINT = '/var/opt/opscode/drbd/data'
+TIMEOUT = 120
+
+def fog_connect
+  Fog::Compute.new(:region => REGION,
+    :aws_access_key_id => AWS_ACCESS_KEY_ID,
+    :aws_secret_access_key => AWS_SECRET_ACCESS_KEY,
+    :provider => 'AWS')
+end
+
+def volume_wait_for_state(state)
+  compute = fog_connect
+  begin
+    Timeout::timeout(TIMEOUT) do
+      while true
+        volume = compute.volumes.get(VOLUME_ID)
+        if volume.state == state
+          puts "Volume #{VOLUME_ID} is now #{state}"
+          break
+        end
+        puts '.'
+        sleep 5
+      end
+    end
+  rescue Timeout::Error
+    raise "Timed out waiting for volume detachment after #{timeout} seconds"
+  end
+end
+
+def attach_volume
+  compute = fog_connect
+  volume = compute.volumes.get(VOLUME_ID)
+
+  # check yourself before you wreck yourself
+  if `mount`.split("\n").select { |line| line.include?(MOUNTPOINT) }.length > 0
+    puts "Mount Point #{MOUNTPOINT} is already mounted!"
+    return true
+  end
+
+  if volume.server_id == SERVER_ID
+    puts "Volume #{VOLUME_ID} already attached to me #{SERVER_ID}"
+  else
+    if volume.state != 'available'
+      if volume.state == 'deleting'
+        raise "Volume #{VOLUME_ID} no longer exists"
+      end
+
+      # force detach
+      compute.detach_volume(VOLUME_ID, {'Force' => true })
+      volume_wait_for_state('available')
+    end
+
+    compute.attach_volume(SERVER_ID, VOLUME_ID, AWS_DEVICE)
+    volume_wait_for_state('in-use')
+  end
+
+  # Wait for LVM to find it
+  begin
+    volume = compute.volumes.get(VOLUME_ID)
+    Timeout::timeout(TIMEOUT) do
+      while true
+        if `pvscan`.include?(LVM_VG)
+          puts "Found LVM volume #{LVM_DEVICE}"
+          system("vgchange --activate y #{LVM_VG}")
+          break
+        end
+        puts '.'
+        sleep 3
+      end
+    end
+  rescue Timeout::Error
+    raise "Timed out waiting for LVM to be ready"
+  end
+
+  begin
+    system("mount #{LVM_DEVICE} #{MOUNTPOINT}")
+  rescue Exception => e
+    raise "Error mounting volume: #{e}"
+  end
+end
+
+def detach_volume
+  compute = fog_connect
+  volume = compute.volumes.get(VOLUME_ID)
+
+  if volume.server_id != SERVER_ID
+    puts "Volume #{VOLUME_ID} is not attached to #{SERVER_ID}!"
+    return true
+  end
+
+  # unmount
+  if `mount`.split("\n").select { |line| line.include?(MOUNTPOINT) }.length > 0
+    begin
+      puts "dismounting #{MOUNTPOINT}"
+      system("umount #{MOUNTPOINT}")
+    rescue Exception => e
+      raise "Error mounting volume: #{e}"
+    end
+  end
+
+  system("vgchange --activate n #{LVM_VG}")
+
+  puts "detaching #{VOLUME_ID}"
+  compute.detach_volume(VOLUME_ID)
+  volume_wait_for_state('available')
+end
+
+case ARGV[0]
+when 'attach'
+  attach_volume
+when 'detach'
+  detach_volume
+else
+  puts "Please specify attach or detach"
+end

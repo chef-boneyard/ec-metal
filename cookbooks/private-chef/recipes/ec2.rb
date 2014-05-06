@@ -44,9 +44,7 @@ end
 installer_file = node['private-chef']['installer_file']
 installer_name = ::File.basename(installer_file.split('?').first)
 
-if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend_storage_type'] == 'ebs'
-  cluster_source = 'cluster.sh.erb'
-elsif PackageHelper.pc_version(installer_name) > '1.4.0'
+if PackageHelper.pc_version(installer_name) > '1.4.0'
   cluster_source = 'cluster.sh.erb'
 else
   cluster_source = 'cluster.sh.pre140.erb'

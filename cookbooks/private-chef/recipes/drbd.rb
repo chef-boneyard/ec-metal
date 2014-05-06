@@ -16,11 +16,11 @@ if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend
     not_if { ::File.exists?('/var/opt/opscode/drbd/drbd_ready') }
   end
 
-  private_chef_backend_storage 'ebs_save_databag' do
-    action :ebs_save_databag
-    only_if { node['private-chef']['backends'][node.name] &&
-      node['private-chef']['backends'][node.name]['bootstrap'] == true }
-    not_if { ::File.exists?('/var/opt/opscode/drbd/drbd_ready') }
+  template '/var/opt/opscode/keepalived/bin/custom_backend_storage' do
+    source 'custom_backend_storage.ebs.erb'
+    owner 'root'
+    group 'root'
+    mode '0700'
   end
 else
   private_chef_backend_storage 'drbd_el_traditicional' do

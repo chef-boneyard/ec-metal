@@ -12,15 +12,25 @@ end
 action :ebs_shared do
   install_drbd_packages # Needed because of raise in opscode-omnibus drbd.rb
   create_drbd_dirs
-  attach_ebs_volume if node['private-chef']['backends'][node.name]['bootstrap'] == true
-  create_lvm if node['private-chef']['backends'][node.name]['bootstrap'] == true
-  mount_ebs if node['private-chef']['backends'][node.name]['bootstrap'] == true
+  if node['private-chef']['backends'][node.name]['bootstrap'] == true
+    attach_ebs_volume
+    create_lvm
+    mount_ebs
+    save_ebs_volumes_db
+  else
+    set_ebs_volume_on_standby
+  end
+  touch drbd_device # stupid hack to trick ha-status into being OK
   touch_drbd_ready
   new_resource.updated_by_last_action(true)
 end
 
 action :ebs_save_databag do
   save_ebs_volumes_db
+end
+
+def bootstrap_host_name
+  node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.values.first['hostname']
 end
 
 def create_ebs_volumes_db
@@ -30,18 +40,22 @@ def create_ebs_volumes_db
 end
 
 def save_ebs_volumes_db
-  log "Saving EBS volume id = #{node['aws']['ebs_volume'][node.hostname]['volume_id']}"
-  databag_item = Chef::DataBagItem.new
-  databag_item.data_bag('ebs_volumes_db')
-  databag_item.raw_data = {
-    'id' => node.hostname,
-    'volume_id' => node['aws']['ebs_volume'][node.hostname]['volume_id']
-  }
-  databag_item.save
+  ruby_block 'save EBS volume_id to databag' do
+    block do
+      Chef::Log.info "Saving EBS volume id = #{node['aws']['ebs_volume'][bootstrap_host_name]['volume_id']}"
+      databag_item = Chef::DataBagItem.new
+      databag_item.data_bag('ebs_volumes_db')
+      databag_item.raw_data = {
+        'id' => node.hostname,
+        'volume_id' => node['aws']['ebs_volume'][bootstrap_host_name]['volume_id']
+      }
+      databag_item.save
+    end
+  end
 end
 
 def get_ebs_volumes_db
-  item = databag_item('ebs_volumes_db', node.hostname)
+  item = data_bag_item('ebs_volumes_db', bootstrap_host_name)
   item['volume_id']
 end
 
@@ -59,8 +73,6 @@ def create_ebs_volume
     end
     action [ :create, :attach ]
   end
-
-  # save_ebs_volumes_db
 end
 
 def attach_ebs_volume
@@ -84,6 +96,10 @@ def attach_ebs_volume
   end
 
   node.override['private-chef']['drbd_disks'] = ['/dev/xvdg']
+end
+
+def set_ebs_volume_on_standby
+  node.override['aws']['ebs_volume'][node.hostname]['volume_id'] = get_ebs_volumes_db
 end
 
 def install_drbd_packages
