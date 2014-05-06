@@ -20,7 +20,7 @@ action :ebs_shared do
   else
     set_ebs_volume_on_standby
   end
-  touch drbd_device # stupid hack to trick ha-status into being OK
+  touch_drbd_device # stupid hack to trick ha-status into being OK
   touch_drbd_ready
   new_resource.updated_by_last_action(true)
 end
@@ -236,6 +236,15 @@ def mount_ebs
     command 'mount /dev/mapper/opscode-drbd /var/opt/opscode/drbd/data'
     action :run
     not_if 'mount | grep /dev/mapper/opscode-drbd'
+  end
+end
+
+def touch_drbd_device
+  file '/dev/drbd0' do
+    action :create
+    owner "root"
+    group "root"
+    mode "0644"
   end
 end
 
