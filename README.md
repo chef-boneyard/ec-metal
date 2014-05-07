@@ -157,6 +157,28 @@ aws_secret_access_key = MySecRetkEy
 | us-west-2 | ami-937502a3 |
 
 * Get yourself a VPC that has a "Public" Subnet with an Internet Gateway, and VPC security groups that allow inbound SSH and HTTPS
+```
+# CREATING THE VPC USING THE CLI TOOLS
+aws ec2 create-vpc --cidr-block "33.33.0.0/16"
+# note your VpcId
+aws ec2 create-subnet --vpc-id vpc-myvpcid --cidr-block "33.33.33.0/24"
+# note your SubnetId
+aws ec2 create-internet-gateway
+# note your InternetGatewayId
+aws ec2 attach-internet-gateway --internet-gateway-id igw-myigwid --vpc-id vpc-myvpcid
+# should be true
+aws ec2 describe-route-tables
+# note the RouteTableId assigned to your VpcId
+aws ec2 create-route --route-table-id rtb-myrtbid --destination "0.0.0.0/0" --gateway-id igw-myigwid
+
+# ADJUSTING THE SECURITY GROUPS to allow ssh, http, https
+# find the default security group for your VPC
+aws ec2 describe-security-groups --filters Name=vpc-id,Values=vpc-b4c52dd1
+# note the GroupId
+aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --port 22 --cidr "0.0.0.0/0"
+aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --port 80 --cidr "0.0.0.0/0"
+aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --port 443 --cidr "0.0.0.0/0"
+```
   * Note that you'll need to plug the vpc subnet ID and backend_vip ipaddress into your config.json
 * SCARY WARNING: The current EC2 configuration uses ephemeral disks which ARE LOST WHEN YOU SHUT DOWN THE NODE
 
