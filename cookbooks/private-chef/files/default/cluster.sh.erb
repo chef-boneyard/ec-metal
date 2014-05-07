@@ -35,8 +35,8 @@ function transition
     master)
       if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_storage' ]; then
           log_me "Attempting CUSTOM BACKEND primary takeover"
-          /var/opt/opscode/keepalived/bin/custom_backend_storage attach || error_exit "CUSTOM BACKEND attach failed"
-          log_me "CUSTOM BACKEND primary attach SUCCESS"
+          output=`/var/opt/opscode/keepalived/bin/custom_backend_storage attach` || error_exit "CUSTOM BACKEND attach failed: ${output}"
+          log_me "CUSTOM BACKEND primary attach SUCCESS: ${output}"
       else
         # 10 * SVWAIT
         try=300
@@ -80,8 +80,8 @@ function transition
 
       if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_storage' ]; then
           log_me "Attempting CUSTOM BACKEND to go standby"
-          /var/opt/opscode/keepalived/bin/custom_backend_storage detach || error_exit "CUSTOM BACKEND detach failed"
-          log_me "CUSTOM BACKEND standby SUCCESS"
+          output=`/var/opt/opscode/keepalived/bin/custom_backend_storage detach` || error_exit "CUSTOM BACKEND detach failed: ${output}"
+          log_me "CUSTOM BACKEND standby SUCCESS: ${output}"
       else
         # 10 * SVWAIT
         try=300
