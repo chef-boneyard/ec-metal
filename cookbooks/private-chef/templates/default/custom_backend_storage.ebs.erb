@@ -3,6 +3,7 @@
 # Created by Chef private-chef::ec2
 
 require 'fog'
+require 'timeout'
 
 # Attributes from template
 REGION = "<%= node['cloud']['region'] %>"
@@ -39,7 +40,7 @@ def volume_wait_for_state(state)
       end
     end
   rescue Timeout::Error
-    raise "Timed out waiting for volume detachment after #{timeout} seconds"
+    raise "Timed out waiting for volume detachment after #{TIMEOUT} seconds"
   end
 end
 
@@ -93,6 +94,81 @@ def attach_volume
   rescue Exception => e
     raise "Error mounting volume: #{e}"
   end
+
+  # stupid hack to trick ha-status into being OK
+  unless ::File.exists?('/dev/drbd0')
+    File.open('/dev/drbd0', 'w') {}
+  end
+end
+
+# output list of service names from p-c-c status, except keepalived
+def running_services
+  `/opt/opscode/bin/private-chef-ctl status`.
+    split("\n").
+    reject { |line| line[/keepalived/] }.
+    grep(/^run:/).
+    map {|line| line.split[1].chomp(':') }
+end
+
+def mean_unmounter
+  puts "invoking the mean_unmounter"
+  begin
+    Timeout::timeout(TIMEOUT) do
+      while true
+
+        # If any pids still hold open files on the mountpoint, kill them
+        pid_list = `/sbin/fuser -m #{MOUNTPOINT}`.split.map(&:to_i)
+        if pid_list.length > 0
+          pid_list.each do |pid|
+            system("kill -9 #{pid}")
+          end
+          puts '.'
+          sleep 5
+        else
+          system("umount -f #{MOUNTPOINT}")
+          break
+        end
+
+      end
+    end
+  rescue Timeout::Error
+    raise "Timed out waiting for volume to unmount"
+  end
+end
+
+def nice_unmounter
+  puts "invoking the nice_unmounter"
+  begin
+    Timeout::timeout(TIMEOUT) do
+      while true
+
+        # First try to stop the services again
+        if running_services.length > 0
+          running_services.each do |service|
+            system("/opt/opscode/bin/private-chef-ctl stop #{service}")
+          end
+          sleep 10
+        end
+
+        # If any pids still hold open files on the mountpoint, kill them
+        pid_list = `/sbin/fuser -m #{MOUNTPOINT}`.split.map(&:to_i)
+        if pid_list.length > 0
+          pid_list.each do |pid|
+            system("kill #{pid}")
+          end
+          puts '.'
+          sleep 5
+        else
+          system("umount #{MOUNTPOINT}")
+          break
+        end
+
+      end
+    end
+  rescue Timeout::Error
+    puts "Timed out waiting for volume to unmount"
+    mean_unmounter
+  end
 end
 
 def detach_volume
@@ -110,10 +186,12 @@ def detach_volume
       puts "dismounting #{MOUNTPOINT}"
       system("umount #{MOUNTPOINT}")
     rescue Exception => e
-      raise "Error mounting volume: #{e}"
+      puts "Error unmounting volume: #{e}"
+      nice_unmounter
     end
   end
 
+  # deactivate the LVM vg to make detach faster
   system("vgchange --activate n #{LVM_VG}")
 
   puts "detaching #{VOLUME_ID}"

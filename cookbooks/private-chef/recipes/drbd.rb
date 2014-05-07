@@ -4,6 +4,7 @@ when 'debian'
 when 'rhel'
   include_recipe 'yum'
   include_recipe 'yum::elrepo'
+  package 'psmisc'
 end
 
 include_recipe 'lvm::default'
