@@ -162,6 +162,8 @@ aws_secret_access_key = MySecRetkEy
 # CREATING THE VPC USING THE CLI TOOLS
 aws ec2 create-vpc --cidr-block "33.33.0.0/16"
 # note your VpcId
+aws ec2 modify-vpc-attribute --vpc-id vpc-myvpcid --enable-dns-hostnames
+# now create a subnet
 aws ec2 create-subnet --vpc-id vpc-myvpcid --cidr-block "33.33.33.0/24"
 # note your SubnetId
 aws ec2 create-internet-gateway
