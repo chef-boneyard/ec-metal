@@ -1,4 +1,4 @@
-ec-ha
+ec-metal
 ================
 This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA clusters.
 
@@ -10,6 +10,8 @@ TOC
 * [TODO](#todo)
 * [Attributes](#attributes)
 * [Running on AWS](#aws)
+  * [Using ephemeral storage with DRBD](#aws-drbd)
+  * [Using an EBS volume without DRBD](#aws-ebs)
 * [Authors](#authors)
 
 <a name="requirements"/>
@@ -34,7 +36,7 @@ Usage
 1. Install dependent gems into `vendor/bundle`: `rake bundle`
 1. Copy `config.json.example` to `config.json` and adjust as needed
   * the `default_package` attribute is used in install and upgrade steps
-1. Download the private-chef packages to the ec-ha/cache directory or point to your own installer cache with `$CACHE_PATH`
+1. Download the private-chef packages to the ec-metal/cache directory or point to your own installer cache with `$CACHE_PATH`
 1. To bring up the environment: `rake up`
 1. To upgrade a running environment, set a new `default_package` attribute and run: `rake upgrade`
 1. To tear down the environment: `rake destroy`
@@ -58,7 +60,6 @@ NOTE: This is still a WIP under heavy development
     + Rake Tasks to auto-create IAM Roles
   - Rake Task to auto-create the VPC networking
   - Creation of ELB (load balancers) and auto-add frontends to the ELB
-  - Optional use of EBS storage (without DRBD) that is handed over during backend node failover
   - rake ssh to find and connect you to your AWS instances
 
 <a name="attributes"/>
@@ -182,6 +183,7 @@ aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --p
   * Note that you'll need to plug the vpc subnet ID and backend_vip ipaddress into your config.json
 * SCARY WARNING: The current EC2 configuration uses ephemeral disks which ARE LOST WHEN YOU SHUT DOWN THE NODE
 
+<a name="aws-drbd"/>
 #### config.json.ec2.example - Amazon EC2 Provisioning
 ```
 {
@@ -227,6 +229,67 @@ aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --p
   }
 }
 
+```
+
+
+<a name="aws-ebs"/>
+### Amazon EC2 provisioning with an EBS volume on the backends
+
+* The single EBS volume is attached and mounted ONLY to the active backend node
+* It is highly recommended to use EBS-optimized instances and PIOPS volumes
+* Note the three added attributes to the ec2_options:
+  - `backend_storage_type`: `ebs`
+  - `ebs_disk_size`: `100`
+  - `ebs_use_piops`: `true`
+* The PIOPS value is automatically calculated as disk_size * 30 up to the maximum of 4000
+
+```
+{
+  "provider": "ec2",
+  "ec2_options": {
+    "region": "us-west-2",
+    "vpc_subnet": "subnet-8b0519ff",
+    "ami_id": "ami-937502a3",
+    "ssh_username": "root",
+    "backend_storage_type": "ebs",
+    "ebs_disk_size": "100",
+    "ebs_use_piops": true
+  },
+  "default_package": "http://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/private-chef-11.1.3-1.el6.x86_64.rpm?AWSAccessKeyId=GetFromSupport&Expires=GetFromSupport&Signature=getfromSupport",
+  "manage_package": "http://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/opscode-manage-1.3.1-1.el6.x86_64.rpm?AWSAccessKeyId=GetFromSupport&Expires=GetFromSupport&Signature=getfromSupport",
+  "layout": {
+    "topology": "ha",
+    "api_fqdn": "api.opscode.ebs",
+    "manage_fqdn": "manage.opscode.ebs",
+    "analytics_fqdn": "analytics.opscode.ebs",
+    "backend_vip": {
+      "hostname": "ebsbackend.opscode.ebs",
+      "ipaddress": "33.33.33.20",
+      "device": "eth0",
+      "heartbeat_device": "eth0"
+    },
+    "backends": {
+      "ebsbackend1": {
+        "hostname": "ebsbackend1.opscode.ebs",
+        "instance_type": "c3.2xlarge",
+        "ebs_optimized": true,
+        "bootstrap": true
+      },
+      "ebsbackend2": {
+        "hostname": "ebsbackend2.opscode.ebs",
+        "ebs_optimized": true,
+        "instance_type": "c3.2xlarge"
+      }
+    },
+    "frontends": {
+      "ebsfrontend1": {
+        "hostname": "ebsfrontend1.opscode.ebs",
+        "ebs_optimized": false,
+        "instance_type": "m3.medium"
+      }
+    }
+  }
+}
 ```
 
 Contributing
