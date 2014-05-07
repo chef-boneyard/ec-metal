@@ -23,7 +23,7 @@ def get_aws
 
   Fog::Compute.new(:aws_access_key_id => aws_credentials['default'][:access_key_id],
     :aws_secret_access_key => aws_credentials['default'][:secret_access_key],
-    :region => 'us-east-1',  # TODO: FIXME
+    :region => aws_credentials['default'][:region],
     :provider => 'AWS')
 end
 
