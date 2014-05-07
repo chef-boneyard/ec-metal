@@ -101,7 +101,7 @@ def attach_ebs_volume
 end
 
 def set_ebs_volume_on_standby
-  node.override['aws']['ebs_volume'][node.hostname]['volume_id'] = get_ebs_volumes_db
+  node.override['aws']['ebs_volume'][bootstrap_host_name]['volume_id'] = get_ebs_volumes_db
 end
 
 def install_drbd_packages
