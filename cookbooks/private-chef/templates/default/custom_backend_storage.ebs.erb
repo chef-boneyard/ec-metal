@@ -182,11 +182,9 @@ def detach_volume
 
   # unmount
   if `mount`.split("\n").select { |line| line.include?(MOUNTPOINT) }.length > 0
-    begin
-      puts "dismounting #{MOUNTPOINT}"
-      system("umount #{MOUNTPOINT}")
-    rescue Exception => e
-      puts "Error unmounting volume: #{e}"
+    puts "dismounting #{MOUNTPOINT}"
+    unless system("umount #{MOUNTPOINT}")
+      puts "Error unmounting volume"
       nice_unmounter
     end
   end
