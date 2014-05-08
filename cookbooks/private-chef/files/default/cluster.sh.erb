@@ -67,9 +67,11 @@ function transition
       <%- end -%>
 <%- end -%>
 
-      # ec-ha AWS addition
-      log_me "Binding the AWS VPC VIP to me"
-      /var/opt/opscode/keepalived/bin/ec2_assign_backend_vip.rb
+      if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_ip' ]; then
+          log_me "Attempting CUSTOM BACKEND IP primary takeover"
+          output=`/var/opt/opscode/keepalived/bin/custom_backend_ip attach` || error_exit "CUSTOM BACKEND IP attach failed: ${output}"
+          log_me "CUSTOM BACKEND IP primary attach SUCCESS: ${output}"
+      fi
 
       ;;
     backup)
@@ -93,6 +95,12 @@ function transition
           let "--try" || error_exit "Cannot become DRBD secondary"
           sleep 1
         done
+      fi
+
+      if [ -x '/var/opt/opscode/keepalived/bin/custom_backend_ip' ]; then
+          log_me "Attempting CUSTOM BACKEND IP to go standby"
+          output=`/var/opt/opscode/keepalived/bin/custom_backend_ip detach` || error_exit "CUSTOM BACKEND IP detach failed: ${output}"
+          log_me "CUSTOM BACKEND IP detach SUCCESS: ${output}"
       fi
       ;;
     fault)

@@ -33,8 +33,8 @@ directory '/var/opt/opscode/keepalived/bin' do
   action :create
 end
 
-template '/var/opt/opscode/keepalived/bin/ec2_assign_backend_vip.rb' do
-  source 'ec2_assign_backend_vip.rb.erb'
+template '/var/opt/opscode/keepalived/bin/custom_backend_ip' do
+  source 'custom_backend_ip.vpc.erb'
   owner 'root'
   group 'root'
   mode '0700'
