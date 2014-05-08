@@ -54,6 +54,11 @@ def attach_volume
     return true
   end
 
+  if system("dmesg | grep 'vbd.*16 Device in use; refusing to close'")
+    raise 'ERROR: Stuck VBD device, please reboot this machine' +
+      '(http://zhigang.org/wiki/XenVirtualDisk#what-happens-when-detaching-a-virtual-disk-while-the-disk-is-opened-in-the-guest-eg-mounted)'
+  end
+
   if volume.server_id == SERVER_ID
     puts "Volume #{VOLUME_ID} already attached to me #{SERVER_ID}"
   else
@@ -67,11 +72,13 @@ def attach_volume
       volume_wait_for_state('available')
     end
 
+    puts "Attaching volume #{VOLUME_ID} to server #{SERVER_ID}"
     compute.attach_volume(SERVER_ID, VOLUME_ID, AWS_DEVICE)
     volume_wait_for_state('in-use')
   end
 
   # Wait for LVM to find it
+  puts 'Waiting for LVM volume to become available'
   begin
     volume = compute.volumes.get(VOLUME_ID)
     Timeout::timeout(TIMEOUT) do
@@ -89,6 +96,7 @@ def attach_volume
     raise "Timed out waiting for LVM to be ready"
   end
 
+  puts "Mounting #{MOUNTPOINT}"
   begin
     system("mount #{LVM_DEVICE} #{MOUNTPOINT}")
   rescue Exception => e
