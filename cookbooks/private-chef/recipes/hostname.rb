@@ -24,3 +24,14 @@ file '/etc/hostname' do
   mode '0644'
   content "#{myhostname}\n"
 end
+
+# Needed for hostname to survive reboots
+if node['platform_family'] == 'rhel'
+  file '/etc/sysconfig/network' do
+    action :create
+    owner "root"
+    group "root"
+    mode "0644"
+    content "NETWORKING=yes\nHOSTNAME=#{myhostname}\n"
+  end
+end
