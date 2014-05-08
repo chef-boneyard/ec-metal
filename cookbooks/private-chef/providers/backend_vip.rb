@@ -11,6 +11,7 @@ action :create do
 
   FogHelper.aws_vpc_assign_secondary_ip('AWS', region, aws_access_key_id, aws_secret_access_key, server_id, ipaddress)
   log "Assigned backend_vip #{ipaddress} to server #{server_id}"
+  new_resource.updated_by_last_action(true)
 end
 
 

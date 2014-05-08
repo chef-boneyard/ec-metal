@@ -1,5 +1,12 @@
 # encoding: utf-8
 
+# Resize EBS root volume
+execute 'Resize root EBS volume' do
+  command 'resize2fs /dev/xvde && touch /.root_resized'
+  action :run
+  not_if { ::File.exists?('/.root_resized') }
+end
+
 case node['platform_family']
 when 'rhel'
   %w(gcc libxml2-devel libxslt-devel).each do |develpkg|
@@ -37,9 +44,15 @@ end
 installer_file = node['private-chef']['installer_file']
 installer_name = ::File.basename(installer_file.split('?').first)
 
+if PackageHelper.pc_version(installer_name) > '1.4.0'
+  cluster_source = 'cluster.sh.erb'
+else
+  cluster_source = 'cluster.sh.pre140.erb'
+end
+
 # Delay the replacement of the EC packages cluster.sh.erb until the package is actually installed
 cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/templates/default/cluster.sh.erb' do
-  source 'cluster.sh.erb'
+  source cluster_source
   owner 'root'
   group 'root'
   mode '0755'

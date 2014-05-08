@@ -22,3 +22,6 @@ default['private-chef']['manage_fqdn'] = "manage.mycompany.com"
 # Underlying Configuration for /etc/opscode/chef-server.rb
 ###
 default['private-chef']['configuration'] = {}
+
+# wrapping the aws cookbook
+default['aws']['right_aws_version'] = '3.1.0'

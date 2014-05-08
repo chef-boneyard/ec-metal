@@ -1,6 +1,6 @@
 # Shamelessly copied from the reporting.rb recipe
 
-installer_path = node['private-chef']['pushy_installer_file']
+installer_file = node['private-chef']['pushy_installer_file']
 installer_name = ::File.basename(installer_file.split('?').first)
 installer_path = "#{Chef::Config[:file_cache_path]}/#{installer_name}"
 

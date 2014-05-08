@@ -10,3 +10,4 @@ keys
 cache
 vendor
 users
+data_bags

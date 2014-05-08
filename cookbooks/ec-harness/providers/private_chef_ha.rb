@@ -124,6 +124,7 @@ end
 
 def cloud_attributes(provider)
   cloud_attrs = node['harness'][provider].to_hash
+  cloud_attrs['provider'] = provider
 
   case provider
   when 'ec2'

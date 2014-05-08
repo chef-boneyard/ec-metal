@@ -1,4 +1,4 @@
-ec-ha
+ec-metal
 ================
 This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA clusters.
 
@@ -10,6 +10,8 @@ TOC
 * [TODO](#todo)
 * [Attributes](#attributes)
 * [Running on AWS](#aws)
+  * [Using ephemeral storage with DRBD](#aws-drbd)
+  * [Using an EBS volume without DRBD](#aws-ebs)
 * [Authors](#authors)
 
 <a name="requirements"/>
@@ -34,7 +36,7 @@ Usage
 1. Install dependent gems into `vendor/bundle`: `rake bundle`
 1. Copy `config.json.example` to `config.json` and adjust as needed
   * the `default_package` attribute is used in install and upgrade steps
-1. Download the private-chef packages to the ec-ha/cache directory or point to your own installer cache with `$CACHE_PATH`
+1. Download the private-chef packages to the ec-metal/cache directory or point to your own installer cache with `$CACHE_PATH`
 1. To bring up the environment: `rake up`
 1. To upgrade a running environment, set a new `default_package` attribute and run: `rake upgrade`
 1. To tear down the environment: `rake destroy`
@@ -58,7 +60,6 @@ NOTE: This is still a WIP under heavy development
     + Rake Tasks to auto-create IAM Roles
   - Rake Task to auto-create the VPC networking
   - Creation of ELB (load balancers) and auto-add frontends to the ELB
-  - Optional use of EBS storage (without DRBD) that is handed over during backend node failover
   - rake ssh to find and connect you to your AWS instances
 
 <a name="attributes"/>
@@ -148,12 +149,43 @@ region = us-east-1
 aws_access_key_id = MYACCESSKEY
 aws_secret_access_key = MySecRetkEy
 ```
-* Get yourself a CentOS 6.5 AMI https://aws.amazon.com/marketplace/ordering?productId=f4325b48-37b0-405a-9847-236c64622e3e&ref_=dtl_psb_continue&region=us-east-1
-  * HIGHLY RECOMMENDED: Build your own AMI based off the CentOS image with patches applied (heartbleed) and chef package installed
+* Get yourself a CentOS 6.5 AMI: defaults to using a CentOS-6.5 + Heartbleed patches + Chef 11.12.4 built from https://github.com/irvingpop/packer-chef-amazon
+
+| Region    | AMI ID       |
+| --------- | ------------ |
+| us-east-1 | ami-54ac4d3c |
+| us-west-1 | ami-c0152e85 |
+| us-west-2 | ami-937502a3 |
+
 * Get yourself a VPC that has a "Public" Subnet with an Internet Gateway, and VPC security groups that allow inbound SSH and HTTPS
+```
+# CREATING THE VPC USING THE CLI TOOLS
+aws ec2 create-vpc --cidr-block "33.33.0.0/16"
+# note your VpcId
+aws ec2 modify-vpc-attribute --vpc-id vpc-myvpcid --enable-dns-hostnames
+# now create a subnet
+aws ec2 create-subnet --vpc-id vpc-myvpcid --cidr-block "33.33.33.0/24"
+# note your SubnetId
+aws ec2 create-internet-gateway
+# note your InternetGatewayId
+aws ec2 attach-internet-gateway --internet-gateway-id igw-myigwid --vpc-id vpc-myvpcid
+# should be true
+aws ec2 describe-route-tables
+# note the RouteTableId assigned to your VpcId
+aws ec2 create-route --route-table-id rtb-myrtbid --destination "0.0.0.0/0" --gateway-id igw-myigwid
+
+# ADJUSTING THE SECURITY GROUPS to allow ssh, http, https
+# find the default security group for your VPC
+aws ec2 describe-security-groups --filters Name=vpc-id,Values=vpc-b4c52dd1
+# note the GroupId
+aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --port 22 --cidr "0.0.0.0/0"
+aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --port 80 --cidr "0.0.0.0/0"
+aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --port 443 --cidr "0.0.0.0/0"
+```
   * Note that you'll need to plug the vpc subnet ID and backend_vip ipaddress into your config.json
 * SCARY WARNING: The current EC2 configuration uses ephemeral disks which ARE LOST WHEN YOU SHUT DOWN THE NODE
 
+<a name="aws-drbd"/>
 #### config.json.ec2.example - Amazon EC2 Provisioning
 ```
 {
@@ -199,6 +231,67 @@ aws_secret_access_key = MySecRetkEy
   }
 }
 
+```
+
+
+<a name="aws-ebs"/>
+### Amazon EC2 provisioning with an EBS volume on the backends
+
+* The single EBS volume is attached and mounted ONLY to the active backend node
+* It is highly recommended to use EBS-optimized instances and PIOPS volumes
+* Note the three added attributes to the ec2_options:
+  - `backend_storage_type`: `ebs`
+  - `ebs_disk_size`: `100`
+  - `ebs_use_piops`: `true`
+* The PIOPS value is automatically calculated as disk_size * 30 up to the maximum of 4000
+
+```
+{
+  "provider": "ec2",
+  "ec2_options": {
+    "region": "us-west-2",
+    "vpc_subnet": "subnet-8b0519ff",
+    "ami_id": "ami-937502a3",
+    "ssh_username": "root",
+    "backend_storage_type": "ebs",
+    "ebs_disk_size": "100",
+    "ebs_use_piops": true
+  },
+  "default_package": "http://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/private-chef-11.1.3-1.el6.x86_64.rpm?AWSAccessKeyId=GetFromSupport&Expires=GetFromSupport&Signature=getfromSupport",
+  "manage_package": "http://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/opscode-manage-1.3.1-1.el6.x86_64.rpm?AWSAccessKeyId=GetFromSupport&Expires=GetFromSupport&Signature=getfromSupport",
+  "layout": {
+    "topology": "ha",
+    "api_fqdn": "api.opscode.ebs",
+    "manage_fqdn": "manage.opscode.ebs",
+    "analytics_fqdn": "analytics.opscode.ebs",
+    "backend_vip": {
+      "hostname": "ebsbackend.opscode.ebs",
+      "ipaddress": "33.33.33.20",
+      "device": "eth0",
+      "heartbeat_device": "eth0"
+    },
+    "backends": {
+      "ebsbackend1": {
+        "hostname": "ebsbackend1.opscode.ebs",
+        "instance_type": "c3.2xlarge",
+        "ebs_optimized": true,
+        "bootstrap": true
+      },
+      "ebsbackend2": {
+        "hostname": "ebsbackend2.opscode.ebs",
+        "ebs_optimized": true,
+        "instance_type": "c3.2xlarge"
+      }
+    },
+    "frontends": {
+      "ebsfrontend1": {
+        "hostname": "ebsfrontend1.opscode.ebs",
+        "ebs_optimized": false,
+        "instance_type": "m3.medium"
+      }
+    }
+  }
+}
 ```
 
 Contributing
