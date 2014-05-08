@@ -81,6 +81,7 @@ task :keygen do
   end
 end
 
+desc 'Add hosts entries to /etc/hosts'
 task :add_hosts do
   config = get_config
   config = fog_populate_ips(config) if config['provider'] == 'ec2'
@@ -88,6 +89,7 @@ task :add_hosts do
   print_final_message(config, harness_dir)
 end
 
+desc 'Remove hosts entries to /etc/hosts'
 task :remove_hosts do
   config = get_config
   config = fog_populate_ips(config) if config['provider'] == 'ec2'

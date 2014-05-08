@@ -17,8 +17,14 @@ def remove_hosts_entries(env)
   puts "Environment virtual hosts entries removed from /etc/hosts file, old host file is saved at #{ENV['HOME']}/hosts.bak"
 end
 
+def mydomainname(hostname)
+    hostname.
+    split('.')[1..-1].
+    join('.')
+end
+
 def marker(env)
-  "#ec-ha"
+  "#ec-metal_#{mydomainname(env['api_fqdn'])}"
 end
 
 def hosts_file_path
