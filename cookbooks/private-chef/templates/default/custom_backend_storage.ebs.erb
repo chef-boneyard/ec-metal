@@ -47,10 +47,10 @@ end
 def mean_detacher
   puts "invoking the mean_detacher"
   begin
-    volume_wait_for_state('available')
-    compute.detach_volume(VOLUME_ID, {'Force' => true })
+    volume_wait_for_state('available', 60)
   rescue Exception
-    raise "Timed out waiting for the EBS volume to detach"
+    puts "Timed out waiting for the EBS volume to be available, FORCE DETACHING"
+    compute.detach_volume(VOLUME_ID, {'Force' => true })
   end
 end
 
@@ -58,9 +58,9 @@ def nice_detacher
   puts "invoking the nice_detacher"
   begin
     volume_wait_for_state('available', 60)
-    compute.detach_volume(VOLUME_ID)
   rescue Exception
-    puts "Timed out waiting for the EBS volume to detach"
+    puts "Timed out waiting for the EBS volume to be available, doing it myself"
+    compute.detach_volume(VOLUME_ID)
     mean_detacher
   end
 end
