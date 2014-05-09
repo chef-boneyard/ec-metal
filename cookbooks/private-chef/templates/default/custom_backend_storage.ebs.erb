@@ -25,10 +25,10 @@ def fog_connect
     :provider => 'AWS')
 end
 
-def volume_wait_for_state(state)
+def volume_wait_for_state(state, timeout=TIMEOUT)
   compute = fog_connect
   begin
-    Timeout::timeout(TIMEOUT) do
+    Timeout::timeout(timeout) do
       while true
         volume = compute.volumes.get(VOLUME_ID)
         if volume.state == state
@@ -41,6 +41,27 @@ def volume_wait_for_state(state)
     end
   rescue Timeout::Error
     raise "Timed out waiting for volume detachment after #{TIMEOUT} seconds"
+  end
+end
+
+def mean_detacher
+  puts "invoking the mean_detacher"
+  begin
+    volume_wait_for_state('available')
+    compute.detach_volume(VOLUME_ID, {'Force' => true })
+  rescue Exception
+    raise "Timed out waiting for the EBS volume to detach"
+  end
+end
+
+def nice_detacher
+  puts "invoking the nice_detacher"
+  begin
+    volume_wait_for_state('available', 60)
+    compute.detach_volume(VOLUME_ID)
+  rescue Exception
+    puts "Timed out waiting for the EBS volume to detach"
+    mean_detacher
   end
 end
 
@@ -67,9 +88,8 @@ def attach_volume
         raise "Volume #{VOLUME_ID} no longer exists"
       end
 
-      # force detach
-      compute.detach_volume(VOLUME_ID, {'Force' => true })
-      volume_wait_for_state('available')
+      # wait for the volume to be available, then force detach
+      nice_detacher
     end
 
     puts "Attaching volume #{VOLUME_ID} to server #{SERVER_ID}"
