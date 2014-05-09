@@ -25,10 +25,10 @@ def fog_connect
     :provider => 'AWS')
 end
 
-def volume_wait_for_state(state)
+def volume_wait_for_state(state, timeout=TIMEOUT)
   compute = fog_connect
   begin
-    Timeout::timeout(TIMEOUT) do
+    Timeout::timeout(timeout) do
       while true
         volume = compute.volumes.get(VOLUME_ID)
         if volume.state == state
@@ -44,6 +44,27 @@ def volume_wait_for_state(state)
   end
 end
 
+def mean_detacher
+  puts "invoking the mean_detacher"
+  begin
+    volume_wait_for_state('available', 60)
+  rescue Exception
+    puts "Timed out waiting for the EBS volume to be available, FORCE DETACHING"
+    compute.detach_volume(VOLUME_ID, {'Force' => true })
+  end
+end
+
+def nice_detacher
+  puts "invoking the nice_detacher"
+  begin
+    volume_wait_for_state('available', 60)
+  rescue Exception
+    puts "Timed out waiting for the EBS volume to be available, doing it myself"
+    compute.detach_volume(VOLUME_ID)
+    mean_detacher
+  end
+end
+
 def attach_volume
   compute = fog_connect
   volume = compute.volumes.get(VOLUME_ID)
@@ -54,6 +75,11 @@ def attach_volume
     return true
   end
 
+  if system("dmesg | grep 'vbd.*16 Device in use; refusing to close'")
+    raise 'ERROR: Stuck VBD device, please reboot this machine' +
+      '(http://zhigang.org/wiki/XenVirtualDisk#what-happens-when-detaching-a-virtual-disk-while-the-disk-is-opened-in-the-guest-eg-mounted)'
+  end
+
   if volume.server_id == SERVER_ID
     puts "Volume #{VOLUME_ID} already attached to me #{SERVER_ID}"
   else
@@ -62,16 +88,17 @@ def attach_volume
         raise "Volume #{VOLUME_ID} no longer exists"
       end
 
-      # force detach
-      compute.detach_volume(VOLUME_ID, {'Force' => true })
-      volume_wait_for_state('available')
+      # wait for the volume to be available, then force detach
+      nice_detacher
     end
 
+    puts "Attaching volume #{VOLUME_ID} to server #{SERVER_ID}"
     compute.attach_volume(SERVER_ID, VOLUME_ID, AWS_DEVICE)
     volume_wait_for_state('in-use')
   end
 
   # Wait for LVM to find it
+  puts 'Waiting for LVM volume to become available'
   begin
     volume = compute.volumes.get(VOLUME_ID)
     Timeout::timeout(TIMEOUT) do
@@ -89,6 +116,7 @@ def attach_volume
     raise "Timed out waiting for LVM to be ready"
   end
 
+  puts "Mounting #{MOUNTPOINT}"
   begin
     system("mount #{LVM_DEVICE} #{MOUNTPOINT}")
   rescue Exception => e
