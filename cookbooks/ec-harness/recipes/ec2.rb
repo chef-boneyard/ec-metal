@@ -10,7 +10,8 @@ with_chef_local_server :chef_repo_path => repo_path,
     File.join(repo_path, 'vendor', 'cookbooks') ]
 
 with_fog_ec2_provisioner :ssh_username => node['harness']['ec2']['ssh_username'],
-    'region' => node['harness']['ec2']['region']
+    'region' => node['harness']['ec2']['region'],
+    :use_private_ip_for_ssh => node['harness']['ec2']['use_private_ip_for_ssh']
 
 with_provisioner_options 'bootstrap_options' => {
       'image_id' => node['harness']['ec2']['ami_id']
