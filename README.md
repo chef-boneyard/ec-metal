@@ -194,7 +194,8 @@ aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --p
     "region": "us-east-1",
     "vpc_subnet": "subnet-c13410e9",
     "ami_id": "ami-e7e7fc8e",
-    "ssh_username": "root"
+    "ssh_username": "root",
+    "use_private_ip_for_ssh": false
   },
   "default_package": "http://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/private-chef-11.1.3-1.el6.x86_64.rpm?AWSAccessKeyId=getonefromsupport&Expires=thistoo&Signature=andthis",
   "layout": {
@@ -255,7 +256,8 @@ aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --p
     "ssh_username": "root",
     "backend_storage_type": "ebs",
     "ebs_disk_size": "100",
-    "ebs_use_piops": true
+    "ebs_use_piops": true,
+    "use_private_ip_for_ssh": false
   },
   "default_package": "http://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/private-chef-11.1.3-1.el6.x86_64.rpm?AWSAccessKeyId=GetFromSupport&Expires=GetFromSupport&Signature=getfromSupport",
   "manage_package": "http://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/opscode-manage-1.3.1-1.el6.x86_64.rpm?AWSAccessKeyId=GetFromSupport&Expires=GetFromSupport&Signature=getfromSupport",
