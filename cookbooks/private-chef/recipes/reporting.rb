@@ -9,6 +9,12 @@ installer_file = node['private-chef']['reporting_installer_file']
 installer_name = ::File.basename(installer_file.split('?').first)
 installer_path = "#{Chef::Config[:file_cache_path]}/#{installer_name}"
 
+bootstrap_host_name =
+  node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.values.first['hostname']
+
+bootstrap_node_name =
+  node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.keys.first
+
 if ::URI.parse(installer_file).absolute?
   remote_file installer_path do
     source installer_file
@@ -22,6 +28,16 @@ package installer_name do
   source installer_path
   provider Chef::Provider::Package::Dpkg if platform?('ubuntu','debian')
   action :install
+end
+
+package 'rsync'
+
+# NOTE: order-of-operations!  This assumes that the machine resource for the bootstrap is running first
+if node.name != bootstrap_node_name
+  execute 'rsync-reporting-from-bootstrap' do
+    command "rsync -avz -e ssh root@#{bootstrap_host_name}:/etc/opscode-reporting/ /etc/opscode-reporting"
+    action :run
+  end
 end
 
 execute 'p-c-c-reconfigure-for-reporting' do
