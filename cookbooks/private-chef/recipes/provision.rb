@@ -21,7 +21,7 @@ else
 end
 
 if PackageHelper.private_chef_installed_version(node) > PackageHelper.pc_version(installer_name)
-  log "Installed package #{PackageHelper.private_chef_installed_version} is newer than installer #{installer_name}"
+  log "Installed package #{PackageHelper.private_chef_installed_version(node)} is newer than installer #{installer_name}"
 else
   package installer_name do
     source installer_path
