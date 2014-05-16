@@ -20,8 +20,8 @@ else
   installer_path = installer_file
 end
 
-if PackageHelper.private_chef_installed_version > PackageHelper.pc_version(installer_name)
-  log "Installed package #{PackageHelper.private_chef_installed} is newer than installer #{installer_name}"
+if PackageHelper.private_chef_installed_version(node) > PackageHelper.pc_version(installer_name)
+  log "Installed package #{PackageHelper.private_chef_installed_version} is newer than installer #{installer_name}"
 else
   package installer_name do
     source installer_path
@@ -29,8 +29,8 @@ else
     action :install
   end
 
-  if PackageHelper.private_chef_installed_version < PackageHelper.pc_version(installer_name) &&
-    PackageHelper.private_chef_installed_version != '0.0.0'
+  if PackageHelper.private_chef_installed_version(node) < PackageHelper.pc_version(installer_name) &&
+    PackageHelper.private_chef_installed_version(node) != '0.0.0'
     file '/tmp/private-chef-perform-upgrade' do
       action :create
       owner 'root'
