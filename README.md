@@ -2,9 +2,9 @@ ec-metal
 ================
 This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA clusters.
 
-TOC
----
+## TOC
 * [Goals](#goals)
+* [Getting Started](#start)
 * [TODO](#todo)
 * [Environments](#envs)
 * [Running Vagrant](#vagrant)
@@ -16,15 +16,21 @@ TOC
 * [Authors](#authors)
 
 <a name="goals"/>
-Goals of this project
----------------------
+## Goals of this project
 * Demonstrate the capabilities and (hopefully) best practices of chef-metal
 * Enable Chef QA and Dev teams to test various EC topologies and packages in install and upgrade scenarios
 * Enable Chef customers to deploy and upgrade Enterprise Chef without runbooks
 
+<a name="start" />
+## Getting Started
+1. Select an [environment](#env)
+1. Configure ec-metal according to the environment selected
+1. Determine which [task](#tasks) you want to run
+1. Set packages for installation or upgrade based on task
+1. Run the ec-metal task!
+
 <a name="todo"/>
-TODO
-----
+## TODO
 NOTE: This is still a WIP under heavy development
 * Figure out a nice way to assist with EC package downloads and caching (dendrite?)
 * Testing
@@ -38,8 +44,7 @@ NOTE: This is still a WIP under heavy development
   - rake ssh to find and connect you to your AWS instances
 
 <a name="envs"/>
-Environments
-------------
+## Environments
 ec-metal supports:
 * [vagrant / virtualbox](#vagrant)
 * [aws / ec2](#aws)
@@ -47,8 +52,7 @@ ec-metal supports:
 Follow the instructions specific to the environment of your choosing.
 
 <a name="vagrant" />
-Running Virtualbox with Vagrant
--------------------------------
+## Running Virtualbox with Vagrant
 1. Install Vagrant and Virtualbox (tested on Vagrant 1.5.x)
 1. Copy `config.json.example` to `config.json`
 1. Edit Vagrant [config.json](#vagrant_conf)
@@ -57,8 +61,7 @@ Running Virtualbox with Vagrant
 1. Run [rake tasks](#tasks)
 
 <a name="vagrant_conf" />
-Vagrant Configuration Attributes
---------------------------------
+### Vagrant Configuration Attributes
 [Provided Template](config.json.example)
 
 *Core attributes to configure*
@@ -71,9 +74,8 @@ Vagrant Configuration Attributes
 The `layouts` object should not need to be changed in most cases.
 
 <a name="aws" />
-Running ec2 on AWS
----------------
-1. Create a .aws/config file as described here: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#d0e726
+## Running ec2 on AWS
+1. Create the .aws/config file as described here: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#d0e726
   
   ```
   [default]
@@ -132,8 +134,7 @@ Running ec2 on AWS
 **WARNING: The current EC2 configuration uses ephemeral disks which ARE LOST WHEN YOU SHUT DOWN THE NODE**
 
 <a name="aws-drbd"/>
-ec2 DRBD Configuration Attributes
---------------------------------
+### ec2 DRBD Configuration Attributes
 [Provided Template](config.json.ec2.example)
 
 ```
@@ -183,9 +184,7 @@ ec2 DRBD Configuration Attributes
 ```
 
 <a name="aws-ebs"/>
-ec2 EBS Configuration Attributes
---------------------------------
-
+### ec2 EBS Configuration Attributes
 * The single EBS volume is attached and mounted ONLY to the active backend node
 * It is highly recommended to use EBS-optimized instances and PIOPS volumes
 * Note the three added attributes to the ec2_options:
@@ -193,7 +192,7 @@ ec2 EBS Configuration Attributes
   - `ebs_disk_size`: `100`
   - `ebs_use_piops`: `true`
 * The PIOPS value is automatically calculated as disk_size * 30 up to the maximum of 4000
-* Core attributes are the same as the DRBD config
+* *Core attributes are the same as the DRBD config*
 
 ```
 {
@@ -212,17 +211,14 @@ ec2 EBS Configuration Attributes
 ```
 
 <a name="tasks" />
-Running ec-metal Tasks
------
+## Running ec-metal Tasks
 ec-metal runs three main paths of execution:
-* install by running `rake up`.  This is also the default rake task.
-* upgrade by running `rake upgrade`
-* upgrade multipe private-chef versions in succession by running `upgrade_torture`
 
-* `Install` will start up a non-existent environment or run Chef convergence on an existing envionment of the same version.
-* `Upgrade` will use an existing environment and run Chef convergence to upgrade to the configured version.
+ * `rake up` - this task will start up a non-existent environment or run Chef convergence on an existing envionment to the configured `default_package`.
+ * `rake upgrade` - this task will use an existing environment and run Chef convergence to upgrade to the configured `default_package`.
+ * `rake upgrade_torture` - this tasks uses the `packages` array.  This task will install the first version then upgrade each version in the array in order.
 
-Install and Upgrade utilize the same configuration attributes, however they are used differently.
+### Setting packages for installation and upgrades
 
 | package key name | related chef package |
 |----------|------------------|
@@ -230,19 +226,18 @@ Install and Upgrade utilize the same configuration attributes, however they are 
 | manage_package | opscode-manage |
 | reporting_package | opscode-reporting |
 | pushy_package | opscode-push-jobs-server |
+| packages | array of private-chef packages |
 
-* **If `manage_package`, `reporting_package`, or `pushy_package` are not included in the config they will not be installed/upgraded.**
+* When `manage_package`, `reporting_package`, or `pushy_package` are omitted from the config they will not be installed/upgraded.
 
-* `Upgrade Torture` uses the `packages` array.  This task will install the first version then upgrade each version in the array in order.
+**When in doubt reference the example config files!**
 
 Notable tasks:
 * `rake destroy` will tear down all instances
 * `rake ssh[nodename]` will ssh into the designated instance
 * `rake status` will display current topology status
 
-Contributing
-------------
-
+### Contributing
 1. Fork the repository on Github
 2. Create a named feature branch (like `add_component_x`)
 3. Write your change
@@ -251,8 +246,7 @@ Contributing
 6. Submit a Pull Request using Github
 
 <a name="authors"/>
-License and Authors
--------------------
+### License and Authors
 Authors:
 * Irving Popovetsky @irvingpop
 * Jeremiah Snapp @jeremiahsnapp
