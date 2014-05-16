@@ -170,26 +170,23 @@ def create_drbd_config_files
 end
 
 def setup_drbd
-  # Debian/Ubuntu defaults to *not* starting the service by default
-  if node['platform_family'] == 'debian'
-    execute 'start-drbd-service-with-timeout' do
-      command 'timeout 20 service drbd start; exit 0'
-      action :run
-      not_if "lsmod | grep drbd"
-    end
-  end
-
   execute 'create-md' do
     command 'yes yes | drbdadm create-md pc0'
     action :run
     only_if 'drbdadm dump-md pc0 2>&1 | grep "No valid meta data"'
-    notifies :run, 'execute[drbdadm-up]', :immediately
+    notifies :run, 'execute[drbdadm-up]', :immediately unless node['platform_family'] == 'debian'
+  end
+
+  if node['platform_family'] == 'debian'
+    execute 'start-drbd-service-with-timeout' do
+      command 'service drbd start'
+      not_if "lsmod | grep drbd"
+    end
   end
 
   execute 'drbdadm-up' do
     command 'drbdadm up pc0'
     action :nothing
-    notifies :run, 'execute[drbd-primary-force]', :immediately
   end
 
   # TODO: more reliably detect if we are an unconfigured bootstrap node
