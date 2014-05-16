@@ -108,5 +108,5 @@ end
 
 task :berks_install do
   cookbooks_path = File.join(harness_dir, 'vendor/cookbooks')
-  system("#{harness_dir}/bin/berks install --path #{cookbooks_path}")
+  system("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
 end
