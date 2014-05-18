@@ -67,7 +67,7 @@ end
 
 task :config_copy do
   config_file = File.join(harness_dir, 'config.json')
-  config_ex_file = File.join(harness_dir, 'config.json.example')
+  config_ex_file = File.join(harness_dir, 'examples', 'config.json.example')
   unless File.exists?(config_file)
     FileUtils.cp(config_ex_file, config_file)
   end

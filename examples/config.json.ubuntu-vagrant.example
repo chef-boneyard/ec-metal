@@ -1,0 +1,62 @@
+{
+  "provider": "vagrant",
+  "vagrant_options": {
+    "box": "opscode-ubuntu-12.04",
+    "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-12.04_chef-provisionerless.box",
+    "disk2_size": "2"
+  },
+  "default_package": "private-chef_11.1.4-1_amd64.deb",
+  "packages": {
+    "OPC1.4.6": "private-chef-1.4.6-1.el6.x86_64.rpm",
+    "EC11.1.4": "private-chef_11.1.4-1_amd64.deb"
+  },
+  "layout": {
+    "topology": "ha",
+    "api_fqdn": "api.opscode.kryptonite",
+    "manage_fqdn": "manage.opscode.kryptonite",
+    "analytics_fqdn": "analytics.opscode.kryptonite",
+    "backend_vip": {
+      "hostname": "backend.opscode.kryptonite",
+      "ipaddress": "33.33.33.20",
+      "heartbeat_device": "eth2",
+      "device": "eth1"
+    },
+    "backends": {
+      "backend1": {
+        "hostname": "backend1.opscode.kryptonite",
+        "ipaddress": "33.33.33.21",
+        "cluster_ipaddress": "33.33.34.5",
+        "memory": "2560",
+        "cpus": "2",
+        "bootstrap": true
+      },
+      "backend2": {
+        "hostname": "backend2.opscode.kryptonite",
+        "ipaddress": "33.33.33.22",
+        "cluster_ipaddress": "33.33.34.6",
+        "memory": "2560",
+        "cpus": "2",
+        "bootstrap": false
+      }
+    },
+    "frontends": {
+      "frontend1": {
+        "hostname": "frontend1.opscode.kryptonite",
+        "ipaddress": "33.33.33.23",
+        "memory": "1024",
+        "cpus": "1"
+      }
+    },
+    "virtual_hosts": {
+      "private-chef.opscode.kryptonite": "33.33.33.23",
+      "manage.opscode.kryptonite": "33.33.33.23",
+      "api.opscode.kryptonite": "33.33.33.23",
+      "analytics.opscode.kryptonite": "33.33.33.23",
+      "backend.opscode.kryptonite": "33.33.33.20",
+      "backend1.opscode.kryptonite": "33.33.33.21",
+      "backend2.opscode.kryptonite": "33.33.33.22",
+      "frontend1.opscode.kryptonite": "33.33.33.23"
+    }
+  }
+}
+
