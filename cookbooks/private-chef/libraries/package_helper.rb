@@ -16,7 +16,7 @@ class PackageHelper
     pkg_provider.load_current_resource
 
     if pkg_provider.current_resource.version
-      pkg_provider.current_resource.version
+      pkg_provider.current_resource.version.split('-').first
     else
       '0.0.0'
     end
