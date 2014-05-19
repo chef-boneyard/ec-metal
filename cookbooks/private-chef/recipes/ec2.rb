@@ -9,6 +9,19 @@ execute 'Resize root EBS volume' do
   not_if { ::File.exists?('/.root_resized') }
 end
 
+# Unmount the cloud-init created /mnt on epheremal volumes automatically
+execute 'Unmount /mnt' do
+  command 'umount -f /mnt'
+  action :run
+  only_if 'grep /mnt /proc/mounts'
+end
+
+execute 'Remove /mnt from fstab' do
+  command 'sed -i.bak "s/.*\/mnt.*//g" /etc/fstab'
+  action :run
+  only_if 'grep /mnt /etc/fstab'
+end
+
 case node['platform_family']
 when 'rhel'
   %w(gcc libxml2-devel libxslt-devel).each do |develpkg|

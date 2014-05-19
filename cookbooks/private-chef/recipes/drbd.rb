@@ -1,6 +1,7 @@
 case node['platform_family']
 when 'debian'
   include_recipe 'apt'
+  package 'linux-image-extra-virtual' if `uname -r` =~ /virtual/
 when 'rhel'
   include_recipe 'yum'
   include_recipe 'yum::elrepo'
