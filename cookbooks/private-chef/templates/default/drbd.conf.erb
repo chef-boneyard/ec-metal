@@ -6,13 +6,13 @@ common {
   startup {
     degr-wfc-timeout 0;
   }
-<%- if DrbdHelper.get_drbdadm_version =~ /^8\.3/ -%>
+<%- if DrbdHelper.get_drbdadm_version.to_f == 8.3 -%>
 
   protocol C;
 <%- end -%>
 
 net {
-<%- if DrbdHelper.get_drbdadm_version =~ /^8\.4/ %>
+<%- if DrbdHelper.get_drbdadm_version.to_f == 8.4 %>
     protocol C;
 <%- end -%>
     cram-hmac-alg sha1;
@@ -27,11 +27,11 @@ net {
   disk {
     on-io-error detach;
   }
- 
+
   syncer {
     rate 40M;
   }
- 
+
   handlers {
     split-brain "/opt/opscode/embedded/lib/drbd/notify-split-brain.sh pc-default@opscode.com";
   }
