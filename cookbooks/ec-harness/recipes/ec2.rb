@@ -36,7 +36,7 @@ node['harness']['vm_config']['backends'].merge(
       # this doesn't work, because https://github.com/aws/aws-cli/issues/520
       # 'private_ip_address' => config['ipaddress'],
       'block_device_mapping' => [
-        {'DeviceName' => '/dev/sda', 'Ebs.VolumeSize' => 12, 'Ebs.DeleteOnTermination' => "true"},
+        {'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 12, 'Ebs.DeleteOnTermination' => "true"},
         {'DeviceName' => '/dev/sdb', 'VirtualName' => 'ephemeral0'}
       ]
     }
