@@ -3,7 +3,7 @@
 class DrbdHelper
 
   def self.get_drbdadm_version
-    `modinfo drbd -F version`
+    `modinfo -F version drbd`
   end
 
 end
