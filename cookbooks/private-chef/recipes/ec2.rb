@@ -1,8 +1,10 @@
 # encoding: utf-8
 
+rootdev = node.filesystem.select { |k,v| v['mount'] == '/' }.keys.first
+
 # Resize EBS root volume
 execute 'Resize root EBS volume' do
-  command 'resize2fs /dev/xvde && touch /.root_resized'
+  command "resize2fs #{rootdev} && touch /.root_resized"
   action :run
   not_if { ::File.exists?('/.root_resized') }
 end
@@ -10,6 +12,13 @@ end
 case node['platform_family']
 when 'rhel'
   %w(gcc libxml2-devel libxslt-devel).each do |develpkg|
+    package develpkg
+  end
+when 'debian'
+  execute 'apt-get update' do
+    action :run
+  end
+  %w(build-essential libxslt-dev libxml2-dev).each do |develpkg|
     package develpkg
   end
 end
