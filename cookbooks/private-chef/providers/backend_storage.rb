@@ -2,7 +2,7 @@
 action :drbd do
   install_drbd_packages
   create_drbd_dirs
-  create_lvm
+  create_lvm(disk_devmap[1]) # assume drvd volume is the second disk
   create_drbd_config_files
   setup_drbd
   touch_drbd_ready
@@ -14,7 +14,7 @@ action :ebs_shared do
   create_drbd_dirs
   if node['private-chef']['backends'][node.name]['bootstrap'] == true
     attach_ebs_volume
-    create_lvm
+    create_lvm(disk_devmap[2]) # assume drbd/ebs volume is the third disk
     mount_ebs
     save_ebs_volumes_db
   else
@@ -77,6 +77,22 @@ def create_ebs_volume
   end
 end
 
+def rootdev
+  node.filesystem.select { |k,v| v['mount'] == '/' }.keys.first
+end
+
+# Return array of disk devices, so we can use first, second, third, etc
+def disk_devmap
+  if rootdev =~ /xvda/
+    diskmap = %w(xvda xvdb xvdc xvdd xvde xvdf xvdg)
+  elsif rootdev =~ /xvde/
+    diskmap = %w(xvde xvdf xvdg xvdh xvdi xvdj xvdk)
+  else
+    diskmap = %w(sda sdb sdc sdd sde sdf sdg)
+  end
+  diskmap.map { |disk| "/dev/#{disk}"  }
+end
+
 def attach_ebs_volume
   begin
     ebs_volumes_db = data_bag('ebs_volumes_db')
@@ -96,8 +112,6 @@ def attach_ebs_volume
       action :attach
     end
   end
-
-  node.override['private-chef']['drbd_disks'] = ['/dev/xvdg']
 end
 
 def set_ebs_volume_on_standby
@@ -133,16 +147,16 @@ def create_drbd_dirs
   end
 end
 
-def create_lvm
+def create_lvm(disks)
   lvm_volume_group 'opscode' do
-    physical_volumes node['private-chef']['drbd_disks']
+    physical_volumes disks
 
     logical_volume 'drbd' do
       size        '80%VG'
       if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend_storage_type'] == 'ebs'
         filesystem 'ext4'
       end
-      stripes     node['private-chef']['drbd_disks'].length
+      stripes disks.length if disks.is_a?(Array)
     end
   end
 end
