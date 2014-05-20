@@ -28,9 +28,7 @@ when 'rhel'
     package develpkg
   end
 when 'debian'
-  execute 'apt-get update' do
-    action :run
-  end
+  include_recipe 'apt'
   %w(build-essential libxslt-dev libxml2-dev).each do |develpkg|
     package develpkg
   end
