@@ -1,7 +1,14 @@
 def ipaddresses_prepopulated(private_chef_attributes)
-  return true if private_chef_attributes['topology'] == 'ha' &&
-    private_chef_attributes['backends'].map { |k,v| v['ipaddress'] }.length == 2 &&
-    private_chef_attributes['virtual_hosts'].is_a?(Hash)
+  case private_chef_attributes['topology']
+  when 'ha'
+    return true if private_chef_attributes['backends'].map { |k,v| v['ipaddress'] }.length == 2 &&
+      private_chef_attributes['virtual_hosts'].is_a?(Hash)
+  when 'tier'
+    return true if private_chef_attributes['backends'].map { |k,v| v['ipaddress'] }.length == 1 &&
+      private_chef_attributes['virtual_hosts'].is_a?(Hash)
+  else
+    return true if private_chef_attributes['virtual_hosts'].is_a?(Hash)
+  end
   false
 end
 

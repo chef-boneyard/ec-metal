@@ -6,21 +6,20 @@ class PackageHelper
     # ex: private-chef-11.0.2-1.el6.x86_64.rpm
     #  or private-chef-1.4.6-1.el6.x86_64
     return '0.0.0' unless package =~ /^private-chef/
-    package.split('-')[2]
+    package.gsub('_', '-').gsub('+', '-').split('-')[2]
   end
 
-  # TODO: Make this work for Ubuntu/Debian as well
-  def self.private_chef_installed
-    rpmq = `rpm -q private-chef`
-    if rpmq =~ /^private-chef-/
-      return rpmq
+  def self.private_chef_installed_version(node)
+    # Chef magic to get the package version in a cross-platform fashion
+    pkg = Chef::Resource::Package.new('private-chef', node)
+    pkg_provider = Chef::Platform.provider_for_resource(pkg)
+    pkg_provider.load_current_resource
+
+    if pkg_provider.current_resource.version
+      pkg_provider.current_resource.version.split('-').first
     else
-      return nil
+      '0.0.0'
     end
-  end
-
-  def self.private_chef_installed_version
-    pc_version(private_chef_installed)
   end
 
 end

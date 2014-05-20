@@ -53,10 +53,12 @@ action :install do
         attribute 'private-chef', privatechef_attributes
         attribute 'root_ssh', node['harness']['root_ssh'].to_hash
 
+        recipe 'private-chef::hostname'
         recipe 'private-chef::hostsfile'
         recipe 'private-chef::provision'
         recipe 'private-chef::bugfixes'
-        recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname)
+        recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname) &&
+          node['harness']['vm_config']['topology'] == 'ha'
         recipe 'private-chef::provision_phase2'
         recipe 'private-chef::users' if vmname == bootstrap_node_name
         recipe 'private-chef::reporting' if node['harness']['reporting_package']

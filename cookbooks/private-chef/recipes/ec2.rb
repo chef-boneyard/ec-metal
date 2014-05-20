@@ -1,15 +1,35 @@
 # encoding: utf-8
 
+rootdev = node.filesystem.select { |k,v| v['mount'] == '/' }.keys.first
+
 # Resize EBS root volume
 execute 'Resize root EBS volume' do
-  command 'resize2fs /dev/xvde && touch /.root_resized'
+  command "resize2fs #{rootdev} && touch /.root_resized"
   action :run
   not_if { ::File.exists?('/.root_resized') }
+end
+
+# Unmount the cloud-init created /mnt on epheremal volumes automatically
+execute 'Unmount /mnt' do
+  command 'umount -f /mnt'
+  action :run
+  only_if 'grep /mnt /proc/mounts'
+end
+
+execute 'Remove /mnt from fstab' do
+  command 'sed -i.bak "s/.*\/mnt.*//g" /etc/fstab'
+  action :run
+  only_if 'grep /mnt /etc/fstab'
 end
 
 case node['platform_family']
 when 'rhel'
   %w(gcc libxml2-devel libxslt-devel).each do |develpkg|
+    package develpkg
+  end
+when 'debian'
+  include_recipe 'apt'
+  %w(build-essential libxslt-dev libxml2-dev).each do |develpkg|
     package develpkg
   end
 end
