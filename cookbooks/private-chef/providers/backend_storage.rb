@@ -2,7 +2,7 @@
 action :drbd do
   install_drbd_packages
   create_drbd_dirs
-  create_lvm(disk_devmap[1]) # assume drvd volume is the second disk
+  create_lvm(disk_devmap[1]) # assume drbd volume is the second disk (ephemeral)
   create_drbd_config_files
   setup_drbd
   touch_drbd_ready
@@ -14,7 +14,7 @@ action :ebs_shared do
   create_drbd_dirs
   if node['private-chef']['backends'][node.name]['bootstrap'] == true
     attach_ebs_volume
-    create_lvm(disk_devmap[2]) # assume drbd/ebs volume is the third disk
+    create_lvm(disk_devmap[2]) # assume drbd/ebs volume is the third disk (EBS)
     mount_ebs
     save_ebs_volumes_db
   else
