@@ -5,6 +5,7 @@ This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA c
 ## TOC
 * [Goals](#goals)
 * [Getting Started](#start)
+* [Usage](#usage)
 * [TODO](#todo)
 * [Environments](#envs)
 * [Running Vagrant](#vagrant)
@@ -12,7 +13,6 @@ This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA c
 * [Running on AWS](#aws)
   * [Using ephemeral storage with DRBD](#aws-drbd)
   * [Using an EBS volume without DRBD](#aws-ebs)
-* [Running ec-metal](#tasks)
 * [Authors](#authors)
 
 <a name="goals"/>
@@ -28,6 +28,33 @@ This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA c
 1. Determine which [task](#tasks) you want to run
 1. Set packages for installation or upgrade based on task
 1. Run the ec-metal task!
+
+<a name="usage" />
+## Usage
+ec-metal runs three main paths of execution:
+
+ * `rake up` - this task will start up a non-existent environment or run Chef convergence on an existing envionment to the configured `default_package`.
+ * `rake upgrade` - this task will use an existing environment and run Chef convergence to upgrade to the configured `default_package`.
+ * `rake upgrade_torture` - this tasks uses the `packages` array.  This task will install the first version then upgrade each version in the array in order.
+
+### Setting packages for installation and upgrades
+
+| package key name | related chef package |
+|----------|------------------|
+| default_package | private-chef | 
+| manage_package | opscode-manage |
+| reporting_package | opscode-reporting |
+| pushy_package | opscode-push-jobs-server |
+| packages | array of private-chef packages |
+
+* When `manage_package`, `reporting_package`, or `pushy_package` are omitted from the config they will not be installed/upgraded.
+
+**When in doubt reference the example config files!**
+
+Notable tasks:
+* `rake destroy` will tear down all instances
+* `rake ssh[nodename]` will ssh into the designated instance
+* `rake status` will display current topology status
 
 <a name="todo"/>
 ## TODO
@@ -209,33 +236,6 @@ The `layouts` object should not need to be changed in most cases.
   }
 ...
 ```
-
-<a name="tasks" />
-## Running ec-metal Tasks
-ec-metal runs three main paths of execution:
-
- * `rake up` - this task will start up a non-existent environment or run Chef convergence on an existing envionment to the configured `default_package`.
- * `rake upgrade` - this task will use an existing environment and run Chef convergence to upgrade to the configured `default_package`.
- * `rake upgrade_torture` - this tasks uses the `packages` array.  This task will install the first version then upgrade each version in the array in order.
-
-### Setting packages for installation and upgrades
-
-| package key name | related chef package |
-|----------|------------------|
-| default_package | private-chef | 
-| manage_package | opscode-manage |
-| reporting_package | opscode-reporting |
-| pushy_package | opscode-push-jobs-server |
-| packages | array of private-chef packages |
-
-* When `manage_package`, `reporting_package`, or `pushy_package` are omitted from the config they will not be installed/upgraded.
-
-**When in doubt reference the example config files!**
-
-Notable tasks:
-* `rake destroy` will tear down all instances
-* `rake ssh[nodename]` will ssh into the designated instance
-* `rake status` will display current topology status
 
 ### Contributing
 1. Fork the repository on Github
