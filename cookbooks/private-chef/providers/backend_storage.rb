@@ -207,12 +207,14 @@ def setup_drbd
     execute 'start-drbd-service-with-timeout' do
       command 'service drbd start'
       not_if "lsmod | grep drbd"
+      notifies :run, "execute[drbd-primary-force]", :immediately
     end
-  end
-
-  execute 'drbdadm-up' do
-    command 'drbdadm up pc0'
-    action :nothing
+  else
+    execute 'drbdadm-up' do
+      command 'drbdadm up pc0'
+      action :nothing
+      notifies :run, "execute[drbd-primary-force]", :immediately
+    end
   end
 
   # TODO: more reliably detect if we are an unconfigured bootstrap node
@@ -222,7 +224,7 @@ def setup_drbd
     else
       command 'drbdadm primary --force pc0'
     end
-    action :run
+    action :nothing
     notifies :run, 'execute[mkfs-drbd-volume]', :immediately
     only_if { node['private-chef']['backends'][node.name]['bootstrap'] == true }
     not_if { ::File.exists?(::File.join(DRBD_DIR, 'drbd_ready')) }
