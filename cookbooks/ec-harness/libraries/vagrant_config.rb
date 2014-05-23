@@ -37,12 +37,13 @@ class VagrantConfigHelper
 
     if node['harness']['vm_config']['backends'].include?(vmname)
       vm_disk2 = ::File.join(node['harness']['vms_dir'], vmname, 'disk2.vmdk')
+      disk2_size = node['harness']['vagrant']['disk2_size'] || 2
       vagrant_config += <<-ENDCONFIG
       config.vm.network 'private_network', ip: "#{config['cluster_ipaddress']}"
       config.vm.provider 'virtualbox' do |v|
         v.customize ['createhd',
                     '--filename', "#{vm_disk2}",
-                    '--size', 2 * 1024,
+                    '--size', #{disk2_size} * 1024,
                     '--format', 'VMDK']
         v.customize ['storageattach', :id,
                     '--storagectl', 'IDE Controller',

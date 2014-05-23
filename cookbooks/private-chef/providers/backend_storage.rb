@@ -87,6 +87,10 @@ def disk_devmap
     diskmap = %w(xvda xvdb xvdc xvdd xvde xvdf xvdg)
   elsif rootdev =~ /xvde/
     diskmap = %w(xvde xvdf xvdg xvdh xvdi xvdj xvdk)
+  elsif node['platform_family'] == 'rhel' &&
+    node['platform_version'].to_i == 5 &&
+    ! ::File.exists?('/dev/sda')
+    diskmap = ::Dir.entries('/proc/ide').reject { |a| a =~ /ide/ || a =~ /drivers/ || a =~ /\./  }.sort
   else
     diskmap = %w(sda sdb sdc sdd sde sdf sdg)
   end
@@ -147,6 +151,14 @@ def create_drbd_dirs
   end
 end
 
+def fstype
+  if system('which mkfs.ext4')
+    'ext4'
+  else
+    'ext3'
+  end
+end
+
 def create_lvm(disks)
   lvm_volume_group 'opscode' do
     physical_volumes disks
@@ -154,7 +166,7 @@ def create_lvm(disks)
     logical_volume 'drbd' do
       size        '80%VG'
       if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend_storage_type'] == 'ebs'
-        filesystem 'ext4'
+        filesystem fstype
       end
       stripes disks.length if disks.is_a?(Array)
     end
@@ -195,12 +207,14 @@ def setup_drbd
     execute 'start-drbd-service-with-timeout' do
       command 'service drbd start'
       not_if "lsmod | grep drbd"
+      notifies :run, "execute[drbd-primary-force]", :immediately
     end
-  end
-
-  execute 'drbdadm-up' do
-    command 'drbdadm up pc0'
-    action :nothing
+  else
+    execute 'drbdadm-up' do
+      command 'drbdadm up pc0'
+      action :nothing
+      notifies :run, "execute[drbd-primary-force]", :immediately
+    end
   end
 
   # TODO: more reliably detect if we are an unconfigured bootstrap node
@@ -210,17 +224,17 @@ def setup_drbd
     else
       command 'drbdadm primary --force pc0'
     end
-    action :run
+    action :nothing
     notifies :run, 'execute[mkfs-drbd-volume]', :immediately
     only_if { node['private-chef']['backends'][node.name]['bootstrap'] == true }
     not_if { ::File.exists?(::File.join(DRBD_DIR, 'drbd_ready')) }
   end
 
   execute 'mkfs-drbd-volume' do
-    command 'mkfs.ext4 /dev/drbd0'
+    command "mkfs.#{fstype} /dev/drbd0"
     action :nothing
     notifies :run, 'execute[mount-drbd-volume]', :immediately
-    not_if 'file -sL /dev/drbd0 | grep ext4'
+    not_if "file -sL /dev/drbd0 | grep #{fstype}"
   end
 
   execute 'mount-drbd-volume' do
