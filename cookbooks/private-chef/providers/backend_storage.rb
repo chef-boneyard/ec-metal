@@ -160,13 +160,14 @@ def fstype
 end
 
 def create_lvm(disks)
+  fs_type = fstype
   lvm_volume_group 'opscode' do
     physical_volumes disks
 
     logical_volume 'drbd' do
       size        '80%VG'
       if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend_storage_type'] == 'ebs'
-        filesystem fstype
+        filesystem fs_type
       end
       stripes disks.length if disks.is_a?(Array)
     end
