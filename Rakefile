@@ -7,6 +7,9 @@ task :default => [:up]
 # Environment variables to be consumed by ec-harness and friends
 harness_dir = ENV['HARNESS_DIR'] = File.dirname(__FILE__)
 
+# just in cases user has a different default Vagrant provider
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
+
 def get_config
   JSON.parse(File.read('config.json'))
 end
