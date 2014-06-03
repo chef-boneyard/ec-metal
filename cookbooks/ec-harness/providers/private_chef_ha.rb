@@ -17,8 +17,8 @@ def cloud_machine_created?(vmname)
     # Handle the 404 meaning the machine hasn't been created yet
     nodeinfo = {'normal' => {} }
   end
-  provisioner_output = nodeinfo['normal']['provisioner_output']
-  return true if provisioner_output && provisioner_output.has_key?('server_id')
+  driver_info = nodeinfo['normal']['metal']['location']
+  return true if driver_info && driver_info.has_key?('server_id')
   false
 end
 
