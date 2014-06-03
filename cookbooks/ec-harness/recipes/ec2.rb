@@ -10,14 +10,18 @@ with_chef_local_server :chef_repo_path => repo_path,
     File.join(repo_path, 'vendor', 'cookbooks') ],
     :port => 9010
 
-with_driver 'fog:AWS:default', :compute_options => {
-  :region => node['harness']['ec2']['region'],
-}
+with_driver "fog:AWS:default:#{node['harness']['ec2']['region']}"
+# alternative method:
+# with_driver 'fog:AWS:default', :compute_options => {
+#   :region => node['harness']['ec2']['region'],
+# }
 
 with_machine_options :ssh_username => node['harness']['ec2']['ssh_username'],
   :use_private_ip_for_ssh => node['harness']['ec2']['use_private_ip_for_ssh']
 
-fog_key_pair "#{ENV['USER']}@ec-ha/#{::File.basename(node['harness']['harness_dir'])}" do
+keypair_name = "#{ENV['USER']}@#{::File.basename(node['harness']['harness_dir'])}"
+
+fog_key_pair keypair_name do
   private_key_path File.join(repo_path, 'keys', 'id_rsa')
   public_key_path File.join(repo_path, 'keys', 'id_rsa.pub')
 end
@@ -28,6 +32,7 @@ node['harness']['vm_config']['backends'].merge(
 
   local_provisioner_options = {
     :bootstrap_options => {
+      :key_name => keypair_name,
       :flavor_id => config['instance_type'] || 'c3.large',
       :region => node['harness']['ec2']['region'],
       :ebs_optimized => config['ebs_optimized'] || false,
