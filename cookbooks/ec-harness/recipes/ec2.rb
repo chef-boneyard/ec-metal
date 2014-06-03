@@ -30,6 +30,8 @@ end
 node['harness']['vm_config']['backends'].merge(
   node['harness']['vm_config']['frontends']).each do |vmname, config|
 
+  fog_helper = FogHelper.new(ami: node['harness']['ec2']['ami_id'], region: node['harness']['ec2']['region'])
+
   local_provisioner_options = {
     :bootstrap_options => {
       :key_name => keypair_name,
@@ -40,7 +42,7 @@ node['harness']['vm_config']['backends'].merge(
       :subnet_id => node['harness']['ec2']['vpc_subnet'],
       :associate_public_ip => true,
       :block_device_mapping => [
-        {'DeviceName' => FogHelper.get_root_blockdevice(node['harness']['ec2']['ami_id']),
+        {'DeviceName' => fog_helper.get_root_blockdevice,
           'Ebs.VolumeSize' => 12,
           'Ebs.DeleteOnTermination' => "true"},
         {'DeviceName' => '/dev/sdb', 'VirtualName' => 'ephemeral0'}
