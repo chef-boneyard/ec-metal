@@ -13,3 +13,6 @@ gem 'chef-metal-vagrant', :git => 'git://github.com/opscode/chef-metal-vagrant.g
 #gem 'chef-metal-ssh', :git => 'git://github.com/double-z/chef-metal-ssh.git'
 
 gem 'berkshelf',          '~> 3.0'
+gem 'hashie',             '~> 2.0'
+gem 'chef', :git => 'git://github.com/opscode/chef.git'
+
