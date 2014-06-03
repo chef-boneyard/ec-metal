@@ -25,7 +25,7 @@ end
 action :cloud_create do
  # Dumb hack to populate all of our machines first, for dynamic name/IP provisioners
   machine_batch 'cloud_create' do
-    action :allocate
+    action [:converge]
     %w(backends frontends).each do |whichend|
       node['harness']['vm_config'][whichend].each do |vmname, config|
 
@@ -129,8 +129,8 @@ def cloud_attributes(provider)
   when 'ec2'
     aws_credentials = ChefMetalFog::AWSCredentials.new
     aws_credentials.load_default
-    cloud_attrs['aws_access_key_id'] ||= aws_credentials.default[:access_key_id]
-    cloud_attrs['aws_secret_access_key'] ||= aws_credentials.default[:secret_access_key]
+    cloud_attrs['aws_access_key_id'] ||= aws_credentials.default[:aws_access_key_id]
+    cloud_attrs['aws_secret_access_key'] ||= aws_credentials.default[:aws_secret_access_key]
   end
 
   cloud_attrs
