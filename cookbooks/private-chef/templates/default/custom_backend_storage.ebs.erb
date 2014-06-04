@@ -105,7 +105,7 @@ def attach_volume
       while true
         if `pvscan`.include?(LVM_VG)
           puts "Found LVM volume #{LVM_DEVICE}"
-          system("vgchange --activate y #{LVM_VG}")
+          system("vgchange -a y #{LVM_VG}")
           break
         end
         puts '.'
@@ -218,7 +218,7 @@ def detach_volume
   end
 
   # deactivate the LVM vg to make detach faster
-  system("vgchange --activate n #{LVM_VG}")
+  system("vgchange -a n #{LVM_VG}")
 
   puts "detaching #{VOLUME_ID}"
   compute.detach_volume(VOLUME_ID)
