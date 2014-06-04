@@ -29,6 +29,7 @@ action :cloud_create do
     %w(backends frontends).each do |whichend|
       node['harness']['vm_config'][whichend].each do |vmname, config|
 
+        next if cloud_machine_created?(vmname)
         machine vmname do
           add_machine_options node['harness']['provisioner_options'][vmname]
           attribute 'private-chef', privatechef_attributes
@@ -36,8 +37,6 @@ action :cloud_create do
           attribute 'cloud', cloud_attributes('ec2')
           recipe 'private-chef::hostname'
           recipe 'private-chef::ec2'
-
-          not_if { cloud_machine_created?(vmname) }
         end
       end
     end
