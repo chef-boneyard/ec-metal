@@ -15,10 +15,10 @@ def cloud_machine_created?(vmname)
     nodeinfo = rest.get("/nodes/#{vmname}")
   rescue Net::HTTPServerException
     # Handle the 404 meaning the machine hasn't been created yet
-    nodeinfo = {'normal' => {} }
+    nodeinfo = {'normal' => { 'metal' => {} } }
   end
-  driver_info = nodeinfo['normal']['metal']['location']
-  return true if driver_info && driver_info.has_key?('server_id')
+  driver_info = nodeinfo['normal']['metal']['location'] || {}
+  return true if driver_info.has_key?('server_id')
   false
 end
 
