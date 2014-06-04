@@ -11,3 +11,4 @@ cache
 vendor
 users
 data_bags
+chef-client-running.pid

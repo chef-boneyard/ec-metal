@@ -24,3 +24,4 @@ private_key_paths	 [keys_dir]
 private_keys		 "#{ENV['USER']}@#{::File.basename(harness_dir)}" => ::File.join(keys_dir, 'id_rsa')
 public_keys		 "#{ENV['USER']}@#{::File.basename(harness_dir)}" => ::File.join(keys_dir, 'id_rsa.pub')
 chef_zero		 :port => find_open_port
+lockfile                 ::File.join(harness_dir, 'chef-client-running.pid')
