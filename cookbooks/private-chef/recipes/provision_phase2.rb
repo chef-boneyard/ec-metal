@@ -14,35 +14,45 @@ bootstrap_node_name =
 
 package 'rsync'
 
-# NOTE: order-of-operations!  This assumes that the machine resource for the bootstrap is running first
-if node.name == bootstrap_node_name
+execute 'rsync-from-bootstrap' do
+  command "rsync -avz -e ssh --exclude chef-server-running.json root@#{bootstrap_host_name}:/etc/opscode/ /etc/opscode"
+  action :run
+  not_if { node.name == bootstrap_node_name }
+end
 
-  execute 'initial-p-c-c-reconfigure' do
-    # Retry the reconfigure step, often caused by service restart timeouts during upgrades
-    command '/opt/opscode/bin/private-chef-ctl reconfigure || sleep 30 ; /opt/opscode/bin/private-chef-ctl reconfigure'
-    action :run
+ruby_block 'p-c-c reconfigure' do
+  block do
+    begin
+      tries ||= 2
+      cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl reconfigure')
+      cmd.run_command
+      if cmd.error?
+        cmd.error!
+      else
+        ::File.open("/var/log/p-c-c-reconfigure-#{Time.now.strftime("%Y%m%d_%H%M%S")}.log", 'w') { |lf| lf.write(cmd.stdout) }
+        puts '--- BEGIN private-chef-ctl reconfigure output ---'
+        puts cmd.stdout
+        puts '--- END private-chef-ctl reconfigure output ---'
+      end
+    rescue Exception => e
+      ::File.open("/var/log/p-c-c-reconfigure-#{Time.now.strftime("%Y%m%d_%H%M%S")}.log", 'w') { |lf| lf.write(cmd.stdout) }
+      puts "#{e} Previous private-chef-ctl reconfigure failed, sleeping for 30 and trying again"
+      sleep 30
+      unless (tries -= 1).zero?
+        retry
+      else
+        raise 'private-chef-ctl reconfigure failed and retries exceeded'
+      end
+    end
   end
+end
 
-  execute 'fix-migration-state' do
-    command '/opt/opscode/embedded/bin/bundle exec bin/partybus init'
-    cwd '/opt/opscode/embedded/service/partybus'
-    action :run
-    not_if 'ls /var/opt/opscode/upgrades/migration-level'
-    not_if 'ls /tmp/private-chef-perform-upgrade'
-  end
-
-else
-
-  execute 'rsync-from-bootstrap' do
-    command "rsync -avz -e ssh --exclude chef-server-running.json root@#{bootstrap_host_name}:/etc/opscode/ /etc/opscode"
-    action :run
-  end
-
-  execute 'p-c-c-reconfigure' do
-    command '/opt/opscode/bin/private-chef-ctl reconfigure'
-    action :run
-  end
-
+execute 'fix-migration-state' do
+  command '/opt/opscode/embedded/bin/bundle exec bin/partybus init'
+  cwd '/opt/opscode/embedded/service/partybus'
+  action :run
+  not_if 'ls /var/opt/opscode/upgrades/migration-level'
+  not_if 'ls /tmp/private-chef-perform-upgrade'
 end
 
 # If anything is still down, wait for things to settle
