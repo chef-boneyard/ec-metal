@@ -9,7 +9,7 @@ require 'timeout'
 REGION = "<%= node['cloud']['region'] %>"
 AWS_ACCESS_KEY_ID = "<%= node['cloud']['aws_access_key_id'] %>"
 AWS_SECRET_ACCESS_KEY = "<%= node['cloud']['aws_secret_access_key'] %>"
-SERVER_ID = "<%= node['provisioner_output']['server_id'] %>"
+SERVER_ID = "<%= node['metal']['location']['server_id'] %>"
 VOLUME_ID = "<%= node['aws']['ebs_volume'][@bootstrap_host_name]['volume_id'] %>"
 AWS_DEVICE = '/dev/sdc'
 LVM_VG = 'opscode'
@@ -105,7 +105,7 @@ def attach_volume
       while true
         if `pvscan`.include?(LVM_VG)
           puts "Found LVM volume #{LVM_DEVICE}"
-          system("vgchange --activate y #{LVM_VG}")
+          system("vgchange -a y #{LVM_VG}")
           break
         end
         puts '.'
@@ -218,7 +218,7 @@ def detach_volume
   end
 
   # deactivate the LVM vg to make detach faster
-  system("vgchange --activate n #{LVM_VG}")
+  system("vgchange -a n #{LVM_VG}")
 
   puts "detaching #{VOLUME_ID}"
   compute.detach_volume(VOLUME_ID)

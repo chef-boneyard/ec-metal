@@ -2,7 +2,14 @@
 
 class FogHelper
 
-  def self.load_ini(credentials_ini_file)
+  attr_accessor :ami, :region
+
+  def initialize(params = {})
+    @ami = params[:ami] || 'ami-XXXXXXX'
+    @region = params[:region] || 'us-east-1'
+  end
+
+  def load_ini(credentials_ini_file)
     require 'inifile'
     credentials = {}
     inifile = IniFile.load(File.expand_path(credentials_ini_file))
@@ -19,24 +26,24 @@ class FogHelper
     credentials
   end
 
-  def self.get_aws
+  def get_aws
     require 'fog'
     aws_credentials = load_ini('~/.aws/config')
 
     Fog::Compute.new(:aws_access_key_id => aws_credentials['default'][:access_key_id],
       :aws_secret_access_key => aws_credentials['default'][:secret_access_key],
-      :region => aws_credentials['default'][:region],
+      :region => @region || aws_credentials['default'][:region],
       :provider => 'AWS')
   end
 
-  def self.describe_ami(ami)
+  def describe_ami
     aws = get_aws
-    aws.describe_images('ImageId' => ami).body['imagesSet']
+    aws.describe_images('ImageId' => @ami).body['imagesSet']
   end
 
-  def self.get_root_blockdevice(ami)
-    ami = describe_ami(ami).first
-    ami['blockDeviceMapping'].
+  def get_root_blockdevice
+    ami_desc = describe_ami.first
+    ami_desc['blockDeviceMapping'].
       select { |dev| dev['deviceName'] =~ /sda/ }.
       first['deviceName']
   end

@@ -15,28 +15,28 @@ def cloud_machine_created?(vmname)
     nodeinfo = rest.get("/nodes/#{vmname}")
   rescue Net::HTTPServerException
     # Handle the 404 meaning the machine hasn't been created yet
-    nodeinfo = {'normal' => {} }
+    nodeinfo = {'normal' => { 'metal' => {} } }
   end
-  provisioner_output = nodeinfo['normal']['provisioner_output']
-  return true if provisioner_output && provisioner_output.has_key?('server_id')
+  driver_info = nodeinfo['normal']['metal']['location'] || {}
+  return true if driver_info.has_key?('server_id')
   false
 end
 
 action :cloud_create do
  # Dumb hack to populate all of our machines first, for dynamic name/IP provisioners
-  if node['harness']['provider'] == 'ec2'
+  machine_batch 'cloud_create' do
+    action [:converge]
     %w(backends frontends).each do |whichend|
       node['harness']['vm_config'][whichend].each do |vmname, config|
-        ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
 
+        next if cloud_machine_created?(vmname)
         machine vmname do
+          add_machine_options node['harness']['provisioner_options'][vmname]
           attribute 'private-chef', privatechef_attributes
           attribute 'root_ssh', node['harness']['root_ssh'].to_hash
           attribute 'cloud', cloud_attributes('ec2')
           recipe 'private-chef::hostname'
           recipe 'private-chef::ec2'
-
-          not_if { cloud_machine_created?(vmname) }
         end
       end
     end
@@ -46,27 +46,29 @@ end
 action :install do
   %w(backends frontends).each do |whichend|
     node['harness']['vm_config'][whichend].each do |vmname, config|
-      # provisoner_options is set by your provisioner recipe (ex: vagrant.rb)
-      ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
+      machine_batch vmname do
+        action [:converge]
 
-      machine vmname do
-        attribute 'private-chef', privatechef_attributes
-        attribute 'root_ssh', node['harness']['root_ssh'].to_hash
+        machine vmname do
+          add_machine_options node['harness']['provisioner_options'][vmname]
+          attribute 'private-chef', privatechef_attributes
+          attribute 'root_ssh', node['harness']['root_ssh'].to_hash
 
-        recipe 'private-chef::hostname'
-        recipe 'private-chef::hostsfile'
-        recipe 'private-chef::provision'
-        recipe 'private-chef::bugfixes'
-        recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname) &&
-          node['harness']['vm_config']['topology'] == 'ha'
-        recipe 'private-chef::provision_phase2'
-        recipe 'private-chef::users' if vmname == bootstrap_node_name
-        recipe 'private-chef::reporting' if node['harness']['reporting_package']
-        recipe 'private-chef::manage' if node['harness']['manage_package'] &&
-          node['harness']['vm_config']['frontends'].include?(vmname)
-        recipe 'private-chef::pushy' if node['harness']['pushy_package']
+          recipe 'private-chef::hostname'
+          recipe 'private-chef::hostsfile'
+          recipe 'private-chef::provision'
+          recipe 'private-chef::bugfixes'
+          recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname) &&
+            node['harness']['vm_config']['topology'] == 'ha'
+          recipe 'private-chef::provision_phase2'
+          recipe 'private-chef::users' if vmname == bootstrap_node_name
+          recipe 'private-chef::reporting' if node['harness']['reporting_package']
+          recipe 'private-chef::manage' if node['harness']['manage_package'] &&
+            node['harness']['vm_config']['frontends'].include?(vmname)
+          recipe 'private-chef::pushy' if node['harness']['pushy_package']
 
-        converge true
+          converge true
+        end
       end
     end
   end
@@ -79,7 +81,7 @@ action :stop_all_but_master do
     select { |vmname, config| config['bootstrap'] != true }.merge(
     node['harness']['vm_config']['frontends']).each do |vmname, config|
 
-    ChefMetal.with_provisioner_options node['harness']['provisioner_options'][vmname]
+    # with_machine_options node['harness']['provisioner_options'][vmname]
     machine_execute "p-c-c_stop_on_#{vmname}" do
       command '/opt/opscode/bin/private-chef-ctl stop ; exit 0'
       machine vmname
@@ -89,16 +91,10 @@ action :stop_all_but_master do
 end
 
 action :destroy do
-
-  # Bring the backends and frontends online
-  node['harness']['vm_config']['backends'].merge(
-    node['harness']['vm_config']['frontends']).each do |vmname, config|
-
-    machine vmname do
-      action :delete
-    end
+  machine_batch do
+    action :destroy
+    machines search(:node, '*:*').map { |n| n.name }
   end
-
 end
 
 def bootstrap_node_name
@@ -130,10 +126,10 @@ def cloud_attributes(provider)
 
   case provider
   when 'ec2'
-    aws_credentials = ChefMetal::AWSCredentials.new
+    aws_credentials = ChefMetalFog::AWSCredentials.new
     aws_credentials.load_default
-    cloud_attrs['aws_access_key_id'] ||= aws_credentials.default[:access_key_id]
-    cloud_attrs['aws_secret_access_key'] ||= aws_credentials.default[:secret_access_key]
+    cloud_attrs['aws_access_key_id'] ||= aws_credentials.default[:aws_access_key_id]
+    cloud_attrs['aws_secret_access_key'] ||= aws_credentials.default[:aws_secret_access_key]
   end
 
   cloud_attrs

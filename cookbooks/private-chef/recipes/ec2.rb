@@ -39,11 +39,11 @@ gem_package 'fog' do
   options('--no-rdoc --no-ri')
 end
 
-private_chef_backend_vip node['private-chef']['backend_vip']['ipaddress'] do
-  only_if { node['private-chef']['backends'][node.name] &&
-    node['private-chef']['backends'][node.name]['bootstrap'] == true }
-  not_if "ls /var/opt/opscode/drbd/drbd_ready"
-end
+# private_chef_backend_vip node['private-chef']['backend_vip']['ipaddress'] do
+#   only_if { node['private-chef']['backends'][node.name] &&
+#     node['private-chef']['backends'][node.name]['bootstrap'] == true }
+#   not_if "ls /var/opt/opscode/drbd/drbd_ready"
+# end
 
 directory '/var/opt/opscode/keepalived/bin' do
   owner 'root'
