@@ -11,3 +11,13 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/keepalived.r
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
+
+cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/partybus.rb' do
+  source 'partybus.rb'
+  owner 'root'
+  group 'root'
+  mode '0755'
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  subscribes :create, "package[#{installer_name}]", :immediately
+  action :nothing
+end
