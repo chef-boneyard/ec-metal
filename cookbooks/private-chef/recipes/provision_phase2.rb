@@ -47,6 +47,7 @@ ruby_block 'p-c-c reconfigure' do
   end
 end
 
+# OC-11297
 execute 'fix-migration-state' do
   command '/opt/opscode/embedded/bin/bundle exec bin/partybus init'
   cwd '/opt/opscode/embedded/service/partybus'
@@ -60,6 +61,7 @@ log "Running upgrades for #{node.name}, bootstrap is #{bootstrap_node_name}" do
   only_if { File.exists?('/tmp/private-chef-perform-upgrade') }
 end
 
+# OC-11382
 execute 'waitforit' do
   command 'sleep 60'
   action :run
