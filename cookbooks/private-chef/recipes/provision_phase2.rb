@@ -79,9 +79,31 @@ execute 'p-c-c-start' do
   only_if 'ls /tmp/private-chef-perform-upgrade'
 end
 
-execute 'p-c-c-upgrade' do
-  command '/opt/opscode/bin/private-chef-ctl upgrade'
-  action :run
+ruby_block 'p-c-c upgrade' do
+  block do
+    begin
+      tries ||= 2
+      cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl upgrade')
+      cmd.run_command
+      if cmd.error?
+        cmd.error!
+      else
+        ::File.open("/var/log/p-c-c-upgrade-#{Time.now.strftime("%Y%m%d_%H%M%S")}.log", 'w') { |lf| lf.write(cmd.stdout) }
+        puts '--- BEGIN private-chef-ctl upgrade output ---'
+        puts cmd.stdout
+        puts '--- END private-chef-ctl upgrade output ---'
+      end
+    rescue Exception => e
+      ::File.open("/var/log/p-c-c-upgrade-#{Time.now.strftime("%Y%m%d_%H%M%S")}.log", 'w') { |lf| lf.write(cmd.stdout) }
+      puts "#{e} Previous private-chef-ctl upgrade failed, sleeping for 30 and trying again"
+      sleep 30
+      unless (tries -= 1).zero?
+        retry
+      else
+        raise 'private-chef-ctl upgrade failed and retries exceeded'
+      end
+    end
+  end
   only_if 'ls /tmp/private-chef-perform-upgrade'
 end
 
