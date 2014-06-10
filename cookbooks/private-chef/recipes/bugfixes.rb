@@ -33,3 +33,14 @@ cookbook_file '/opt/opscode/bin/private-chef-ctl' do
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
+
+# OC-11575
+cookbook_file '/opt/opscode/embedded/cookbooks/enterprise/definitions/component_runit_service.rb' do
+  source 'component_runit_service.rb'
+  owner 'root'
+  group 'root'
+  mode '0755'
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  subscribes :create, "package[#{installer_name}]", :immediately
+  action :nothing
+end
