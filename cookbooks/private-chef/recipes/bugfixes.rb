@@ -44,3 +44,14 @@ cookbook_file '/opt/opscode/embedded/cookbooks/enterprise/definitions/component_
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
+
+# OC-11382
+cookbook_file '/opt/opscode/embedded/service/omnibus-ctl/upgrade.rb' do
+  source 'upgrade.rb'
+  owner 'root'
+  group 'root'
+  mode '0644'
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  subscribes :create, "package[#{installer_name}]", :immediately
+  action :nothing
+end
