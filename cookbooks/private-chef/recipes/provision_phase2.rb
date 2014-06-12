@@ -61,15 +61,6 @@ log "Running upgrades for #{node.name}, bootstrap is #{bootstrap_node_name}" do
   only_if { File.exists?('/tmp/private-chef-perform-upgrade') }
 end
 
-# OC-11382
-execute 'waitforit' do
-  command 'sleep 60'
-  action :run
-  only_if { node.name == bootstrap_node_name }
-  only_if '/opt/opscode/bin/private-chef-ctl status | grep ^down'
-  only_if 'ls /tmp/private-chef-perform-upgrade'
-end
-
 # after 1.2->1.4 upgrade postgresql won't be running, but WHY?
 execute 'p-c-c-start' do
   command '/opt/opscode/bin/private-chef-ctl start'
