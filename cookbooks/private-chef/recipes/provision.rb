@@ -21,7 +21,7 @@ else
   installer_path = installer_file
 end
 
-if PackageHelper.private_chef_installed_version(node) > PackageHelper.pc_version(installer_name)
+if Gem::Version.new(PackageHelper.private_chef_installed_version(node)) > Gem::Version.new(PackageHelper.pc_version(installer_name))
   log "Installed package #{PackageHelper.private_chef_installed_version(node)} is newer than installer #{installer_name}"
 else
   package installer_name do
@@ -32,7 +32,7 @@ else
     action :install
   end
 
-  if PackageHelper.private_chef_installed_version(node) < PackageHelper.pc_version(installer_name) &&
+  if Gem::Version.new(PackageHelper.private_chef_installed_version(node)) < Gem::Version.new(PackageHelper.pc_version(installer_name)) &&
     PackageHelper.private_chef_installed_version(node) != '0.0.0'
     file '/tmp/private-chef-perform-upgrade' do
       action :create
