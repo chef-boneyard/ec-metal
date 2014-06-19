@@ -39,8 +39,11 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
 end
 
 def postgres_ready?
-  return true if
-    system("PGPASSWORD=#{get_secrets['postgresql']['sql_password']} /opt/opscode/embedded/bin/psql -U opscode_chef -c 'select count(*) from users'")
+  pg_cmd = "PGPASSWORD=#{get_secrets['postgresql']['sql_password']} " +
+    "/opt/opscode/embedded/bin/psql -h 127.0.0.1 -U opscode_chef " +
+    "-c 'select count(*) from users' " +
+    "> /dev/null"
+  return true if system(pg_cmd)
   false
 end
 
@@ -49,7 +52,10 @@ def erchef_ready?
   require 'openssl'
 
   begin
-    server_status = JSON.parse(open('https://localhost/_status', ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE).read)
+    server_status = JSON.parse(
+      open('https://localhost/_status',
+      ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
+      .read)
   rescue Exception
     return false
   end
