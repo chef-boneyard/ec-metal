@@ -16,4 +16,10 @@ node['harness']['packages'].each do |name, packagefile|
     action :install
   end
 
+  unless name == node['harness']['packages'].keys.first
+    ec_harness_private_chef_ha "start_non_bootstrap_on_#{node['harness']['provider']}" do
+      action :start_non_bootstrap
+    end
+  end
+
 end

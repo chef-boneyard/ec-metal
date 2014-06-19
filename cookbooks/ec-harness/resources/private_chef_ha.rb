@@ -1,4 +1,4 @@
-actions [:install, :cloud_create, :stop_all_but_master, :destroy]
+actions [:install, :cloud_create, :stop_all_but_master, :start_non_bootstrap, :destroy]
 
 default_action :install
 
