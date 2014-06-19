@@ -101,8 +101,13 @@ end
 execute 'p-c-c-cleanup' do
   command '/opt/opscode/bin/private-chef-ctl cleanup'
   action :run
-  only_if 'rpm -q private-chef |grep private-chef-11'
   only_if 'ls /tmp/private-chef-perform-upgrade'
+  case node['platform_family']
+  when 'rhel'
+    only_if 'rpm -q private-chef |grep private-chef-11'
+  when 'debian'
+    only_if 'dpkg -l |grep private-chef.*11'
+  end
 end
 
 file '/tmp/private-chef-perform-upgrade' do
