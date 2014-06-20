@@ -41,7 +41,7 @@ ec-metal runs three main paths of execution:
 
 | package key name | related chef package |
 |----------|------------------|
-| default_package | private-chef | 
+| default_package | private-chef |
 | manage_package | opscode-manage |
 | reporting_package | opscode-reporting |
 | pushy_package | opscode-push-jobs-server |
@@ -61,7 +61,6 @@ Notable tasks:
 NOTE: This is still a WIP under heavy development
 * Figure out a nice way to assist with EC package downloads and caching (dendrite?)
 * Testing
-* Ubuntu support (12.04 and 14.04)
 * Ability to drive installation, upgrade and restore-from-backup on already-provisioned servers (ex: customer environments) possibly using: https://github.com/double-z/chef-metal-ssh
 * EC2 improvements
   - Switch to using EC2 IAM roles to avoid slinging aws keys around.
@@ -164,7 +163,7 @@ The `layouts` object should not need to be changed in most cases.
 ### ec2 DRBD Configuration Attributes
 [Provided Template](config.json.ec2.example)
 
-```
+```json
 {
   "provider": "ec2",
   "ec2_options": {
@@ -221,7 +220,7 @@ The `layouts` object should not need to be changed in most cases.
 * The PIOPS value is automatically calculated as disk_size * 30 up to the maximum of 4000
 * *Core attributes are the same as the DRBD config*
 
-```
+```json
 {
   "provider": "ec2",
   "ec2_options": {
@@ -235,6 +234,35 @@ The `layouts` object should not need to be changed in most cases.
     "use_private_ip_for_ssh": false
   }
 ...
+```
+
+<a name="bugfixes"/>
+## Applying EC bug fixes
+ec-metal will apply EC bugfixes by default (as shown in the https://github.com/opscode/ec-metal/blob/master/cookbooks/private-chef/recipes/bugfixes.rb recipe).  To disable this feature, set the following option in your config.json:
+```json
+{
+  "apply_ec_bugfixes": false
+}
+```
+
+<a name="topologies"/>
+## Support Topologies
+ec-metal currently supports the `ha` and `tier` topologies.  Please note that if you use the `tier` topology you must set the `backend_vip` `ipaddress` to be the same as the IP address of the bootstrap (and only) backend node like so:
+```json
+{
+   "layout": {
+    "topology": "tier",
+    "backend_vip": {
+      "ipaddress": "33.33.33.20"
+    },
+    "backends": {
+      "backend1": {
+        "ipaddress": "33.33.33.20",
+        "bootstrap": true
+      }
+    }
+  }
+}
 ```
 
 ### Contributing
