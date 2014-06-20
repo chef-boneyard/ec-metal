@@ -58,7 +58,7 @@ action :install do
           recipe 'private-chef::hostname'
           recipe 'private-chef::hostsfile'
           recipe 'private-chef::provision'
-          recipe 'private-chef::bugfixes'
+          recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
           recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname) &&
             node['harness']['vm_config']['topology'] == 'ha'
           recipe 'private-chef::provision_phase2'
