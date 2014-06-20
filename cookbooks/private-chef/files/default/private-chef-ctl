@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# Copyright:: Copyright (c) 2012 Opscode, Inc.
+#
+# All Rights Reserved
+#
+
+export SVWAIT=30
+
+# Ensure the calling environment (disapproval look Bundler) does not infect our
+# Ruby environment if private-chef-ctl is called from a Ruby script.
+for ruby_env_var in RUBYOPT \
+                    BUNDLE_BIN_PATH \
+                    BUNDLE_GEMFILE \
+                    GEM_PATH \
+                    GEM_HOME
+do
+  unset $ruby_env_var
+done
+
+/opt/opscode/embedded/bin/omnibus-ctl opscode /opt/opscode/embedded/service/omnibus-ctl $@

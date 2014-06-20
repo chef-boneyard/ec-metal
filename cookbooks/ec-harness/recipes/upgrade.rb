@@ -9,3 +9,7 @@ end
 ec_harness_private_chef_ha "install_#{node['harness']['default_package']}_on_#{node['harness']['provider']}" do
   action :install
 end
+
+ec_harness_private_chef_ha "start_non_bootstrap_on_#{node['harness']['provider']}" do
+  action :start_non_bootstrap
+end
