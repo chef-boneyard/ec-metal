@@ -2,6 +2,7 @@
 
 require 'chef_metal'
 require 'chef/server_api'
+require 'chef_metal_fog'
 
 def whyrun_supported?
   true
@@ -144,7 +145,7 @@ def cloud_attributes(provider)
 
   case provider
   when 'ec2'
-    aws_credentials = ChefMetalFog::AWSCredentials.new
+    aws_credentials = ChefMetalFog::Providers::AWS::Credentials.new
     aws_credentials.load_default
     cloud_attrs['aws_access_key_id'] ||= aws_credentials.default[:aws_access_key_id]
     cloud_attrs['aws_secret_access_key'] ||= aws_credentials.default[:aws_secret_access_key]

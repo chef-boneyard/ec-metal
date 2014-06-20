@@ -56,6 +56,7 @@ node['harness']['vm_config']['backends'].merge(
       :block_device_mapping => [
         {'DeviceName' => fog_helper.get_root_blockdevice,
           'Ebs.VolumeSize' => 12,
+          'Ebs.VolumeType' => 'gp2',
           'Ebs.DeleteOnTermination' => "true"},
         {'DeviceName' => '/dev/sdb', 'VirtualName' => 'ephemeral0'}
       ]

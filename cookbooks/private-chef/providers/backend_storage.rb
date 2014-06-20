@@ -72,6 +72,8 @@ def create_ebs_volume
       piops_val = node['cloud']['ebs_disk_size'].to_i * 30
       piops_val = 4000 if piops_val > 4000
       piops piops_val
+    else
+      volume_type 'gp2'
     end
     action [ :create, :attach ]
   end
