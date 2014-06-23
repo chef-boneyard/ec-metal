@@ -203,7 +203,11 @@ def setup_drbd
   execute 'create-md' do
     command 'yes yes | drbdadm create-md pc0'
     action :run
-    only_if 'drbdadm dump-md pc0 2>&1 | grep "No valid meta data"'
+    if running_lucid?
+      only_if 'drbdadm dump-md pc0 2>&1 | grep "exited with code 255"'
+    else
+      only_if 'drbdadm dump-md pc0 2>&1 | grep "No valid meta data"'
+    end
     notifies :run, 'execute[drbdadm-up]', :immediately unless node['platform_family'] == 'debian'
   end
 
@@ -211,6 +215,28 @@ def setup_drbd
     execute 'start-drbd-service-with-timeout' do
       command 'service drbd start'
       not_if "lsmod | grep drbd"
+      if running_lucid?
+        notifies :run, "execute[drbdadm-disconnect]", :immediately
+      else
+        notifies :run, "execute[drbd-primary-force]", :immediately
+      end
+    end
+
+    # Ubuntu 10.04 specific
+    execute 'drbdadm-disconnect' do
+      action :nothing
+      command 'drbdadm disconnect pc0'
+      notifies :run, "execute[drbdadm-detach]", :immediately
+    end
+    execute 'drbdadm-detach' do
+      action :nothing
+      command 'drbdadm detach pc0'
+      notifies :run, "execute[drbdadm-up-10.04]", :immediately
+    end
+    # why can't I notify execute[drbdadm-up]? - resource not found
+     execute 'drbdadm-up-10.04' do
+      action :nothing
+      command 'drbdadm up pc0'
       notifies :run, "execute[drbd-primary-force]", :immediately
     end
   else
@@ -274,4 +300,8 @@ def touch_drbd_ready
     mode '0644'
     content "Created by ec-harness"
   end
+end
+
+def running_lucid?
+  node['platform'] == 'ubuntu' && node['platform_version'].to_i == 10
 end
