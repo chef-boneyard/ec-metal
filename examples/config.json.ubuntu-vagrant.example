@@ -5,6 +5,7 @@
     "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-12.04_chef-provisionerless.box",
     "disk2_size": "2"
   },
+  "apply_ec_bugfixes": true,
   "default_package": "private-chef_11.1.4-1_amd64.deb",
   "packages": {
     "OPC1.4.6": "private-chef-1.4.6-1.el6.x86_64.rpm",
