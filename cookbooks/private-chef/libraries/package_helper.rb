@@ -6,7 +6,7 @@ class PackageHelper
     #  or private-chef-1.4.6-1.el6.x86_64
     return '0.0.0' unless package =~ /^private-chef/
     package
-      .gsub(/[_+]/, '-')
+      .gsub(/[_+%]/, '-')
       .split('-')[2]
   end
 
