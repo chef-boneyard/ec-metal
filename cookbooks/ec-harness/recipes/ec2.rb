@@ -4,7 +4,7 @@ require 'cheffish'
 require 'chef_metal_fog'
 
 def find_open_port
-  port = 9000
+  port = 9010
   begin
     s = TCPServer.new('127.0.0.1', port)
     s.close
