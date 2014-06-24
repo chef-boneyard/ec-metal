@@ -57,8 +57,8 @@ cookbook_file '/opt/opscode/embedded/service/omnibus-ctl/upgrade.rb' do
 end
 
 # OC-11669
-cookbook_file '/opt/opscode/embedded/cookbooks/enterprise/recipes/runit_upstart.rb' do
-  source 'runit_upstart.rb'
+cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/default.rb' do
+  source 'private_chef_default.rb'
   owner 'root'
   group 'root'
   mode '0644'
