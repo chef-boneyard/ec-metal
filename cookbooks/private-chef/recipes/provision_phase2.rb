@@ -20,6 +20,17 @@ execute 'rsync-from-bootstrap' do
   not_if { node.name == bootstrap_node_name }
 end
 
+# Intentionally bomb out before running reconfigure, so it can be done manually
+if node['private-chef']['lemme_doit'] == true
+  ruby_block 'p-c-c bomb' do
+    block do
+      exit 1
+    end
+    only_if 'ls /tmp/private-chef-perform-upgrade'
+  end
+end
+
+
 ruby_block 'p-c-c reconfigure' do
   block do
     begin
