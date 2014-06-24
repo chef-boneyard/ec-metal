@@ -9,7 +9,7 @@ default['harness']['default_package'] = config_json['default_package']
 default['harness']['packages'] = config_json['packages']
 
 # Provide an option to not monkeypatch the bugfixes
-default['harness']['apply_ec_bugfixes'] = config_json['apply_ec_bugfixes'] || true
+default['harness']['apply_ec_bugfixes'] = config_json['apply_ec_bugfixes']
 
 # addon packages
 default['harness']['manage_package'] = config_json['manage_package']
