@@ -74,11 +74,12 @@ end
 
 # after 1.2->1.4 upgrade postgresql won't be running, but WHY?
 execute 'p-c-c-start' do
-  command '/opt/opscode/bin/private-chef-ctl start'
+  command '/opt/opscode/bin/private-chef-ctl start postgresql'
   action :run
   only_if { node.name == bootstrap_node_name }
   only_if '/opt/opscode/bin/private-chef-ctl status | grep postgres | grep ^down'
   only_if 'ls /tmp/private-chef-perform-upgrade'
+  retries 1
 end
 
 ruby_block 'p-c-c upgrade' do
