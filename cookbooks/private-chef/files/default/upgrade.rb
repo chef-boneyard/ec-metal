@@ -13,7 +13,7 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   STDOUT.sync = true
   (0..120).each do |attempt|
     break unless is_data_master?
-    break if erchef_ready?
+    break if erchef_ready? && postgres_ready?
     sleep 1
 
     if attempt == 120

@@ -11,6 +11,9 @@ default['harness']['packages'] = config_json['packages']
 # Provide an option to not monkeypatch the bugfixes
 default['harness']['apply_ec_bugfixes'] = config_json['apply_ec_bugfixes']
 
+# Provide an option to intentionally bomb out before running the upgrade reconfigure, so it can be done manually
+default['harness']['vm_config']['lemme_doit'] = config_json['lemme_doit'] || false
+
 # addon packages
 default['harness']['manage_package'] = config_json['manage_package']
 default['harness']['reporting_package'] = config_json['reporting_package']

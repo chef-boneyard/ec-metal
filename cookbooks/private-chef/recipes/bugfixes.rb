@@ -45,9 +45,51 @@ cookbook_file '/opt/opscode/embedded/cookbooks/enterprise/definitions/component_
   action :nothing
 end
 
-# OC-11382
-cookbook_file '/opt/opscode/embedded/service/omnibus-ctl/upgrade.rb' do
-  source 'upgrade.rb'
+# # OC-11382
+# cookbook_file '/opt/opscode/embedded/service/omnibus-ctl/upgrade.rb' do
+#   source 'upgrade.rb'
+#   owner 'root'
+#   group 'root'
+#   mode '0644'
+#   only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+#   subscribes :create, "package[#{installer_name}]", :immediately
+#   action :nothing
+# end
+
+# OC-11669
+cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/default.rb' do
+  source 'private_chef_default.rb'
+  owner 'root'
+  group 'root'
+  mode '0644'
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  subscribes :create, "package[#{installer_name}]", :immediately
+  action :nothing
+end
+
+cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/resources/keepalived_safemode.rb' do
+  source 'resources_keepalived_safemode.rb'
+  owner 'root'
+  group 'root'
+  mode '0644'
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  subscribes :create, "package[#{installer_name}]", :immediately
+  action :nothing
+end
+
+cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/providers/keepalived_safemode.rb' do
+  source 'providers_keepalived_safemode.rb'
+  owner 'root'
+  group 'root'
+  mode '0644'
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  subscribes :create, "package[#{installer_name}]", :immediately
+  action :nothing
+end
+
+# OC-11670
+cookbook_file '/opt/opscode/embedded/upgrades/001/009_migrate_authz.rb' do
+  source '009_migrate_authz.rb'
   owner 'root'
   group 'root'
   mode '0644'
