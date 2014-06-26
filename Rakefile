@@ -113,3 +113,27 @@ task :berks_install do
   cookbooks_path = File.join(harness_dir, 'vendor/cookbooks')
   system("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
 end
+
+desc "Runs remote commands via ssh.  Usage remaote[servername, 'command args string']"
+# "knife-opc user create rockawesome patrick wright patrick@getchef.com password"
+# "knife-opc org create myorg2 supercoolorg -a rockawesome"
+task :remote, [:machine, :command] do |t, arg|
+  configip = fog_populate_ips(get_config)
+  %w(backends frontends).each do |whichend|
+    configip['layout'][whichend].each do |node,attrs|
+      if node == arg[:machine]
+        case configip['provider']
+          when 'ec2'
+            ssh_username = configip['ec2_options']['ssh_username'] || 'ec2-user'
+          when 'vagrant'
+            ssh_username = 'vagrant'
+          else
+            ssh_username = 'root'
+        end
+        cmd = "ssh #{ssh_username}@#{attrs['ipaddress']} -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \"#{arg[:command]}\""
+        puts "Executing: #{cmd}"
+        system(cmd)
+      end
+    end
+  end
+end
