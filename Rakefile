@@ -131,7 +131,7 @@ task :remote, [:machine, :command] do |t, arg|
             ssh_username = 'root'
         end
         cmd = "ssh #{ssh_username}@#{attrs['ipaddress']} -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \"#{arg[:command]}\""
-        puts "Executing: #{cmd}"
+        puts "Executing '#{arg[:command]}' on #{arg[:machine]}"
         system(cmd)
       end
     end
