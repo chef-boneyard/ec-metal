@@ -67,7 +67,7 @@ action :install do
           recipe 'private-chef::manage' if node['harness']['manage_package'] &&
             node['harness']['vm_config']['frontends'].include?(vmname)
           recipe 'private-chef::pushy' if node['harness']['pushy_package']
-          recipe 'private-chef::tools' if node['harness']['vm_config']['backends'].include?(vmname)
+          recipe 'private-chef::tools'
 
           converge true
         end

@@ -114,7 +114,7 @@ task :berks_install do
   system("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
 end
 
-desc "Runs remote commands via ssh.  Usage remaote[servername, 'command args string']"
+desc "Runs remote commands via ssh.  Usage remote[servername, 'command args string']"
 # "knife-opc user create rockawesome patrick wright patrick@getchef.com password"
 # "knife-opc org create myorg2 supercoolorg -a rockawesome"
 task :remote, [:machine, :command] do |t, arg|
