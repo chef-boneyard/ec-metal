@@ -10,10 +10,11 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   bundle = File.join(base_path, "embedded", "bin", "bundle")
 
   puts 'Waiting for Enterprise Chef to finish starting up'
+  sleep 10
   STDOUT.sync = true
   (0..120).each do |attempt|
     break unless is_data_master?
-    break if erchef_ready? && postgres_ready?
+    break if cluster_status_master? && postgres_ready? && erchef_ready?
     sleep 1
 
     if attempt == 120
@@ -86,19 +87,12 @@ def is_data_master?
   when 'tier'
     role == 'backend'
   when 'ha'
-    if (role == 'backend')
-      dir = node['private_chef']['keepalived']['dir']
-      cluster_status_file = "#{dir}/current_cluster_status"
+    if role == 'backend'
+      cluster_status_file = ::File.join(node['private_chef']['keepalived']['dir'],
+        'current_cluster_status')
 
       if File.exists?(cluster_status_file)
         File.open(cluster_status_file).read.chomp == 'master'
-      else
-        # If the file doesn't exist, then we are most likely doing
-        # the initial setup, because keepalived must be configured
-        # after everything else.  In this case, we'll consider
-        # ourself the master if we're defined as the bootstrap
-        # server
-        is_bootstrap_server?(node)
       end
     else
       false # frontends can't be masters, by definition
@@ -114,4 +108,13 @@ def get_node
     puts 'ERROR: Unable to read /etc/opscode/private-chef-secrets.json, error: ' + e
     exit 1
   end
+end
+
+def cluster_status_master?
+  requested_cluster_status_file = ::File.join(node['private_chef']['keepalived']['dir'],
+    'requested_cluster_status')
+  return true if
+    ::File.exists?(requested_cluster_status_file) &&
+    ::File.open(requested_cluster_status_file).read.chomp == 'master'
+  false
 end
