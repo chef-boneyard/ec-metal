@@ -13,7 +13,6 @@ add_command "upgrade", "Upgrade your private chef installation.", 1 do
   sleep 10
   STDOUT.sync = true
   (0..120).each do |attempt|
-    # this is wrong, because it looks at current_cluster_status which may be backup
     break unless is_data_master?
     break if cluster_status_master? && postgres_ready? && erchef_ready?
     sleep 1
