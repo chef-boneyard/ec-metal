@@ -18,9 +18,7 @@ with_machine_options :vagrant_options => {
 }
 
 # set provisioner options for all of our machines
-node['harness']['vm_config']['backends'].merge(
-  node['harness']['vm_config']['frontends']).each do |vmname, config|
-
+TopoHelper.merged_topology(node['harness']['vm_config']).each do |vmname, config|
   local_provisioner_options = {
     'vagrant_config' => VagrantConfigHelper.generate_vagrant_config(vmname, config, node)
   }
