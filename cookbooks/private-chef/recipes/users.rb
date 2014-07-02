@@ -51,7 +51,7 @@ unless File.exists?("/srv/piab/dev_users_created")
 
   ruby_block "Waiting for first-time OPC initializtion" do
     block do
-      sleep 60
+      sleep 80
     end
   end
 
