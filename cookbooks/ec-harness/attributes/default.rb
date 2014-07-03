@@ -18,6 +18,8 @@ default['harness']['vm_config']['lemme_doit'] = config_json['lemme_doit'] || fal
 default['harness']['manage_package'] = config_json['manage_package']
 default['harness']['reporting_package'] = config_json['reporting_package']
 default['harness']['pushy_package'] = config_json['pushy_package']
+default['harness']['analytics_package'] = config_json['analytics_package']
+
 
 # HARNESS_DIR is set by the Rakefile to the project root directory
 default['harness']['repo_path'] = ENV['HARNESS_DIR']

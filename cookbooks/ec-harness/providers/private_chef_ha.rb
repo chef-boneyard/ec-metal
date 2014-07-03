@@ -75,6 +75,27 @@ action :install do
     end
   end
 
+  if node['harness']['analytics_package'] && node['harness']['vm_config']['analytics']
+    node['harness']['vm_config']['analytics'].each do |vmname, config|
+      machine_batch vmname do
+        action [:converge]
+
+        machine vmname do
+          add_machine_options node['harness']['provisioner_options'][vmname]
+          attribute 'private-chef', privatechef_attributes
+          attribute 'root_ssh', node['harness']['root_ssh'].to_hash
+
+          recipe 'private-chef::hostname'
+          recipe 'private-chef::hostsfile'
+          recipe 'private-chef::provision'
+          recipe 'private-chef::analytics'
+
+          converge true
+        end
+      end
+    end
+  end
+
 end
 
 action :stop_all_but_master do
@@ -130,13 +151,22 @@ end
 def privatechef_attributes
   packages = package_attributes
   attributes = node['harness']['vm_config'].to_hash
+  attributes['configuration'] = {} unless attributes['configuration']
   attributes['installer_file'] = packages['ec']
   unless packages['manage'] == nil
     attributes['manage_installer_file'] = packages['manage']
-    attributes['configuration'] = { 'opscode_webui' => { 'enable' => false } }
+    attributes['configuration']['opscode_webui'] = { 'enable' => false }
   end
   attributes['reporting_installer_file'] = packages['reporting']
   attributes['pushy_installer_file'] = packages['pushy']
+  unless packages['analytics'] == nil
+    attributes['analytics_installer_file'] = packages['analytics']
+    attributes['configuration']['dark_launch'] = { 'actions' => true }
+    attributes['configuration']['rabbitmq'] = {
+      'vip' => attributes['backend_vip']['ipaddress'],
+      'node_ip_address' => '0.0.0.0'
+    }
+  end
   attributes
 end
 
@@ -166,6 +196,7 @@ def package_attributes
   packages['manage'] = installer_path(node['harness']['manage_package'])
   packages['reporting'] = installer_path(node['harness']['reporting_package'])
   packages['pushy'] = installer_path(node['harness']['pushy_package'])
+  packages['analytics'] = installer_path(node['harness']['analytics_package'])
 
   packages
 end
