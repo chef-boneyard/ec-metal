@@ -30,6 +30,55 @@ package installer_name do
   action :install
 end
 
+# Terrible:  copied from provision.rb - factor me
+# SSH key management for inter-node trust
+directory '/root/.ssh' do
+  owner 'root'
+  group 'root'
+  mode '0700'
+  action :create
+end
+
+file '/root/.ssh/id_rsa' do
+  action :create
+  owner 'root'
+  group 'root'
+  mode '0600'
+  content node['root_ssh']['privkey']
+end
+
+file '/root/.ssh/authorized_keys' do
+  action :create
+  owner 'root'
+  group 'root'
+  mode '0600'
+  content node['root_ssh']['pubkey']
+end
+
+file '/root/.ssh/config' do
+  action :create
+  owner 'root'
+  group 'root'
+  mode '0600'
+  content "Host *\n  StrictHostKeyChecking no\n"
+end
+
+# RHEL-specific bug fixes
+if node['platform_family'] == 'rhel'
+  # Deal with RHEL-based boxes that may have their own firewalls up
+  service 'iptables' do
+    action [ :disable, :stop ]
+  end
+
+  # As of EC11.1.8, we need to disable sudo 'requiretty' on RHEL-based systems
+  execute 'sudoers-disable-requiretty' do
+    command 'sed -i "s/^.*requiretty/#Defaults requiretty/" /etc/sudoers'
+    action :run
+    only_if 'grep "^Defaults.*requiretty" /etc/sudoers'
+  end
+end
+# end Terrible
+
 package 'rsync'
 
 if node.name != bootstrap_node_name

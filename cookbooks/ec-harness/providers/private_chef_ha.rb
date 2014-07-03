@@ -87,7 +87,6 @@ action :install do
 
           recipe 'private-chef::hostname'
           recipe 'private-chef::hostsfile'
-          recipe 'private-chef::provision'
           recipe 'private-chef::analytics'
 
           converge true
