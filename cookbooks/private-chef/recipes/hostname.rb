@@ -2,9 +2,10 @@
 
 # Get my hostname from the frontend or backend "hostname" attribute
 def getmyhostname
-  mydata = node['private-chef']['backends'].
-    merge(node['private-chef']['frontends']).
-    select { |k,v| k == node.name }.values.first
+  mydata = TopoHelper.merged_topology(node['private-chef'])
+    .select { |k,v| k == node.name }
+    .values
+    .first
   mydata['hostname']
 end
 

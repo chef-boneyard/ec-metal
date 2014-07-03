@@ -67,6 +67,14 @@ execute 'fix-migration-state' do
   not_if 'ls /tmp/private-chef-perform-upgrade'
 end
 
+# Analytics file copy needed on EC11.1.8 and older
+execute 'copy-webui_priv.pem' do
+  command 'cp /etc/opscode/webui_priv.pem /etc/opscode-analytics'
+  action :run
+  only_if { node['private-chef']['analytics_installer_file'] }
+  not_if 'test -f /etc/opscode-analytics/webui_priv.pem'
+end
+
 # If anything is still down, wait for things to settle
 log "Running upgrades for #{node.name}, bootstrap is #{bootstrap_node_name}" do
   only_if { File.exists?('/tmp/private-chef-perform-upgrade') }

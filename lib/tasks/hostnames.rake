@@ -65,7 +65,8 @@ end
 def print_final_message(private_chef_config, harness_dir)
   print_cool_text
   puts "Web UI...............https://#{private_chef_config['layout']['manage_fqdn']}"
-  puts "API FQDN.............https://#{private_chef_config['layout']['api_fqdn']}\n\n"
+  puts "API FQDN.............https://#{private_chef_config['layout']['api_fqdn']}"
+  puts "Analytics FQDN.......https://#{private_chef_config['layout']['analytics_fqdn']}\n\n"
 
   case private_chef_config['provider']
   when 'ec2'
