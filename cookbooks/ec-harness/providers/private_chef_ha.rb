@@ -45,7 +45,7 @@ action :cloud_create do
 end
 
 action :install do
-  %w(backends frontends).each do |whichend|
+  %w(backends frontends standalones).each do |whichend|
     node['harness']['vm_config'][whichend].each do |vmname, config|
       machine_batch vmname do
         action [:converge]
@@ -65,7 +65,8 @@ action :install do
           recipe 'private-chef::users' if vmname == bootstrap_node_name
           recipe 'private-chef::reporting' if node['harness']['reporting_package']
           recipe 'private-chef::manage' if node['harness']['manage_package'] &&
-            node['harness']['vm_config']['frontends'].include?(vmname)
+            node['harness']['vm_config']['frontends'].include?(vmname) ||
+            node['harness']['vm_config']['topology'] == 'standalone'
           recipe 'private-chef::pushy' if node['harness']['pushy_package']
           recipe 'private-chef::tools'
 

@@ -6,18 +6,20 @@
 # All Rights Reserved
 #
 
-bootstrap_host_name =
-  node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.values.first['hostname']
+if node['private-chef']['topology'] != 'standalone'
+  bootstrap_host_name =
+    node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.values.first['hostname']
 
-bootstrap_node_name =
-  node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.keys.first
+  bootstrap_node_name =
+    node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.keys.first
 
-package 'rsync'
+  package 'rsync'
 
-execute 'rsync-from-bootstrap' do
-  command "rsync -avz -e ssh --exclude chef-server-running.json root@#{bootstrap_host_name}:/etc/opscode/ /etc/opscode"
-  action :run
-  not_if { node.name == bootstrap_node_name }
+  execute 'rsync-from-bootstrap' do
+    command "rsync -avz -e ssh --exclude chef-server-running.json root@#{bootstrap_host_name}:/etc/opscode/ /etc/opscode"
+    action :run
+    not_if { node.name == bootstrap_node_name }
+  end
 end
 
 # Intentionally bomb out before running reconfigure, so it can be done manually
@@ -84,7 +86,7 @@ end
 execute 'p-c-c-start' do
   command '/opt/opscode/bin/private-chef-ctl start postgresql'
   action :run
-  only_if { node.name == bootstrap_node_name }
+  only_if { node.name == bootstrap_node_name || node['private-chef']['topology'] == 'standalone' }
   only_if '/opt/opscode/bin/private-chef-ctl status | grep postgres | grep ^down'
   only_if 'ls /tmp/private-chef-perform-upgrade'
   retries 1
