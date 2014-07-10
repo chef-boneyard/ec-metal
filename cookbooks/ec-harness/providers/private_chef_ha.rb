@@ -54,6 +54,7 @@ action :install do
           add_machine_options node['harness']['provisioner_options'][vmname]
           attribute 'private-chef', privatechef_attributes
           attribute 'root_ssh', node['harness']['root_ssh'].to_hash
+          attribute 'osc-install', node['harness']['osc_install']
 
           recipe 'private-chef::hostname'
           recipe 'private-chef::hostsfile'
@@ -65,8 +66,9 @@ action :install do
           recipe 'private-chef::users' if vmname == bootstrap_node_name
           recipe 'private-chef::reporting' if node['harness']['reporting_package']
           recipe 'private-chef::manage' if node['harness']['manage_package'] &&
-            node['harness']['vm_config']['frontends'].include?(vmname) ||
-            node['harness']['vm_config']['topology'] == 'standalone'
+            ( node['harness']['vm_config']['frontends'].include?(vmname) ||
+            node['harness']['vm_config']['topology'] == 'standalone' ) &&
+            node['harness']['osc_install'] == false
           recipe 'private-chef::pushy' if node['harness']['pushy_package']
           recipe 'private-chef::tools'
 

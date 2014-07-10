@@ -37,7 +37,11 @@ ruby_block 'p-c-c reconfigure' do
   block do
     begin
       tries ||= 2
-      cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl reconfigure')
+        if node['osc-install'] 
+          cmd = Mixlib::ShellOut.new('/opt/chef-server/bin/chef-server-ctl reconfigure')
+        else
+          cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl reconfigure')
+        end
       cmd.run_command
       if cmd.error?
         cmd.error!
@@ -67,6 +71,7 @@ execute 'fix-migration-state' do
   action :run
   not_if 'ls /var/opt/opscode/upgrades/migration-level'
   not_if 'ls /tmp/private-chef-perform-upgrade'
+  not_if { node['osc-install'] }
 end
 
 # Analytics file copy needed on EC11.1.8 and older
@@ -75,11 +80,13 @@ execute 'copy-webui_priv.pem' do
   action :run
   only_if { node['private-chef']['analytics_installer_file'] }
   not_if 'test -f /etc/opscode-analytics/webui_priv.pem'
+  not_if { node['osc-install'] }
 end
 
 # If anything is still down, wait for things to settle
 log "Running upgrades for #{node.name}, bootstrap is #{bootstrap_node_name}" do
   only_if { File.exists?('/tmp/private-chef-perform-upgrade') }
+  not_if { node['osc-install'] }
 end
 
 # after 1.2->1.4 upgrade postgresql won't be running, but WHY?
@@ -89,6 +96,7 @@ execute 'p-c-c-start' do
   only_if { node.name == bootstrap_node_name || node['private-chef']['topology'] == 'standalone' }
   only_if '/opt/opscode/bin/private-chef-ctl status | grep postgres | grep ^down'
   only_if 'ls /tmp/private-chef-perform-upgrade'
+  not_if { node['osc-install'] }
   retries 1
 end
 
@@ -118,6 +126,7 @@ ruby_block 'p-c-c upgrade' do
     end
   end
   only_if 'ls /tmp/private-chef-perform-upgrade'
+  not_if { node['osc-install'] }
 end
 
 execute 'p-c-c-cleanup' do
@@ -130,6 +139,7 @@ execute 'p-c-c-cleanup' do
   when 'debian'
     only_if 'dpkg -l |grep private-chef.*11'
   end
+  not_if { node['osc-install'] }
 end
 
 file '/tmp/private-chef-perform-upgrade' do
