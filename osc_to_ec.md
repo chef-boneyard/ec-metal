@@ -14,10 +14,12 @@ this branch supports a env var to configure the "config.json" file name
 Once the packages on interest are available run this:
 
 install osc 
+
 ```ECM_CONFIG=config-osc.json CACHE_PATH=~/Chef/packages rake up```
 
+
 upgrade to ec
-```
-ECM_CONFIG=config-ec.json CACHE_PATH=~/Chef/packages rake up```
+
+```ECM_CONFIG=config-ec.json CACHE_PATH=~/Chef/packages rake up```
 
 use `rake up for both executions` and change the ECM_CONFIG value
