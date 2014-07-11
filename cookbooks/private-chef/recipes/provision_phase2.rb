@@ -72,7 +72,7 @@ execute 'fix-migration-state' do
   action :run
   not_if 'ls /var/opt/opscode/upgrades/migration-level'
   not_if 'ls /tmp/private-chef-perform-upgrade'
-  not_if { node['osc-install'] }
+  not_if { node['osc-install'] || node['osc-upgrade'] }
 end
 
 # Analytics file copy needed on EC11.1.8 and older
@@ -81,7 +81,7 @@ execute 'copy-webui_priv.pem' do
   action :run
   only_if { node['private-chef']['analytics_installer_file'] }
   not_if 'test -f /etc/opscode-analytics/webui_priv.pem'
-  not_if { node['osc-install'] }
+  not_if { node['osc-install'] || node['osc-upgrade'] }
 end
 
 # If anything is still down, wait for things to settle
@@ -97,7 +97,7 @@ execute 'p-c-c-start' do
   only_if { node.name == bootstrap_node_name || node['private-chef']['topology'] == 'standalone' }
   only_if '/opt/opscode/bin/private-chef-ctl status | grep postgres | grep ^down'
   only_if 'ls /tmp/private-chef-perform-upgrade'
-  not_if { node['osc-install'] }
+  not_if { node['osc-install'] || node['osc-upgrade'] }
   retries 1
 end
 
@@ -127,7 +127,7 @@ ruby_block 'p-c-c upgrade' do
     end
   end
   only_if 'ls /tmp/private-chef-perform-upgrade'
-  not_if { node['osc-install'] }
+  not_if { node['osc-install'] || node['osc-upgrade'] }
 end
 
 ruby_block 'p-c-c osc upgrade' do
@@ -173,4 +173,15 @@ end
 
 file '/tmp/private-chef-perform-upgrade' do
   action :delete
+end
+
+
+execute 'run pedant' do
+  if node['osc-install']
+    command '/opt/chef-server/bin/chef-server-ctl test'
+  else
+    command '/opt/opscode/bin/private-chef-ctl test'
+  end
+  action :run
+  only_if { node['run-pedant'] }
 end

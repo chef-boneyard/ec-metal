@@ -8,6 +8,7 @@ default['harness']['vm_config'] = config_json['layout']
 default['harness']['default_package'] = config_json['default_package']
 default['harness']['osc_install'] = config_json['osc_install'] || false
 default['harness']['osc_upgrade'] = config_json['osc_upgrade'] || false
+default['harness']['run_pedant'] = config_json['run_pedant'] || false
 default['harness']['packages'] = config_json['packages']
 
 # Provide an option to not monkeypatch the bugfixes

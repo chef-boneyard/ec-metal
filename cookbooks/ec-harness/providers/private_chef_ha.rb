@@ -56,6 +56,7 @@ action :install do
           attribute 'root_ssh', node['harness']['root_ssh'].to_hash
           attribute 'osc-install', node['harness']['osc_install']
           attribute 'osc-upgrade', node['harness']['osc_upgrade']
+          attribute 'run-pedant', node['harness']['run_pedant']
 
           recipe 'private-chef::hostname'
           recipe 'private-chef::hostsfile'

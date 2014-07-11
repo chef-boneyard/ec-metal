@@ -23,3 +23,11 @@ upgrade to ec
 ```ECM_CONFIG=config-ec.json CACHE_PATH=~/Chef/packages rake up```
 
 use `rake up for both executions` and change the ECM_CONFIG value
+
+
+## pedant
+
+Automatically run pedant at the end of the provision phase by setting `run_pedant` attribute to true
+
+## note upgrade_torture
+won't work, don't try it.
