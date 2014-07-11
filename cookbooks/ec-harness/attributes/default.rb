@@ -1,5 +1,5 @@
 # Load harness attributes from the config file
-config_json = JSON.parse(File.read(File.join(ENV['HARNESS_DIR'], 'config.json')))
+config_json = JSON.parse(File.read(File.join(ENV['HARNESS_DIR'], ENV['ECM_CONFIG'] || 'config.json')))
 default['harness']['harness_dir'] = ENV['HARNESS_DIR']
 default['harness']['provider'] = config_json['provider']
 default['harness']['vagrant'] = config_json['vagrant_options']
