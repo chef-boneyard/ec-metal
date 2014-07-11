@@ -44,6 +44,23 @@ task :upgrade => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   end
 end
 
+desc ''
+task :install_osc => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+  create_users_directory
+  if system("#{harness_dir}/bin/chef-client -z -o ec-harness::install_osc")
+    #Rake::Task['add_hosts'].execute unless ENV['disable_hosts']
+  end
+end
+
+
+desc ''
+task :upgrade_osc => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+  create_users_directory
+  if system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade_osc")
+    #Rake::Task['add_hosts'].execute unless ENV['disable_hosts']
+  end
+end
+
 desc 'Destroy all VMs'
 task :destroy do
   system("#{harness_dir}/bin/chef-client -z -o ec-harness::cleanup")

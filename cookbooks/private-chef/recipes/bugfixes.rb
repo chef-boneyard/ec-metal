@@ -7,7 +7,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/keepalived.r
   owner 'root'
   group 'root'
   mode '0755'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && (node['private-chef']['backends'][node.name] || node['private-chef']['standalones'][node.name]) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -18,7 +18,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/partybus.rb'
   owner 'root'
   group 'root'
   mode '0755'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && (node['private-chef']['backends'][node.name] || node['private-chef']['standalones'][node.name]) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -40,7 +40,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/enterprise/definitions/component_
   owner 'root'
   group 'root'
   mode '0755'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && (node['private-chef']['backends'][node.name] || node['private-chef']['standalones'][node.name]) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -62,7 +62,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/redis_lb.rb'
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && (node['private-chef']['backends'][node.name] || node['private-chef']['standalones'][node.name]) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -73,7 +73,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/default.rb' 
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && (node['private-chef']['backends'][node.name] || node['private-chef']['standalones'][node.name]) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -83,7 +83,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/resources/keepalived
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && (node['private-chef']['backends'][node.name] || node['private-chef']['standalones'][node.name]) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -93,7 +93,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/providers/keepalived
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && (node['private-chef']['backends'][node.name] || node['private-chef']['standalones'][node.name]) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -104,7 +104,7 @@ cookbook_file '/opt/opscode/embedded/upgrades/001/009_migrate_authz.rb' do
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && node['private-chef']['backends'][node.name] }
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && (node['private-chef']['backends'][node.name] || node['private-chef']['standalones'][node.name]) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
