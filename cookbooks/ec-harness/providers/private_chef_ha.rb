@@ -141,24 +141,6 @@ action :stop_all_but_master do
   end
 end
 
-action :stop_osc do
-  node['harness']['vm_config']['standalones'].each do |vmname, config|
-    machine_execute "c-s-c_stop_on_#{vmname}" do
-      command '/opt/chef-server/bin/chef-server-ctl stop ; exit 0'
-      machine vmname
-    end
-  end
-end
-
-action :start_osc do
-  node['harness']['vm_config']['standalones'].each do |vmname, config|
-    machine_execute "c-s-c_stop_on_#{vmname}" do
-      command '/opt/chef-server/bin/chef-server-ctl start ; exit 0'
-      machine vmname
-    end
-  end
-end
-
 action :start_non_bootstrap do
   # all backends minus bootstrap
   node['harness']['vm_config']['backends'].
@@ -171,15 +153,6 @@ action :start_non_bootstrap do
 
   node['harness']['vm_config']['frontends'].each do |vmname, config|
     machine_execute "p-c-c_start_on_#{vmname}" do
-      command '/opt/opscode/bin/private-chef-ctl start ; exit 0'
-      machine vmname
-    end
-  end
-end
-
-action :start_standalone do
-  node['harness']['vm_config']['standalones'].each do |vmname, config|
-    machine_execute "c-s-c_start_on_#{vmname}" do
       command '/opt/opscode/bin/private-chef-ctl start ; exit 0'
       machine vmname
     end
