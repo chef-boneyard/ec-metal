@@ -1,0 +1,34 @@
+{
+  "provider": "ec2",
+  "ec2_options": {
+    "region": "",
+    "vpc_subnet": "",
+    "ami_id": "",
+    "ssh_username": "root",
+    "use_private_ip_for_ssh": false
+  },
+  "apply_ec_bugfixes": false,
+  "osc_install": true,
+  "run_pedant" : true,
+  "default_package": "https://opscode-omnibus-packages.s3.amazonaws.com/el/5/x86_64/chef-server-11.1.3-1.el5.x86_64.rpm",
+  "packages": {
+  },
+  "layout": {
+    "topology": "standalone",
+    "api_fqdn": "api.opscode.piab",
+    "manage_fqdn": "manage.opscode.piab",
+    "analytics_fqdn": "analytics.opscode.piab",
+    "standalones": {
+      "standalone1": {
+        "hostname": "frontend1.opscode.kryptonite",
+        "instance_type": "c3.xlarge",
+        "ebs_optimized": true
+      }
+    },
+    "backends" : { },
+    "frontends" : { },
+    "virtual_hosts": {
+    }
+  }
+}
+

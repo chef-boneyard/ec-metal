@@ -9,7 +9,7 @@
   "osc_upgrade": true,
   "lemme_doit" : false,
   "run_pedant" : true,
-  "default_package": "private-chef-11.1.5+20140709085251.git.137.15ee648-1.el6.x86_64.rpm",
+  "default_package": "",
   "packages": {
   },
   "layout": {

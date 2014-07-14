@@ -3,7 +3,7 @@ Instead of building auto-detection logic for osc and ec packages and futher clut
 
 osc_install and osc_upgrade (they are mutually exclusive)
 
-see config example files config-osc.json and config-ec.json
+see config example config files centos6-osc-vbox.json and centos6-ec-vbox.json
 
 config file known issues:
 - although the osc to ec paths don't use backends or frontends the empty arrays are required ( not to tear down the code base)
