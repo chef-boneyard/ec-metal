@@ -65,7 +65,8 @@ action :install do
           recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname) &&
             node['harness']['vm_config']['topology'] == 'ha'
           recipe 'private-chef::provision_phase2'
-          recipe 'private-chef::users' if vmname == bootstrap_node_name
+          recipe 'private-chef::users' if vmname == bootstrap_node_name &&
+            node['harness']['osc_install'] == false
           recipe 'private-chef::reporting' if node['harness']['reporting_package']
           recipe 'private-chef::manage' if node['harness']['manage_package'] &&
             ( node['harness']['vm_config']['frontends'].include?(vmname) ||
@@ -100,6 +101,29 @@ action :install do
     end
   end
 
+end
+
+action :pedant do
+  %w(backends frontends standalones).each do |whichend|
+    node['harness']['vm_config'][whichend].each do |vmname, config|
+      machine_batch vmname do
+        action [:converge]
+
+        machine vmname do
+          add_machine_options node['harness']['provisioner_options'][vmname]
+          attribute 'private-chef', privatechef_attributes
+          attribute 'root_ssh', node['harness']['root_ssh'].to_hash
+          attribute 'osc-install', node['harness']['osc_install']
+          attribute 'osc-upgrade', node['harness']['osc_upgrade']
+          attribute 'run-pedant', node['harness']['run_pedant']
+
+          recipe 'private-chef::pedant'
+
+          converge true
+        end
+      end
+    end
+  end
 end
 
 action :stop_all_but_master do

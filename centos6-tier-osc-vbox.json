@@ -1,0 +1,55 @@
+{
+  "provider": "vagrant",
+  "vagrant_options": {
+    "box": "opscode-centos-6.5",
+    "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.5_chef-provisionerless.box",
+    "disk2_size": "2"
+  },
+  "apply_ec_bugfixes": false,
+  "osc_install": true,
+  "run_pedant" : true,
+  "default_package": "chef-server-11.1.3-1.el6.x86_64.rpm",
+  "packages": {
+  },
+  "layout": {
+    "topology": "tier",
+    "api_fqdn": "api.opscode.kryptonite",
+    "manage_fqdn": "manage.opscode.kryptonite",
+    "analytics_fqdn": "analytics.opscode.kryptonite",
+    "backend_vip": {
+      "hostname": "backend.opscode.kryptonite",
+      "ipaddress": "33.33.33.21",
+      "heartbeat_device": "eth2",
+      "device": "eth1"
+    },
+    "backends": {
+      "backend1": {
+        "hostname": "backend1.opscode.kryptonite",
+        "ipaddress": "33.33.33.21",
+        "cluster_ipaddress": "33.33.34.5",
+        "memory": "2560",
+        "cpus": "2",
+        "bootstrap": true
+      }
+    },
+    "frontends": {
+      "frontend1": {
+        "hostname": "frontend1.opscode.kryptonite",
+        "ipaddress": "33.33.33.23",
+        "memory": "1024",
+        "cpus": "1"
+      }
+    },
+    "standalones": {
+    },
+    "virtual_hosts": {
+      "private-chef.opscode.kryptonite": "33.33.33.23",
+      "manage.opscode.kryptonite": "33.33.33.23",
+      "api.opscode.kryptonite": "33.33.33.23",
+      "analytics.opscode.kryptonite": "33.33.33.23",
+      "backend.opscode.kryptonite": "33.33.33.21",
+      "backend1.opscode.kryptonite": "33.33.33.21",
+      "frontend1.opscode.kryptonite": "33.33.33.23"
+    }
+  }
+}
