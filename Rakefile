@@ -136,7 +136,7 @@ desc "Runs remote commands via ssh.  Usage remote[servername, 'command args stri
 # "knife-opc org create myorg2 supercoolorg -a rockawesome"
 task :remote, [:machine, :command] do |t, arg|
   configip = fog_populate_ips(get_config)
-  %w(backends frontends).each do |whichend|
+  %w(backends frontends standalones).each do |whichend|
     configip['layout'][whichend].each do |node,attrs|
       if node == arg[:machine]
         case configip['provider']
@@ -151,6 +151,17 @@ task :remote, [:machine, :command] do |t, arg|
         puts "Executing '#{arg[:command]}' on #{arg[:machine]}"
         system(cmd)
       end
+    end
+  end
+end
+
+task :ec2_to_file do
+  file = File.open('ec2_ips', 'w')
+  file.truncate(file.size)
+  configip = fog_populate_ips(get_config)
+  %w(backends frontends standalones).each do |whichend|
+    configip['layout'][whichend].each do |node,attrs|
+      file.write("#{node}=#{attrs['ipaddress']}\n")
     end
   end
 end

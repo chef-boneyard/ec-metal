@@ -36,11 +36,10 @@ def get_running_server_ips
       'hostname' => server.dns_name } }
 end
 
-
 def fog_populate_ips(config)
  get_running_server_ips.each do |entry|
     puts "node #{entry['name']} ip #{entry['ipaddress']}"
-    %w(backends frontends).each do |whichend|
+    %w(backends frontends standalones).each do |whichend|
       next unless config['layout'][whichend][entry['name']]
       config['layout'][whichend][entry['name']]['ipaddress'] = entry['ipaddress']
 

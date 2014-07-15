@@ -1,5 +1,5 @@
 # Steps for running osc to ec in ec-metal
-Instead of building auto-detection logic for osc and ec packages and futher clutter the code two new config attributes were added:
+Instead of building auto-detection logic for osc and ec packages and futher clutter the code due to the osc hacks two new config attributes were added:
 
 osc_install and osc_upgrade (they are mutually exclusive)
 
