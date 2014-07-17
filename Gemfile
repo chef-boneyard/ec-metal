@@ -7,5 +7,5 @@ gem 'chef-metal-fog',     '~> 0.6.0'
 gem 'cheffish',           '~> 0.6.0'
 
 gem 'berkshelf',          '~> 3.0'
-gem 'chef',               '~> 11.14.0.alpha'
+gem 'chef',               '~> 11.14.0.rc'
 

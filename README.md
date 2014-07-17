@@ -79,7 +79,7 @@ Follow the instructions specific to the environment of your choosing.
 
 <a name="vagrant" />
 ## Running Virtualbox with Vagrant
-1. Install Vagrant and Virtualbox (tested on Vagrant 1.5.x)
+1. Install Vagrant and Virtualbox (tested on Vagrant 1.5 and 1.6)
 1. Copy `config.json.example` to `config.json`
 1. Edit Vagrant [config.json](#vagrant_conf)
   * **Note on memory:** HA topologies with DRBD can be demanding on your system. Usage has showed the backend systems require at least 2.5G RAM and the frontend requires at least 1G RAM to order to install and operate nominally.
