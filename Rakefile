@@ -11,7 +11,7 @@ harness_dir = ENV['HARNESS_DIR'] = File.dirname(__FILE__)
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 
 def get_config
-  JSON.parse(File.read('config.json'))
+  JSON.parse(File.read(ENV['ECM_CONFIG'] || 'config.json'))
 end
 
 desc 'Install required Gems into the vendor/bundle directory'

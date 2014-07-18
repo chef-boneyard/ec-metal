@@ -21,7 +21,7 @@
     "analytics_fqdn": "analytics.opscode.piab",
     "standalones": {
       "standalone1": {
-        "hostname": "frontend1.opscode.kryptonite",
+        "hostname": "frontend1.opscode.piab",
         "instance_type": "c3.xlarge",
         "ebs_optimized": true
       }

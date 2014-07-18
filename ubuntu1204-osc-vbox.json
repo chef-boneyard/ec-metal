@@ -18,7 +18,7 @@
     "analytics_fqdn": "analytics.opscode.piab",
     "standalones": {
       "standalone1": {
-        "hostname": "frontend1.opscode.kryptonite",
+        "hostname": "frontend1.opscode.piab",
         "ipaddress": "33.33.33.23",
         "memory": "1024",
         "cpus": "1"
