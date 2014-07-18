@@ -33,8 +33,6 @@ class FogHelper
     compute.assign_private_ip_addresses(myeni, 'PrivateIpAddresses' => [ipaddress], 'AllowReassignment' => true)
   end
 
-  private
-
   def get_aws
     require 'fog'
     aws_credentials = load_ini('~/.aws/config')
