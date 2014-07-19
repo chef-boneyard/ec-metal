@@ -16,7 +16,6 @@ def fog_populate_ips(config)
   require_relative '../../cookbooks/ec-common/libraries/topo_helper'
 
   get_running_server_ips(config['ec2_options']['region']).each do |entry|
-    puts "#{entry['name']}"
 
     TopoHelper.found_topo_types(config['layout']).each do |whichend|
       next unless config['layout'][whichend][entry['name']]
