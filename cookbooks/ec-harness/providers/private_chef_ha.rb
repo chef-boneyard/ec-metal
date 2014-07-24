@@ -27,7 +27,8 @@ action :cloud_create do
  # Dumb hack to populate all of our machines first, for dynamic name/IP provisioners
   machine_batch 'cloud_create' do
     action [:converge]
-    %w(backends frontends).each do |whichend|
+    %w(backends frontends standalones).each do |whichend|
+      next if node['harness']['vm_config'][wichend].nil?
       node['harness']['vm_config'][whichend].each do |vmname, config|
 
         next if cloud_machine_created?(vmname)
@@ -46,7 +47,7 @@ end
 
 action :install do
   %w(backends frontends standalones).each do |whichend|
-    node['harness']['vm_config'][whichend].each do |vmname, config|
+    (node['harness']['vm_config'][whichend] || {}).each do |vmname, config|
       machine_batch vmname do
         action [:converge]
 
@@ -62,7 +63,7 @@ action :install do
           recipe 'private-chef::hostsfile'
           recipe 'private-chef::provision'
           recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
-          recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname) &&
+          recipe 'private-chef::drbd' if (node['harness']['vm_config']['backends'] || {}).include?(vmname) &&
             node['harness']['vm_config']['topology'] == 'ha'
           recipe 'private-chef::provision_phase2'
           recipe 'private-chef::users' if vmname == bootstrap_node_name &&
@@ -105,7 +106,7 @@ end
 
 action :pedant do
   %w(backends frontends standalones).each do |whichend|
-    node['harness']['vm_config'][whichend].each do |vmname, config|
+    (node['harness']['vm_config'][whichend] || {}).each do |vmname, config|
       machine_batch vmname do
         action [:converge]
 
@@ -127,6 +128,8 @@ action :pedant do
 end
 
 action :stop_all_but_master do
+  return unless node['harness']['vm_config']['standalones'].nil? ||
+                node['harness']['vm_config']['standalones'].size == 0
   # all backends minus bootstrap
   node['harness']['vm_config']['backends'].
     select { |vmname, config| config['bootstrap'] != true }.merge(
@@ -142,6 +145,8 @@ action :stop_all_but_master do
 end
 
 action :start_non_bootstrap do
+  return unless node['harness']['vm_config']['standalones'].nil? ||
+                node['harness']['vm_config']['standalones'].size == 0
   # all backends minus bootstrap
   node['harness']['vm_config']['backends'].
     select { |vmname, config| config['bootstrap'] != true }.each do |vmname, config|
@@ -167,7 +172,12 @@ action :destroy do
 end
 
 def bootstrap_node_name
+  if node['harness']['vm_config']['standalones'].nil? ||
+     node['harness']['vm_config']['standalones'].size == 0
   node['harness']['vm_config']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.keys.first
+  else
+    node['harness']['vm_config']['standalones'].keys.first
+  end
 end
 
 def installer_path(ec_package)
