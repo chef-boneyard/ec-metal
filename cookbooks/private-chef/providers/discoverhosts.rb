@@ -72,12 +72,14 @@ action :create do
       end
     end
 
-    # Backend VIP
-    hostsfile_entry node['private-chef']['backend_vip']['ipaddress'] do
-      hostname node['private-chef']['backend_vip']['hostname']
-      aliases [node['private-chef']['backend_vip']['hostname'].split('.').first]
-      comment "Chef private-chef::hostsfile"
-      unique true
+    # Backend VIP, required for HA only
+    if node['private-chef']['topology'] == 'ha'
+      hostsfile_entry node['private-chef']['backend_vip']['ipaddress'] do
+        hostname node['private-chef']['backend_vip']['hostname']
+        aliases [node['private-chef']['backend_vip']['hostname'].split('.').first]
+        comment "Chef private-chef::hostsfile"
+        unique true
+      end
     end
 
   else
