@@ -63,6 +63,8 @@ EOH
 end
 
 def print_final_message(private_chef_config, harness_dir)
+  require_relative '../../cookbooks/ec-common/libraries/topo_helper'
+
   print_cool_text
   puts "Web UI...............https://#{private_chef_config['layout']['manage_fqdn']}"
   puts "API FQDN.............https://#{private_chef_config['layout']['api_fqdn']}"
@@ -78,11 +80,11 @@ def print_final_message(private_chef_config, harness_dir)
   end
   keydir = File.join(harness_dir, 'keys')
 
-  %w(backends frontends).each do |whichend|
-    private_chef_config['layout'][whichend].each do |node,attrs|
-      puts "Bootstrap node is: #{node}" if attrs['bootstrap'] == true
-      puts "#{node}: https://#{attrs['hostname']} | ssh #{ssh_username}@#{attrs['ipaddress']} -i #{keydir}/id_rsa"
-    end
+  topo = TopoHelper.new(ec_config: private_chef_config['layout'])
+  topo.merged_topology.each do |node, attrs|
+    puts "Bootstrap node is: #{node}" if attrs['bootstrap'] == true
+    puts "#{node}: https://#{attrs['hostname']} | ssh #{ssh_username}@#{attrs['ipaddress']} -i #{keydir}/id_rsa"
   end
+
   puts ""
 end
