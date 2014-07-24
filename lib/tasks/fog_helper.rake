@@ -17,7 +17,7 @@ def fog_populate_ips(config)
 
   get_running_server_ips(config['ec2_options']['region']).each do |entry|
 
-    topo = TopoHelper.new(config['layout'])
+    topo = TopoHelper.new(ec_config: config['layout'])
     topo.found_topo_types.each do |whichend|
       next unless config['layout'][whichend][entry['name']]
       config['layout'][whichend][entry['name']]['ipaddress'] = entry['ipaddress']
