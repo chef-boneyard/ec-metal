@@ -61,14 +61,14 @@ action :install do
         recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
         recipe 'private-chef::drbd' if
           node['harness']['vm_config']['topology'] == 'ha' &&
-          node['harness']['vm_config']['backends'].include?(vmname)
+          topo.is_backend?(vmname)
         recipe 'private-chef::provision_phase2'
         recipe 'private-chef::users' if
           node['harness']['vm_config']['topology'] == 'ha' &&
-          vmname == bootstrap_node_name
+          vmname == topo.bootstrap_node_name
         recipe 'private-chef::reporting' if node['harness']['reporting_package']
         recipe 'private-chef::manage' if node['harness']['manage_package'] &&
-          node['harness']['vm_config']['frontends'].include?(vmname)
+          topo.is_frontend?(vmname)
         recipe 'private-chef::pushy' if node['harness']['pushy_package']
         recipe 'private-chef::tools'
 
@@ -138,10 +138,6 @@ action :destroy do
     action :destroy
     machines search(:node, '*:*').map { |n| n.name }
   end
-end
-
-def bootstrap_node_name
-  node['harness']['vm_config']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.keys.first
 end
 
 def installer_path(ec_package)

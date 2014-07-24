@@ -40,6 +40,13 @@ class TopoHelper
     false
   end
 
+  def is_frontend?(nodename)
+    if found_topo_types.include?('frontends')
+      return true if @ec_config['frontends'].has_key?(nodename)
+    end
+    false
+  end
+
   def bootstrap_node_name
     if found_topo_types.include?('backends')
       @ec_config['backends']
