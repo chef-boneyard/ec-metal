@@ -29,13 +29,19 @@ class VagrantConfigHelper
       end
     ENDCONFIG
 
-    if vmname == node['harness']['vm_config']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.keys.first
+    if node['harness']['vm_config']['standalones'].nil?
+      bootstrap_vm = node['harness']['vm_config']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.keys.first
+    else
+      bootstrap_vm = node['harness']['vm_config']['standalones'].keys.first
+    end
+
+    if vmname == bootstrap_vm
       vagrant_config += <<-ENDCONFIG
       config.vm.synced_folder "#{File.join(ENV['HARNESS_DIR'], 'users')}", '/srv/piab/users'
       ENDCONFIG
     end
 
-    if node['harness']['vm_config']['backends'].include?(vmname)
+    if (node['harness']['vm_config']['backends'] || {}).include?(vmname)
       vm_disk2 = ::File.join(node['harness']['vms_dir'], vmname, 'disk2.vmdk')
       disk2_size = node['harness']['vagrant']['disk2_size'] || 2
       vagrant_config += <<-ENDCONFIG
