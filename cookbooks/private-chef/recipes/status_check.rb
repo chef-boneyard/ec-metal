@@ -12,7 +12,7 @@ file '/opt/opscode/service/opscode-chef-mover' do
 end
 
 # Status check, so we bomb if p-c-c status isn't clean
-if node['harness']['vm_config']['backends'].include?(node.name)
+if TopoHelper.new(ec_config: node['private-chef']).is_backend?(node.name)
   execute 'p-c-c-ha-status' do
     command '/opt/opscode/bin/private-chef-ctl ha-status'
     action :run

@@ -6,18 +6,14 @@
 # All Rights Reserved
 #
 
-bootstrap_host_name =
-  node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.values.first['hostname']
-
-bootstrap_node_name =
-  node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.keys.first
+topology = TopoHelper.new(ec_config: node['private-chef'])
 
 package 'rsync'
 
 execute 'rsync-from-bootstrap' do
-  command "rsync -avz -e ssh --exclude chef-server-running.json root@#{bootstrap_host_name}:/etc/opscode/ /etc/opscode"
+  command "rsync -avz -e ssh --exclude chef-server-running.json root@#{topology.bootstrap_host_name}:/etc/opscode/ /etc/opscode"
   action :run
-  not_if { node.name == bootstrap_node_name }
+  not_if { node.name == topology.bootstrap_node_name }
 end
 
 # Intentionally bomb out before running reconfigure, so it can be done manually
@@ -76,7 +72,7 @@ execute 'copy-webui_priv.pem' do
 end
 
 # If anything is still down, wait for things to settle
-log "Running upgrades for #{node.name}, bootstrap is #{bootstrap_node_name}" do
+log "Running upgrades for #{node.name}, bootstrap is #{topology.bootstrap_node_name}" do
   only_if { File.exists?('/tmp/private-chef-perform-upgrade') }
 end
 
@@ -84,7 +80,7 @@ end
 execute 'p-c-c-start' do
   command '/opt/opscode/bin/private-chef-ctl start postgresql'
   action :run
-  only_if { node.name == bootstrap_node_name }
+  only_if { node.name == topology.bootstrap_node_name }
   only_if '/opt/opscode/bin/private-chef-ctl status | grep postgres | grep ^down'
   only_if 'ls /tmp/private-chef-perform-upgrade'
   retries 1

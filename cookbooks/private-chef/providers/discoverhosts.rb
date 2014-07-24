@@ -31,11 +31,11 @@ def search_ipaddress(vmname)
 end
 
 def mydomainname
-  node['private-chef']['backends'].
-    values.
-    first['hostname'].
-    split('.')[1..-1].
-    join('.')
+  TopoHelper.new(ec_config: node['private-chef']).merged_topology
+    .values
+    .first['hostname']
+    .split('.')[1..-1]
+    .join('.')
 end
 
 action :create do
@@ -44,8 +44,9 @@ action :create do
 
     log "[private-chef::hostsfile] Performing dynamic discovery..."
 
-    %w(backends frontends).each do |whichend|
-      node['private-chef'][whichend].each do |vmname,config|
+    topo = TopoHelper.new(ec_config: node['private-chef'])
+    topo.found_topo_types.each do |whichend|
+      node['private-chef'][whichend].each do |vmname, config|
         if vmname == node.name
           ipaddress = node.ipaddress
           log "Using IP address #{ipaddress} for myself: #{vmname}"
@@ -68,7 +69,6 @@ action :create do
           comment "Chef private-chef::hostsfile"
           unique true
         end
-
       end
     end
 

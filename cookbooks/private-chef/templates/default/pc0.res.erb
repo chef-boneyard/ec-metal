@@ -6,7 +6,8 @@ resource pc0 {
     rate 40M;
   }
 
-<% node['private-chef']['backends'].each_pair do |name, options| -%>
+<% topo = TopoHelper.new(ec_config: node['private-chef'], include_layers: ['backends']) -%>
+<% topo.merged_topology.each do |name, options| -%>
   on <%= options[:hostname] || "#{name}.opscode.piab" %> {
     device /dev/drbd0;
     disk /dev/opscode/drbd;

@@ -39,9 +39,8 @@ fog_key_pair keypair_name do
 end
 
 # set provisioner options for all of our machines
-node['harness']['vm_config']['backends'].merge(
-  node['harness']['vm_config']['frontends']).each do |vmname, config|
-
+topo = TopoHelper.new(ec_config: node['harness']['vm_config'])
+topo.merged_topology.each do |vmname, config|
   fog_helper = FogHelper.new(ami: node['harness']['ec2']['ami_id'], region: node['harness']['ec2']['region'])
 
   local_provisioner_options = {

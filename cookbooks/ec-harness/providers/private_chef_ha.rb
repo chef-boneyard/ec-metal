@@ -27,50 +27,52 @@ action :cloud_create do
  # Dumb hack to populate all of our machines first, for dynamic name/IP provisioners
   machine_batch 'cloud_create' do
     action [:converge]
-    %w(backends frontends).each do |whichend|
-      node['harness']['vm_config'][whichend].each do |vmname, config|
+    topo = TopoHelper.new(ec_config: node['harness']['vm_config'])
+    topo.merged_topology.each do |vmname, config|
 
-        next if cloud_machine_created?(vmname)
-        machine vmname do
-          add_machine_options node['harness']['provisioner_options'][vmname]
-          attribute 'private-chef', privatechef_attributes
-          attribute 'root_ssh', node['harness']['root_ssh'].to_hash
-          attribute 'cloud', cloud_attributes('ec2')
-          recipe 'private-chef::hostname'
-          recipe 'private-chef::ec2'
-        end
+      next if cloud_machine_created?(vmname)
+      machine vmname do
+        add_machine_options node['harness']['provisioner_options'][vmname]
+        attribute 'private-chef', privatechef_attributes
+        attribute 'root_ssh', node['harness']['root_ssh'].to_hash
+        attribute 'cloud', cloud_attributes('ec2')
+        recipe 'private-chef::hostname'
+        recipe 'private-chef::ec2'
       end
+
     end
   end
 end
 
 action :install do
-  %w(backends frontends).each do |whichend|
-    node['harness']['vm_config'][whichend].each do |vmname, config|
-      machine_batch vmname do
-        action [:converge]
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['analytics'])
+  topo.merged_topology.each do |vmname, config|
+    machine_batch vmname do
+      action [:converge]
 
-        machine vmname do
-          add_machine_options node['harness']['provisioner_options'][vmname]
-          attribute 'private-chef', privatechef_attributes
-          attribute 'root_ssh', node['harness']['root_ssh'].to_hash
+      machine vmname do
+        add_machine_options node['harness']['provisioner_options'][vmname]
+        attribute 'private-chef', privatechef_attributes
+        attribute 'root_ssh', node['harness']['root_ssh'].to_hash
 
-          recipe 'private-chef::hostname'
-          recipe 'private-chef::hostsfile'
-          recipe 'private-chef::provision'
-          recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
-          recipe 'private-chef::drbd' if node['harness']['vm_config']['backends'].include?(vmname) &&
-            node['harness']['vm_config']['topology'] == 'ha'
-          recipe 'private-chef::provision_phase2'
-          recipe 'private-chef::users' if vmname == bootstrap_node_name
-          recipe 'private-chef::reporting' if node['harness']['reporting_package']
-          recipe 'private-chef::manage' if node['harness']['manage_package'] &&
-            node['harness']['vm_config']['frontends'].include?(vmname)
-          recipe 'private-chef::pushy' if node['harness']['pushy_package']
-          recipe 'private-chef::tools'
+        recipe 'private-chef::hostname'
+        recipe 'private-chef::hostsfile'
+        recipe 'private-chef::provision'
+        recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
+        recipe 'private-chef::drbd' if
+          node['harness']['vm_config']['topology'] == 'ha' &&
+          node['harness']['vm_config']['backends'].include?(vmname)
+        recipe 'private-chef::provision_phase2'
+        recipe 'private-chef::users' if
+          node['harness']['vm_config']['topology'] == 'ha' &&
+          vmname == bootstrap_node_name
+        recipe 'private-chef::reporting' if node['harness']['reporting_package']
+        recipe 'private-chef::manage' if node['harness']['manage_package'] &&
+          node['harness']['vm_config']['frontends'].include?(vmname)
+        recipe 'private-chef::pushy' if node['harness']['pushy_package']
+        recipe 'private-chef::tools'
 
-          converge true
-        end
+        converge true
       end
     end
   end
@@ -98,10 +100,9 @@ action :install do
 end
 
 action :stop_all_but_master do
-  # all backends minus bootstrap
-  node['harness']['vm_config']['backends'].
-    select { |vmname, config| config['bootstrap'] != true }.merge(
-    node['harness']['vm_config']['frontends']).each do |vmname, config|
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['analytics'])
+  topo.merged_topology.each do |vmname, config|
+    next if config['bootstrap'] == true # all backends minus bootstrap
 
     # with_machine_options node['harness']['provisioner_options'][vmname]
     machine_execute "p-c-c_stop_on_#{vmname}" do
@@ -113,16 +114,18 @@ action :stop_all_but_master do
 end
 
 action :start_non_bootstrap do
-  # all backends minus bootstrap
-  node['harness']['vm_config']['backends'].
-    select { |vmname, config| config['bootstrap'] != true }.each do |vmname, config|
+  topo_be = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: ['backends'])
+  topo_be.merged_topology.each do |vmname, config|
+    next if config['bootstrap'] == true # all backends minus bootstrap
+
     machine_execute "p-c-c_start_keepalived_on_#{vmname}" do
       command '/opt/opscode/bin/private-chef-ctl start keepalived ; exit 0'
       machine vmname
     end
   end
 
-  node['harness']['vm_config']['frontends'].each do |vmname, config|
+  topo_fe = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: ['frontends'])
+  topo_fe.merged_topology.each do |vmname, config|
     machine_execute "p-c-c_start_on_#{vmname}" do
       command '/opt/opscode/bin/private-chef-ctl start ; exit 0'
       machine vmname
