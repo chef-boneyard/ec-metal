@@ -68,13 +68,28 @@ class TopoHelper
   end
 
   def is_backend?(nodename)
-    return false unless found_topo_types.include?('backends') ^ found_topo_types.include?('standalones')
-    @ec_config['backends'].has_key?(nodename) ^ @ec_config['standalones'].has_key?(nodename)
+    is_topo_type?(nodename, 'backends')
   end
 
   def is_frontend?(nodename)
-    return false unless found_topo_types.include?('frontends') ^ found_topo_types.include?('standalones')
-    @ec_config['frontends'].has_key?(nodename) ^ @ec_config['standalones'].has_key?(nodename)
+    is_topo_type?(nodename, 'frontends')
+  end
+
+  def is_analytics?(nodename)
+    is_topo_type?(nodename, 'analytics')
+  end
+
+  def is_standalone?(nodename)
+    is_topo_type?(nodename, 'standalones')
+  end
+
+  def is_topo_type?(nodename, topotype)
+    if found_topo_types.include?(topotype)
+      return @ec_config[topotype].has_key?(nodename)
+    elsif found_topo_types.include?('standalones')
+      return @ec_config['standalones'].has_key?(nodename)
+    end
+    false
   end
 
   def bootstrap_node_name
