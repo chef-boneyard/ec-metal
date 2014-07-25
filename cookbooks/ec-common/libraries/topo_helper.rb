@@ -6,6 +6,51 @@ class TopoHelper
 
   attr_accessor :ec_config, :include_layers, :exclude_layers
 
+  # Expected usage:
+  # topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['analytics'])
+  #
+  # where vm_config looks like:
+  # "layout": {
+  #   "topology": "ha",
+  #   "api_fqdn": "api.precise.aws",
+  #   "manage_fqdn": "manage.precise.aws",
+  #   "analytics_fqdn": "analytics.precise.aws",
+  #   "configuration": {
+  #   },
+  #   "backend_vip": {
+  #     "hostname": "backend.precise.aws",
+  #     "ipaddress": "33.33.13.7",
+  #     "device": "eth0",
+  #     "heartbeat_device": "eth0"
+  #   },
+  #   "backends": {
+  #     "ip-ub-backend1": {
+  #       "hostname": "ip-ub-backend1.precise.aws",
+  #       "instance_type": "m3.xlarge",
+  #       "ebs_optimized": true,
+  #       "bootstrap": true
+  #     },
+  #     "ip-ub-backend2": {
+  #       "hostname": "ip-ub-backend2.precise.aws",
+  #       "ebs_optimized": true,
+  #       "instance_type": "m3.xlarge"
+  #     }
+  #   },
+  #   "frontends": {
+  #     "ip-ub-frontend1": {
+  #       "hostname": "ip-ub-frontend1.precise.aws",
+  #       "ebs_optimized": true,
+  #       "instance_type": "m3.xlarge"
+  #     }
+  #   },
+  #  "analytics": {
+  #     "ip-ub-analytics1": {
+  #       "hostname": "ip-ub-analytics1.precise.aws",
+  #       "ebs_optimized": true,
+  #       "instance_type": "m3.xlarge"
+  #     }
+  #   }
+  # }
   def initialize(params = {})
     @ec_config = params[:ec_config] || {} # typically node['harness']['vm_config'] or node['private-chef']
     @include_layers = params[:include_layers] || []
