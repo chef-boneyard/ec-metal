@@ -58,78 +58,59 @@ class TopoHelper
   end
 
   def merged_topology
-    combined_topo = []
-    TOPO_TYPES.each do |layer|
-      if layer_exists?(layer) && include_layer?(layer)
-        combined_topo << @ec_config[layer]
-      end
-    end
-
-    combined_topo.reduce({}, :merge)
+    found_topo_types
+      .map { |layer| @ec_config[layer] }
+      .reduce({}, :merge)
   end
 
   def found_topo_types
-    found_topos = []
-    TOPO_TYPES.each do |layer|
-      if layer_exists?(layer) && include_layer?(layer)
-        found_topos << layer
-      end
-    end
-    found_topos
+    TOPO_TYPES.select { |layer| layer_exists?(layer) && include_layer?(layer) }
   end
 
   def is_backend?(nodename)
-    if found_topo_types.include?('backends')
-      return true if @ec_config['backends'].has_key?(nodename)
-    end
-    false
+    return false unless found_topo_types.include?('backends') ^ found_topo_types.include?('standalones')
+    @ec_config['backends'].has_key?(nodename) ^ @ec_config['standalones'].has_key?(nodename)
   end
 
   def is_frontend?(nodename)
-    if found_topo_types.include?('frontends')
-      return true if @ec_config['frontends'].has_key?(nodename)
-    elsif found_topo_types.include?('standalones')
-      return true if @ec_config['standalones'].has_key?(nodename)
-    end
-    false
+    return false unless found_topo_types.include?('frontends') ^ found_topo_types.include?('standalones')
+    @ec_config['frontends'].has_key?(nodename) ^ @ec_config['standalones'].has_key?(nodename)
   end
 
   def bootstrap_node_name
-    if found_topo_types.include?('backends')
-      @ec_config['backends']
-        .select { |node,attrs| attrs['bootstrap'] == true }
-        .keys
-        .first
-    elsif found_topo_types.include?('standalones')
-      @ec_config['standalones'].keys.first
-    end
+    bootstrap_node.keys.first
   end
 
   def bootstrap_host_name
+    bootstrap_node.values.first['hostname']
+  end
+
+  def bootstrap_node
     if found_topo_types.include?('backends')
       @ec_config['backends']
         .select { |node,attrs| attrs['bootstrap'] == true }
-        .values
-        .first['hostname']
     elsif found_topo_types.include?('standalones')
-      @ec_config['standalones'].values.first['hostname']
+      @ec_config['standalones']
     end
+  end
+
+  def mydomainname
+    merged_topology
+      .values
+      .first['hostname']
+      .split('.')[1..-1]
+      .join('.')
   end
 
   private
 
   def layer_exists?(layer)
-    return true if @ec_config[layer].is_a?(Hash)
-    false
+    @ec_config[layer].is_a?(Hash)
   end
 
   def include_layer?(layer)
     if @include_layers.length > 0
-      if @include_layers.include?(layer)
-        return true
-      else
-        return false
-      end
+      return @include_layers.include?(layer)
     end
 
     if @exclude_layers.length > 0 && @exclude_layers.include?(layer)

@@ -30,14 +30,6 @@ def search_ipaddress(vmname)
   end
 end
 
-def mydomainname
-  TopoHelper.new(ec_config: node['private-chef']).merged_topology
-    .values
-    .first['hostname']
-    .split('.')[1..-1]
-    .join('.')
-end
-
 action :create do
 
   unless ipaddresses_prepopulated(node['private-chef'])
@@ -60,7 +52,7 @@ action :create do
         # Hack until we have load balancers
         hostsfile_aliases = []
         if whichend == 'frontends'
-          hostsfile_aliases = ["manage.#{mydomainname}", "api.#{mydomainname}"]
+          hostsfile_aliases = ["manage.#{topo.mydomainname}", "api.#{topo.mydomainname}"]
         end
 
         hostsfile_entry ipaddress do
