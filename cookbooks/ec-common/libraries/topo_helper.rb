@@ -53,6 +53,8 @@ class TopoHelper
         .select { |node,attrs| attrs['bootstrap'] == true }
         .keys
         .first
+    elsif found_topo_types.include?('standalones')
+      @ec_config['standalones'].keys.first
     end
   end
 
@@ -62,6 +64,8 @@ class TopoHelper
         .select { |node,attrs| attrs['bootstrap'] == true }
         .values
         .first['hostname']
+    elsif found_topo_types.include?('standalones')
+      @ec_config['standalones'].values.first['hostname']
     end
   end
 
