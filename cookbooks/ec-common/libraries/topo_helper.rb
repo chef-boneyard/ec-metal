@@ -43,6 +43,8 @@ class TopoHelper
   def is_frontend?(nodename)
     if found_topo_types.include?('frontends')
       return true if @ec_config['frontends'].has_key?(nodename)
+    elsif found_topo_types.include?('standalones')
+      return true if @ec_config['standalones'].has_key?(nodename)
     end
     false
   end
