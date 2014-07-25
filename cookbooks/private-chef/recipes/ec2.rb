@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+topology = TopoHelper.new(ec_config: node['private-chef'])
+
 rootdev = node.filesystem.select { |k,v| v['mount'] == '/' }.keys.first
 
 # Resize EBS root volume
@@ -39,12 +41,6 @@ gem_package 'fog' do
   options('--no-rdoc --no-ri')
 end
 
-# private_chef_backend_vip node['private-chef']['backend_vip']['ipaddress'] do
-#   only_if { node['private-chef']['backends'][node.name] &&
-#     node['private-chef']['backends'][node.name]['bootstrap'] == true }
-#   not_if "ls /var/opt/opscode/drbd/drbd_ready"
-# end
-
 directory '/var/opt/opscode/keepalived/bin' do
   owner 'root'
   group 'root'
@@ -58,7 +54,8 @@ template '/var/opt/opscode/keepalived/bin/custom_backend_ip' do
   owner 'root'
   group 'root'
   mode '0700'
-  only_if { node['private-chef']['backends'][node.name] }
+  only_if { topology.is_ha? }
+  only_if { topology.is_backend?(node.name) }
 end
 
 installer_file = node['private-chef']['installer_file']
@@ -78,7 +75,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/templates/default/cl
   owner 'root'
   group 'root'
   mode '0755'
-  only_if { node['private-chef']['backends'][node.name] }
+  only_if { topology.is_backend?(node.name) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end

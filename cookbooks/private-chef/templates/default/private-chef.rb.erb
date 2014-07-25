@@ -1,6 +1,6 @@
 topology "<%= node['private-chef']['topology'] %>"
 
-<% node['private-chef']['backends'].each_pair do |name, options| -%>
+<% (node['private-chef']['backends'] || {}).each_pair do |name, options| -%>
 server "<%= options['hostname'] || "#{name}.opscode.piab" %>",
   :ipaddress => "<%= options['ipaddress'] %>",
   <% if options['cluster_ipaddress'] -%>
@@ -10,7 +10,7 @@ server "<%= options['hostname'] || "#{name}.opscode.piab" %>",
   :bootstrap => <%= options['bootstrap'] || false %>
 <% end -%>
 
-<% node['private-chef']['frontends'].each_pair do |name, options| -%>
+<% (node['private-chef']['frontends'] || {}).each_pair do |name, options| -%>
 server "<%= options['hostname'] || "#{name}.opscode.piab" %>",
   :ipaddress => "<%= options['ipaddress'] %>",
   :role => "frontend"

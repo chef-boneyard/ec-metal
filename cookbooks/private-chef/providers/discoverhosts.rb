@@ -30,22 +30,15 @@ def search_ipaddress(vmname)
   end
 end
 
-def mydomainname
-  node['private-chef']['backends'].
-    values.
-    first['hostname'].
-    split('.')[1..-1].
-    join('.')
-end
-
 action :create do
 
   unless ipaddresses_prepopulated(node['private-chef'])
 
     log "[private-chef::hostsfile] Performing dynamic discovery..."
 
-    %w(backends frontends).each do |whichend|
-      node['private-chef'][whichend].each do |vmname,config|
+    topo = TopoHelper.new(ec_config: node['private-chef'])
+    topo.found_topo_types.each do |whichend|
+      node['private-chef'][whichend].each do |vmname, config|
         if vmname == node.name
           ipaddress = node.ipaddress
           log "Using IP address #{ipaddress} for myself: #{vmname}"
@@ -59,7 +52,7 @@ action :create do
         # Hack until we have load balancers
         hostsfile_aliases = []
         if whichend == 'frontends'
-          hostsfile_aliases = ["manage.#{mydomainname}", "api.#{mydomainname}"]
+          hostsfile_aliases = ["manage.#{topo.mydomainname}", "api.#{topo.mydomainname}"]
         end
 
         hostsfile_entry ipaddress do
@@ -68,16 +61,17 @@ action :create do
           comment "Chef private-chef::hostsfile"
           unique true
         end
-
       end
     end
 
-    # Backend VIP
-    hostsfile_entry node['private-chef']['backend_vip']['ipaddress'] do
-      hostname node['private-chef']['backend_vip']['hostname']
-      aliases [node['private-chef']['backend_vip']['hostname'].split('.').first]
-      comment "Chef private-chef::hostsfile"
-      unique true
+    # Backend VIP, required for HA only
+    if node['private-chef']['topology'] == 'ha'
+      hostsfile_entry node['private-chef']['backend_vip']['ipaddress'] do
+        hostname node['private-chef']['backend_vip']['hostname']
+        aliases [node['private-chef']['backend_vip']['hostname'].split('.').first]
+        comment "Chef private-chef::hostsfile"
+        unique true
+      end
     end
 
   else

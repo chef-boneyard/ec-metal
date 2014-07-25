@@ -8,12 +8,7 @@
 installer_file = node['private-chef']['analytics_installer_file']
 installer_name = ::File.basename(installer_file.split('?').first)
 installer_path = "#{Chef::Config[:file_cache_path]}/#{installer_name}"
-
-bootstrap_host_name =
-  node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.values.first['hostname']
-
-bootstrap_node_name =
-  node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.keys.first
+topology = TopoHelper.new(ec_config: node['private-chef'])
 
 if ::URI.parse(installer_file).absolute?
   remote_file installer_path do
@@ -81,9 +76,9 @@ end
 
 package 'rsync'
 
-if node.name != bootstrap_node_name
+if node.name != topology.bootstrap_node_name
   execute 'rsync-opscode-from-bootstrap' do
-    command "rsync -avz -e ssh root@#{bootstrap_host_name}:/etc/opscode-analytics/ /etc/opscode-analytics"
+    command "rsync -avz -e ssh root@#{topology.bootstrap_host_name}:/etc/opscode-analytics/ /etc/opscode-analytics"
     action :run
   end
 end
