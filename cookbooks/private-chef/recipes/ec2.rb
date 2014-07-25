@@ -54,6 +54,7 @@ template '/var/opt/opscode/keepalived/bin/custom_backend_ip' do
   owner 'root'
   group 'root'
   mode '0700'
+  only_if { topology.is_ha? }
   only_if { topology.is_backend?(node.name) }
 end
 

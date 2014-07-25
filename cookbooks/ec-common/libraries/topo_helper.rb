@@ -117,6 +117,10 @@ class TopoHelper
       .join('.')
   end
 
+  def is_ha?
+    @ec_config['topology'] == 'ha' || @ec_config['topology'] == 'customha'
+  end
+
   private
 
   def layer_exists?(layer)
