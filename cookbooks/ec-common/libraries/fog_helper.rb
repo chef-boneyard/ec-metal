@@ -11,7 +11,9 @@ class FogHelper
 
   def get_root_blockdevice
     ami_desc = describe_ami.first
-    ami_desc['rootDeviceName']
+    ami_desc['blockDeviceMapping'].
+      select { |dev| dev['deviceName'] =~ /sda/ }.
+      first['deviceName']
   end
 
   def describe_ami
