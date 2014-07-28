@@ -42,18 +42,17 @@ action :create do
         if vmname == node.name
           ipaddress = node.ipaddress
           log "Using IP address #{ipaddress} for myself: #{vmname}"
+
+          # point the API fqdn at myself on each host, so p-c-c test runs against me
+          hostsfile_aliases = ["api.#{topo.mydomainname}"]
         else
           log "Searching for the IP address of #{vmname}"
           ipaddress = search_ipaddress(vmname)
           log "Discovered node #{vmname} IP: #{ipaddress}"
+          hostsfile_aliases = []
         end
         node.set['private-chef'][whichend][vmname]['ipaddress'] = ipaddress
 
-        # Hack until we have load balancers
-        hostsfile_aliases = []
-        if whichend == 'frontends'
-          hostsfile_aliases = ["manage.#{topo.mydomainname}", "api.#{topo.mydomainname}"]
-        end
 
         hostsfile_entry ipaddress do
           hostname config['hostname']
