@@ -47,6 +47,8 @@ directory '/var/opt/opscode/keepalived/bin' do
   mode '0700'
   recursive true
   action :create
+  only_if { topology.is_ha? }
+  only_if { topology.is_backend?(node.name) }
 end
 
 template '/var/opt/opscode/keepalived/bin/custom_backend_ip' do
