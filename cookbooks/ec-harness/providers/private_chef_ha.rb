@@ -64,7 +64,6 @@ action :install do
           topo.is_backend?(vmname)
         recipe 'private-chef::provision_phase2'
         recipe 'private-chef::users' if
-          node['harness']['vm_config']['topology'] == 'ha' &&
           vmname == topo.bootstrap_node_name
         recipe 'private-chef::reporting' if node['harness']['reporting_package']
         recipe 'private-chef::manage' if node['harness']['manage_package'] &&
