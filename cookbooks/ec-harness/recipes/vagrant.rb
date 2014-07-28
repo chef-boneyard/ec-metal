@@ -9,7 +9,8 @@ vagrant_cluster vms_dir
 
 directory repo_path
 with_chef_local_server :chef_repo_path => repo_path,
-  :cookbook_path => [ File.join(repo_path, 'cookbooks'),
+  :cookbook_path => [File.join(repo_path, '../', 'cookbooks'),
+                     File.join(repo_path, 'cookbooks'),
     File.join(repo_path, 'vendor', 'cookbooks') ]
 
 with_machine_options :vagrant_options => {

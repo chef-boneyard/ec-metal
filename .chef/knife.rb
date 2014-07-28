@@ -12,6 +12,9 @@ end
 
 current_dir = ::File.dirname(__FILE__)
 harness_dir = ::File.expand_path(::File.join(current_dir, '..'))
+repo = ::File.join(harness_dir, 'repo')
+FileUtils.mkdir_p(repo)
+chef_repo_path repo
 keys_dir = ::File.join(harness_dir, 'keys')
 log_level                :info
 log_location             STDOUT

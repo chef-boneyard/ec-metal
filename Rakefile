@@ -5,7 +5,8 @@ Dir["lib/tasks/*.rake"].each { |t| load t }
 task :default => [:up]
 
 # Environment variables to be consumed by ec-harness and friends
-harness_dir = ENV['HARNESS_DIR'] = File.dirname(__FILE__)
+harness_dir = ENV['HARNESS_DIR'] ||= File.dirname(__FILE__)
+ENV['REPO_PATH'] ||= File.join(harness_dir, 'chef-repo')
 
 # just in cases user has a different default Vagrant provider
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
@@ -110,7 +111,7 @@ task :cachedir do
 end
 
 task :berks_install do
-  cookbooks_path = File.join(harness_dir, 'vendor/cookbooks')
+  cookbooks_path = File.join(ENV['REPO_PATH'], 'vendor/cookbooks')
   system("rm -r #{cookbooks_path}") if Dir.exists?(cookbooks_path)
   system("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
 end

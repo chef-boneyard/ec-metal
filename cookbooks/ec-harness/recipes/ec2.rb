@@ -18,7 +18,8 @@ end
 repo_path = node['harness']['repo_path']
 
 with_chef_local_server :chef_repo_path => repo_path,
-  :cookbook_path => [ File.join(repo_path, 'cookbooks'),
+  :cookbook_path => [ File.join(repo_path, '../', 'cookbooks'),
+                      File.join(repo_path, 'cookbooks'),
     File.join(repo_path, 'vendor', 'cookbooks') ],
     :port => find_open_port
 

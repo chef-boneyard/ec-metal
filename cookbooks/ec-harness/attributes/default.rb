@@ -22,7 +22,7 @@ default['harness']['analytics_package'] = ENV['ANALYTICS_PACKAGE'] || config_jso
 
 
 # HARNESS_DIR is set by the Rakefile to the project root directory
-default['harness']['repo_path'] = ENV['HARNESS_DIR']
+default['harness']['repo_path'] = ENV['REPO_PATH']
 default['harness']['vms_dir'] = File.join(ENV['HARNESS_DIR'], 'vagrant_vms')
 
 # host_cache_path is mapped to /tmp/cache on the VMs
