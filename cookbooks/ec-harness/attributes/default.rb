@@ -1,11 +1,14 @@
 # Load harness attributes from the config file
-config_json = JSON.parse(File.read(File.join(ENV['HARNESS_DIR'], 'config.json')))
+config_json = JSON.parse(File.read(File.join(ENV['HARNESS_DIR'], ENV['ECM_CONFIG'] || 'config.json')))
 default['harness']['harness_dir'] = ENV['HARNESS_DIR']
 default['harness']['provider'] = config_json['provider']
 default['harness']['vagrant'] = config_json['vagrant_options']
 default['harness']['ec2'] = config_json['ec2_options']
 default['harness']['vm_config'] = config_json['layout']
 default['harness']['default_package'] = ENV['DEFAULT_PACKAGE'] || config_json['default_package']
+default['harness']['run_pedant'] = config_json['run_pedant'] || false
+default['harness']['osc_install'] = config_json['osc_install'] || false
+default['harness']['osc_upgrade'] = config_json['osc_upgrade'] || false
 default['harness']['packages'] = config_json['packages']
 
 # Provide an option to not monkeypatch the bugfixes
