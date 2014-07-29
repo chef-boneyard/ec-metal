@@ -138,3 +138,19 @@ task :remote, [:machine, :command] do |t, arg|
     end
   end
 end
+
+desc 'Provision a machine, initial for a fresh machine or upgrade to upgrade a fresh machine to a new version'
+task :provision, [:type] do |t,arg|
+  unless ['initial', 'upgrade'].include?(arg.type)
+    abort("Invalid option for type.  Please use initial or upgrade")
+  end
+  puts "Stubbed out.  Currently doing nothing"
+end
+
+desc 'Test, options are seed, api, and uat (User acceptance test)'
+task :test, [:type] do |t,arg|
+  unless ['seed', 'api', 'uat'].include?(arg.type)
+    abort("Invalid option for type.  Please use seed, api or uat")
+  end
+  puts "Stubbed out.  Currently doing nothing"
+end
