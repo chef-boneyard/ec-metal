@@ -12,10 +12,10 @@ end
 
 current_dir = ::File.dirname(__FILE__)
 harness_dir = ::File.expand_path(::File.join(current_dir, '..'))
-repo = ::File.join(harness_dir, 'repo')
+repo = ::File.join(harness_dir, 'chef-repo')
 FileUtils.mkdir_p(repo)
 chef_repo_path repo
-keys_dir = ::File.join(harness_dir, 'keys')
+keys_dir = ::File.join(repo, 'keys')
 log_level                :info
 log_location             STDOUT
 node_name                "metal-mastah"
