@@ -1,6 +1,7 @@
 # Load harness attributes from the config file
-config_json = JSON.parse(File.read(File.join(ENV['HARNESS_DIR'], 'config.json')))
-default['harness']['harness_dir'] = ENV['HARNESS_DIR']
+harness_dir = ENV['HARNESS_DIR']
+config_json = JSON.parse(File.read(File.join(harness_dir, 'config.json')))
+default['harness']['harness_dir'] = harness_dir
 default['harness']['provider'] = config_json['provider']
 default['harness']['vagrant'] = config_json['vagrant_options']
 default['harness']['ec2'] = config_json['ec2_options']
@@ -22,13 +23,14 @@ default['harness']['analytics_package'] = ENV['ANALYTICS_PACKAGE'] || config_jso
 
 
 # HARNESS_DIR is set by the Rakefile to the project root directory
-default['harness']['repo_path'] = ENV['REPO_PATH']
-default['harness']['vms_dir'] = File.join(ENV['HARNESS_DIR'], 'vagrant_vms')
+repo_path = ENV['REPO_PATH']
+default['harness']['repo_path'] = repo_path
+default['harness']['vms_dir'] = File.join(harness_dir, 'vagrant_vms')
 
 # host_cache_path is mapped to /tmp/cache on the VMs
-default['harness']['host_cache_path'] = ENV['CACHE_PATH'] || File.join(ENV['HARNESS_DIR'], 'cache')
+default['harness']['host_cache_path'] = ENV['CACHE_PATH'] || File.join(harness_dir, 'cache')
 default['harness']['vm_mountpoint'] = '/tmp/cache'
 
 # SSH key distribution for inter-machine trust
-default['harness']['root_ssh']['privkey'] = File.read(File.join(ENV['HARNESS_DIR'], 'keys', 'id_rsa'))
-default['harness']['root_ssh']['pubkey'] = File.read(File.join(ENV['HARNESS_DIR'], 'keys', 'id_rsa.pub'))
+default['harness']['root_ssh']['privkey'] = File.read(File.join(repo_path, 'keys', 'id_rsa'))
+default['harness']['root_ssh']['pubkey'] = File.read(File.join(repo_path, 'keys', 'id_rsa.pub'))

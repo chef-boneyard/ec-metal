@@ -6,7 +6,7 @@ task :default => [:up]
 
 # Environment variables to be consumed by ec-harness and friends
 harness_dir = ENV['HARNESS_DIR'] ||= File.dirname(__FILE__)
-ENV['REPO_PATH'] ||= File.join(harness_dir, 'chef-repo')
+repo_dir = ENV['REPO_PATH'] ||= File.join(harness_dir, 'chef-repo')
 
 # just in cases user has a different default Vagrant provider
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
@@ -78,7 +78,7 @@ task :config_copy do
 end
 
 task :keygen do
-  keydir = File.join(harness_dir, 'keys')
+  keydir = File.join(repo_dir, 'keys')
   Dir.mkdir keydir unless Dir.exists? keydir
   if Dir["#{keydir}/*"].empty?
     system("ssh-keygen -t rsa -P '' -q -f #{keydir}/id_rsa")
@@ -90,7 +90,7 @@ task :add_hosts do
   config = get_config
   config = fog_populate_ips(config) if config['provider'] == 'ec2'
   create_hosts_entries(config['layout'])
-  print_final_message(config, harness_dir)
+  print_final_message(config, repo_dir)
 end
 
 desc 'Remove hosts entries to /etc/hosts'
@@ -132,7 +132,7 @@ task :remote, [:machine, :command] do |t, arg|
           else
             ssh_username = 'root'
         end
-        cmd = "ssh #{ssh_username}@#{attrs['ipaddress']} -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \"#{arg[:command]}\""
+        cmd = "ssh #{ssh_username}@#{attrs['ipaddress']} -o StrictHostKeyChecking=no -i #{File.join(repo_dir, 'keys')}/id_rsa \"#{arg[:command]}\""
         puts "Executing '#{arg[:command]}' on #{arg[:machine]}"
         system(cmd)
       end
