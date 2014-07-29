@@ -1,4 +1,4 @@
-Gemfile.lock
+Berksfile.lock
 .bundle
 bin
 config.json
