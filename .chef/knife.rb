@@ -16,6 +16,7 @@ repo = ENV['REPO_PATH']
 FileUtils.mkdir_p(repo)
 chef_repo_path repo
 keys_dir = ::File.join(repo, 'keys')
+FileUtils.mkdir_p(keys_dir)
 log_level                :info
 log_location             STDOUT
 node_name                "metal-mastah"
