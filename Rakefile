@@ -79,7 +79,7 @@ end
 
 task :keygen do
   keydir = File.join(repo_dir, 'keys')
-  Dir.mkdir keydir unless Dir.exists? keydir
+  FileUtils.mkdir_p keydir
   if Dir["#{keydir}/*"].empty?
     system("ssh-keygen -t rsa -P '' -q -f #{keydir}/id_rsa")
   end
@@ -105,7 +105,7 @@ task :cachedir do
     cachedir = ENV['CACHE_PATH']
   else
     cachedir = File.join(harness_dir, 'cache')
-    Dir.mkdir cachedir unless Dir.exists?(cachedir)
+    FileUtils.mkdir_p cachedir
   end
   puts "Using package cache directory #{cachedir}"
 end
