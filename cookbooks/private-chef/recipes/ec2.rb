@@ -63,9 +63,9 @@ end
 installer_file = node['private-chef']['installer_file']
 installer_name = ::File.basename(installer_file.split('?').first)
 
-if PackageHelper.pc_version(installer_name) > '11.0.0'
+if PackageHelper.package_version(installer_name) > '11.0.0'
   cluster_source = 'cluster.sh.erb'
-elsif PackageHelper.pc_version(installer_name) > '1.4.0'
+elsif PackageHelper.package_version(installer_name) > '1.4.0'
   cluster_source = 'cluster.sh.pc14.erb'
 else
   raise 'EC2 operation not supported on Private chef < 1.4.0'

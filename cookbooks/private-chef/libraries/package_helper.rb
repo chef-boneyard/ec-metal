@@ -1,18 +1,15 @@
 # encoding: utf-8
 
 class PackageHelper
-  def self.pc_version(package)
-    # ex: private-chef-11.0.2-1.el6.x86_64.rpm
-    #  or private-chef-1.4.6-1.el6.x86_64
-    return '0.0.0' unless package =~ /^private-chef/
-    package
-      .gsub(/[_+%]/, '-')
-      .split('-')[2]
-  end
 
-  def self.private_chef_installed_version(node)
+  def self.package_version(package)
+    return '0.0.0' unless ( (package =~ /^private-chef/) || (package =~ /^chef-server/) )
+    package.gsub(/[_+%]/, '-').split('-')[2]
+  end
+  
+  def self.installed_version(package, node)
     # Chef magic to get the package version in a cross-platform fashion
-    pkg = Chef::Resource::Package.new('private-chef', node)
+    pkg = Chef::Resource::Package.new(package, node)
     pkg_provider = Chef::Platform.provider_for_resource(pkg)
     pkg_provider.load_current_resource
 
@@ -25,4 +22,13 @@ class PackageHelper
       '0.0.0'
     end
   end
+
+  def self.private_chef_installed_version(node)
+    self.installed_version('private-chef', node)
+  end
+
+  def self.osc_version_installed_version(node)
+    self.installed_version('chef-server', node)
+  end
+
 end
