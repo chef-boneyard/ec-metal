@@ -303,7 +303,7 @@ def setup_drbd
 end
 
 def mount_ebs
-  mountpoint = '/var/opt/opscode/drbd/data'
+  mountpoint = topology.is_ha? ? '/var/opt/opscode/drbd/data' : '/var/opt/opscode'
   execute 'mount-ebs-volume' do
     command "mount /dev/mapper/opscode-drbd #{mountpoint}"
     action :run
