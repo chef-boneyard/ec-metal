@@ -9,18 +9,16 @@ when 'rhel'
 end
 
 include_recipe 'lvm::default'
+topology = TopoHelper.new(ec_config: node['private-chef'])
 
 if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend_storage_type'] == 'ebs'
   include_recipe 'aws'
 
   private_chef_backend_storage 'ebs_shared_storage' do
     action :ebs_shared
-    only_if { node['private-chef']['backends'][node.name] }
+    only_if { topology.is_backend?(node.name) }
     not_if { ::File.exists?('/var/opt/opscode/drbd/drbd_ready') }
   end
-
-  bootstrap_host_name =
-    node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.values.first['hostname']
 
   template '/var/opt/opscode/keepalived/bin/custom_backend_storage' do
     source 'custom_backend_storage.ebs.erb'
@@ -28,8 +26,9 @@ if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend
     group 'root'
     mode '0700'
     variables ({
-      :bootstrap_host_name => bootstrap_host_name
+      :bootstrap_host_name => topology.bootstrap_host_name
       })
+    only_if { topology.is_ha? }
   end
 else
   private_chef_backend_storage 'drbd_el_traditicional' do
