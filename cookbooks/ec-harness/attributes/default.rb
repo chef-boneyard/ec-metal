@@ -26,7 +26,7 @@ default['harness']['repo_path'] = ENV['HARNESS_DIR']
 default['harness']['vms_dir'] = File.join(ENV['HARNESS_DIR'], 'vagrant_vms')
 
 # host_cache_path is mapped to /tmp/cache on the VMs
-default['harness']['host_cache_path'] = ENV['CACHE_PATH'] || File.join(ENV['HARNESS_DIR'], 'cache')
+default['harness']['host_cache_path'] = ENV['EM_CACHE_PATH'] || File.join(ENV['HARNESS_DIR'], 'cache')
 default['harness']['vm_mountpoint'] = '/tmp/cache'
 
 # SSH key distribution for inter-machine trust
