@@ -27,6 +27,21 @@ file '/opt/opscode/sv/opscode-webui/keepalive_me' do
   action :delete
 end
 
+# string values need to be Strings in manage.rb
+# this will likely break if ruby expressions are set in the config, TODO
+manage_options = node['private-chef']['manage_options'].map { |key, value|
+                   value = "\"#{value}\"" if value.is_a?(String)
+                   "#{key} #{value}"
+                 }.join("\n")
+
+file '/etc/opscode-manage/manage.rb' do
+  action :create
+  owner 'root'
+  group 'root'
+  mode '0644'
+  content manage_options
+end
+
 # assumes non-ha setting. if this is ha, manage is going to have issues
 execute "reconfigure-private-chef-for-manage" do
   command "private-chef-ctl reconfigure"

@@ -6,6 +6,7 @@ This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA c
 * [Goals](#goals)
 * [Getting Started](#start)
 * [Usage](#usage)
+* [Configuration](#config)
 * [TODO](#todo)
 * [Environments](#envs)
 * [Running Vagrant](#vagrant)
@@ -55,6 +56,17 @@ Notable tasks:
 * `rake destroy` will tear down all instances
 * `rake ssh[nodename]` will ssh into the designated instance
 * `rake status` will display current topology status
+
+<a name="config"/>
+## Configuration
+### Manage Options
+```json
+  "manage_options": {
+    "public_port": 443,
+    "platform.user": "pivotal",
+    "disable_sign_up" : false
+  },
+```
 
 <a name="todo"/>
 ## TODO

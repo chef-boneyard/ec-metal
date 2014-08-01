@@ -24,6 +24,8 @@ default['harness']['reporting_package'] = ENV['REPORTING_PACKAGE'] || config_jso
 default['harness']['pushy_package'] = ENV['PUSHY_PACKAGE'] || config_json['pushy_package']
 default['harness']['analytics_package'] = ENV['ANALYTICS_PACKAGE'] || config_json['analytics_package']
 
+# manage options
+default['harness']['manage_options'] = config_json['manage_options'] || {}
 
 # HARNESS_DIR is set by the Rakefile to the project root directory
 repo_path = ENV['REPO_PATH']
