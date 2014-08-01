@@ -34,8 +34,9 @@ if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend
       })
     only_if { topology.is_ha? }
   end
-else
+elsif topology.is_ha?
   private_chef_backend_storage 'drbd_el_traditicional' do
     action :drbd
   end
 end
+
