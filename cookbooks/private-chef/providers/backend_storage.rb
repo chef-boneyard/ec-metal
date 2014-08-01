@@ -14,7 +14,7 @@ action :ebs_shared do
   create_drbd_dirs
   if topology.bootstrap_node_name == node.name
     attach_ebs_volume
-    create_lvm(disk_devmap[2]) # assume drbd/ebs volume is the third disk (EBS)
+    create_lvm(disk_devmap[3]) # assume drbd/ebs volume is the fourth disk (/dev/sdd)
     mount_ebs
     save_ebs_volumes_db
   else
