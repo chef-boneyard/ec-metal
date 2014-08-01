@@ -218,6 +218,7 @@ def privatechef_attributes
     attributes['configuration']['opscode_webui'] = { 'enable' => false }
     attributes['manage_options'] = node['harness']['manage_options']
   end
+  attributes['manage_options'] = node['harness']['manage_options']
   attributes['reporting_installer_file'] = packages['reporting']
   attributes['pushy_installer_file'] = packages['pushy']
   unless packages['analytics'] == nil
