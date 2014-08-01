@@ -27,7 +27,7 @@ end
 
 action :ebs_standalone do
   attach_ebs_volume
-  create_lvm(disk_devmap[2], '/var/opt/opscode') # assume drbd/ebs volume is the third disk (EBS)
+  create_lvm(disk_devmap[3], '/var/opt/opscode') # assume drbd/ebs volume is the fourth disk (/dev/sdd)
   save_ebs_volumes_db
   new_resource.updated_by_last_action(true)
 end
@@ -73,7 +73,7 @@ def create_ebs_volume
     aws_access_key node['cloud']['aws_access_key_id']
     aws_secret_access_key node['cloud']['aws_secret_access_key']
     size node['cloud']['ebs_disk_size'].to_i
-    device '/dev/sdc'
+    device '/dev/sdd'
     if node['cloud']['ebs_use_piops'] == true
       volume_type 'io1'
       piops_val = node['cloud']['ebs_disk_size'].to_i * 30
@@ -121,7 +121,7 @@ def attach_ebs_volume
       aws_access_key node['cloud']['aws_access_key_id']
       aws_secret_access_key node['cloud']['aws_secret_access_key']
       volume_id get_ebs_volumes_db
-      device '/dev/sdc'
+      device '/dev/sdd'
       action :attach
     end
   end
