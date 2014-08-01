@@ -122,7 +122,7 @@ class GenerateConfig
     when 'vagrant'
       @config["vagrant_options"] = {
           :box => "opscode-#{@options.platform}",
-          :disk2_size => 2,
+          :disk2_size => '2',
           # TODO(jmink) There must be a better way
           :box_url => "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_#{@options.platform}_chef-provisionerless.box" }
     when 'ec2'
@@ -157,8 +157,8 @@ class GenerateConfig
       :analytics_fqdn => 'analytics.opscode.piab',
       :backend_vip => {
         :hostname => 'backend.opscode.piab',
-        :ipaddress =>  '33.33.33.20'
-      }
+        :ipaddress =>  '33.33.33.21'
+      },
       :backends => { },
       :frontends => { }
       }
@@ -167,41 +167,43 @@ class GenerateConfig
     when 'vagrant'
 
       ip = 21
-      custer_ip = 5
+      cluster_ip = 5
       options[:num_backends].times do |n|
-        @config[:backends]["backend#{n}"] = {
+        backend =
+        {
           :hostname => "backend#{n}.opscode.piab",
           :memory => '2560',
           :cpus => '2',
-          :ipaddress] => "33.33.33.#{ip}",
+          :ipaddress => "33.33.33.#{ip}",
           :cluster_ipaddress => "33.33.34.#{cluster_ip}"
         }
-          ip += 1
-          cluster_ip += 1
+        backend[:bootstrap] = true if n == 0
+        @config[:layout][:backends]["backend#{n}"] = backend
+        ip += 1
+        cluster_ip += 1
       end
       options[:num_frontends].times do |n|
-        @config[:frontends]["frontend#{n}"] = {
+        @config[:layout][:frontends]["frontend#{n}"] = {
           :hostname => "frontend#{n}.opscode.piab",
           :memory => '1024',
           :cpus => '1',
           :ipaddress => "33.33.33.#{ip}",
-          :cluster_ipaddress => "33.33.34.#{cluster_ip}"
         }
         ip += 1
-        cluster_ip += 1
       end
 
-      @config[:virtual_hosts] = {
+      @config[:layout][:virtual_hosts] = {
         "private-chef.opscode.piab" => "33.33.33.23",
         "manage.opscode.piab" => "33.33.33.23",
         "api.opscode.piab" => "33.33.33.23",
-        "analytics.opscode.piab" => "33.33.33.23"
+        "analytics.opscode.piab" => "33.33.33.23",
+        "backend.opscode.piab" => "33.33.33.21"
       }
-      @config[:backends].each |k,v| do
-        @config[:virtual_hosts][v[:hostname]] = v[:ipaddress]
+      @config[:layout][:backends].each do |k,v|
+        @config[:layout][:virtual_hosts][v[:hostname]] = v[:ipaddress]
       end
-      @config[:frontends].each |k,v| do
-        @config[:virtual_hosts][v[:hostname]] = v[:ipaddress]
+      @config[:layout][:frontends].each do |k,v|
+        @config[:layout][:virtual_hosts][v[:hostname]] = v[:ipaddress]
       end
 
     when 'ec2'
