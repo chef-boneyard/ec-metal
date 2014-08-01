@@ -24,6 +24,16 @@ if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend
     not_if { ::File.exists?('/var/opt/opscode/drbd/drbd_ready') }
   end
 
+  private_chef_backend_storage 'ebs_shared_storage' do
+    action :set_ebs_volume_node_attribute
+    only_if { topology.is_backend?(node.name) }
+    not_if { node['aws'] &&
+      node['aws']['ebs_volume'] &&
+      node['aws']['ebs_volume'][topology.bootstrap_host_name] &&
+      node['aws']['ebs_volume'][topology.bootstrap_host_name]['volume_id']
+    }
+  end
+
   template '/var/opt/opscode/keepalived/bin/custom_backend_storage' do
     source 'custom_backend_storage.ebs.erb'
     owner 'root'
@@ -33,6 +43,7 @@ if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend
       :bootstrap_host_name => topology.bootstrap_host_name
       })
     only_if { topology.is_ha? }
+    only_if { topology.is_backend?(node.name) }
   end
 elsif topology.is_ha?
   private_chef_backend_storage 'drbd_el_traditicional' do

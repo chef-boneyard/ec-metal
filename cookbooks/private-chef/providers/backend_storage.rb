@@ -36,6 +36,10 @@ action :ebs_save_databag do
   save_ebs_volumes_db
 end
 
+action :set_ebs_volume_node_attribute do
+  set_ebs_volume_on_standby
+end
+
 def topology
   TopoHelper.new(ec_config: node['private-chef'])
 end
