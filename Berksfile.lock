@@ -1,0 +1,17 @@
+DEPENDENCIES
+  apt (~> 2.0)
+  aws (~> 2.3.0)
+  ec-tools
+    git: https://github.com/patrick-wright/ec-tools
+    revision: ca7a04b6c1cdc2cba11b57894280bd67a4256204
+  hostsfile (~> 2.0)
+  lvm (~> 1.0)
+  yum (~> 2.0)
+
+GRAPH
+  apt (2.4.0)
+  aws (2.3.0)
+  ec-tools (0.1.1)
+  hostsfile (2.4.5)
+  lvm (1.2.2)
+  yum (2.4.4)

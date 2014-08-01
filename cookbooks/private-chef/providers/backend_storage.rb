@@ -12,9 +12,9 @@ end
 action :ebs_shared do
   install_drbd_packages # Needed because of raise in opscode-omnibus drbd.rb
   create_drbd_dirs
-  if node['private-chef']['backends'][node.name]['bootstrap'] == true
+  if topology.bootstrap_node_name == node.name
     attach_ebs_volume
-    create_lvm(disk_devmap[2]) # assume drbd/ebs volume is the third disk (EBS)
+    create_lvm(disk_devmap[3]) # assume drbd/ebs volume is the fourth disk (/dev/sdd)
     mount_ebs
     save_ebs_volumes_db
   else
@@ -25,12 +25,23 @@ action :ebs_shared do
   new_resource.updated_by_last_action(true)
 end
 
+action :ebs_standalone do
+  attach_ebs_volume
+  create_lvm(disk_devmap[3], '/var/opt/opscode') # assume drbd/ebs volume is the fourth disk (/dev/sdd)
+  save_ebs_volumes_db
+  new_resource.updated_by_last_action(true)
+end
+
 action :ebs_save_databag do
   save_ebs_volumes_db
 end
 
-def bootstrap_host_name
-  node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.values.first['hostname']
+action :set_ebs_volume_node_attribute do
+  set_ebs_volume_on_standby
+end
+
+def topology
+  TopoHelper.new(ec_config: node['private-chef'])
 end
 
 def create_ebs_volumes_db
@@ -43,7 +54,7 @@ def save_ebs_volumes_db
   ruby_block 'save EBS volume_id to databag' do
     block do
       bootstrap_host_name =
-        node['private-chef']['backends'].select { |node,attrs| attrs['bootstrap'] == true }.values.first['hostname']
+        TopoHelper.new(ec_config: node['private-chef']).bootstrap_host_name
       Chef::Log.info "Saving EBS volume id = #{node['aws']['ebs_volume'][bootstrap_host_name]['volume_id']}"
       databag_item = Chef::DataBagItem.new
       databag_item.data_bag('ebs_volumes_db')
@@ -57,24 +68,23 @@ def save_ebs_volumes_db
 end
 
 def get_ebs_volumes_db
-  item = data_bag_item('ebs_volumes_db', bootstrap_host_name)
+  item = data_bag_item('ebs_volumes_db', topology.bootstrap_host_name)
   item['volume_id']
 end
 
 def create_ebs_volume
-  aws_ebs_volume bootstrap_host_name do
+  aws_ebs_volume topology.bootstrap_host_name do
     aws_access_key node['cloud']['aws_access_key_id']
     aws_secret_access_key node['cloud']['aws_secret_access_key']
     size node['cloud']['ebs_disk_size'].to_i
-    device '/dev/sdc'
+    device '/dev/sdd'
     if node['cloud']['ebs_use_piops'] == true
       volume_type 'io1'
       piops_val = node['cloud']['ebs_disk_size'].to_i * 30
       piops_val = 4000 if piops_val > 4000
       piops piops_val
-    # TODO: when the right_aws gem supports gp2 volumes, uncomment
-    # else
-    #   volume_type 'gp2'
+    else
+      volume_type 'gp2'
     end
     action [ :create, :attach ]
   end
@@ -108,21 +118,21 @@ def attach_ebs_volume
     ebs_volumes_db = data_bag('ebs_volumes_db')
   end
 
-  unless ebs_volumes_db.include?(bootstrap_host_name)
+  unless ebs_volumes_db.include?(topology.bootstrap_host_name)
     create_ebs_volume
   else
-    aws_ebs_volume bootstrap_host_name do
+    aws_ebs_volume topology.bootstrap_host_name do
       aws_access_key node['cloud']['aws_access_key_id']
       aws_secret_access_key node['cloud']['aws_secret_access_key']
       volume_id get_ebs_volumes_db
-      device '/dev/sdc'
+      device '/dev/sdd'
       action :attach
     end
   end
 end
 
 def set_ebs_volume_on_standby
-  node.set['aws']['ebs_volume'][bootstrap_host_name]['volume_id'] = get_ebs_volumes_db
+  node.set['aws']['ebs_volume'][topology.bootstrap_host_name]['volume_id'] = get_ebs_volumes_db
   node.save
 end
 
@@ -162,7 +172,16 @@ def fstype
   end
 end
 
-def create_lvm(disks)
+def create_lvm(disks, mountpoint = nil)
+  stupid_chown_trick = false
+  if mountpoint && !Dir.exists?(mountpoint)
+    # stupid trick to make sure the partybus migration-level stuff still triggers
+    # until a better fix for OC-11297 has been developed
+    # essentially use a different mode
+    # Note, lvm cookbook is dumb and resets this, so do it later on
+    stupid_chown_trick = true
+  end
+
   fs_type = fstype
   lvm_volume_group 'opscode' do
     physical_volumes disks
@@ -172,7 +191,16 @@ def create_lvm(disks)
       if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend_storage_type'] == 'ebs'
         filesystem fs_type
       end
+      # Only let lvm create/manage the mountpoint for standalone/tier servers
+      mount_point mountpoint if mountpoint
       stripes disks.length if disks.is_a?(Array)
+    end
+  end
+
+  if stupid_chown_trick == true
+    directory mountpoint do
+      mode '0775'
+      action :create
     end
   end
 end
@@ -275,8 +303,9 @@ def setup_drbd
 end
 
 def mount_ebs
+  mountpoint = '/var/opt/opscode/drbd/data'
   execute 'mount-ebs-volume' do
-    command 'mount /dev/mapper/opscode-drbd /var/opt/opscode/drbd/data'
+    command "mount /dev/mapper/opscode-drbd #{mountpoint}"
     action :run
     not_if 'mount | grep /dev/mapper/opscode-drbd'
   end
