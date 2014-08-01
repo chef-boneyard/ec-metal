@@ -107,8 +107,8 @@ class GenerateConfig
 
     # TODO(jmink) handle upgrade packages correctly
     # TODO(jmink) Error handling
-    @config["default_package"] = ENV['EM_INITIAL_PACKAGE_NAME'] || ENV['EM_TARGET_PACKAGE_NAME']
-    # TODO(jmink) handle manage package and analytics package as needed
+    @config["default_package"] = ENV['EMC_TARGET_PACKAGE_NAME']
+    @config["manage_package"] = ENV['EMC_DEPENDENT_PACKAGE_NAME'] unless ENV['EMC_DEPENDENT_PACKAGE_NAME'].nil?
 
     @config[:packages] = {}
     set_topology()
@@ -142,64 +142,68 @@ class GenerateConfig
     # TODO(jmink) Fill out the whole structure
     case @options.topology
     when 'ha'
-      generate_ha_topology()
+      generate_full_topology(:num_backends => 2, :num_frontends => 1)
     when 'standalone'
     when 'tier'
+      generate_full_topology(:num_backends => 1, :num_frontends => 1)
     end
   end
 
-  def generate_ha_topology
+  def generate_full_topology(options)
     # Define provider agnostic layout
     @config[:layout] = { :topology => @options.topology,
       :api_fqdn => 'api.opscode.piab',
       :manage_fqdn => 'manage.opscode.piab',
       :analytics_fqdn => 'analytics.opscode.piab',
-      :backend_vip => { :hostname => 'backend.opscode.piab',
-        :ipaddress =>  '33.33.33.20',
-        :device => '??',
-        :heartbeat_device => '??' },
-      :backends => {
-        :backend1 => {
-          :hostname => 'backend1.opscode.piab',
-          :bootstrap => true },
-        :backend2 => {
-          :hostname => 'backend2.opscode.piab' }
-      },
-      :frontends => {
-          :frontend1 => { :hostname => 'frontend1.opscode.piab' }
-       }
+      :backend_vip => {
+        :hostname => 'backend.opscode.piab',
+        :ipaddress =>  '33.33.33.20'
+      }
+      :backends => { },
+      :frontends => { }
       }
 
     case @options.provider
     when 'vagrant'
+
       ip = 21
       custer_ip = 5
-      @config[:layout][:backends].each do |k,v|
-        v[:memory] = '2560'
-        v[:cpus] = '2'
-        v[:ipaddress] = "33.33.33.#{ip}"
-        v[:cluster_ipaddress] = "33.33.34.#{cluster_ip}"
+      options[:num_backends].times do |n|
+        @config[:backends]["backend#{n}"] = {
+          :hostname => "backend#{n}.opscode.piab",
+          :memory => '2560',
+          :cpus => '2',
+          :ipaddress] => "33.33.33.#{ip}",
+          :cluster_ipaddress => "33.33.34.#{cluster_ip}"
+        }
+          ip += 1
+          cluster_ip += 1
+      end
+      options[:num_frontends].times do |n|
+        @config[:frontends]["frontend#{n}"] = {
+          :hostname => "frontend#{n}.opscode.piab",
+          :memory => '1024',
+          :cpus => '1',
+          :ipaddress => "33.33.33.#{ip}",
+          :cluster_ipaddress => "33.33.34.#{cluster_ip}"
+        }
         ip += 1
         cluster_ip += 1
       end
-      @config[:layout][:frontends].each do |k,v|
-        v[:memory] = '1024'
-        v[:cpus] = '1'
-        v[:ipaddress] = "33.33.33.#{ip}"
-        v[:cluster_ipaddress] = "33.33.34.#{cluster_ip}"
-        ip += 1
-        cluster_ip += 1
-      end
+
       @config[:virtual_hosts] = {
         "private-chef.opscode.piab" => "33.33.33.23",
         "manage.opscode.piab" => "33.33.33.23",
         "api.opscode.piab" => "33.33.33.23",
-        "analytics.opscode.piab" => "33.33.33.23",
-        "backend.opscode.piab" => "33.33.33.20",
-        "backend1.opscode.piab" => "33.33.33.21",
-        "backend2.opscode.piab" => "33.33.33.22",
-        "frontend1.opscode.piab" => "33.33.33.23"
+        "analytics.opscode.piab" => "33.33.33.23"
       }
+      @config[:backends].each |k,v| do
+        @config[:virtual_hosts][v[:hostname]] = v[:ipaddress]
+      end
+      @config[:frontends].each |k,v| do
+        @config[:virtual_hosts][v[:hostname]] = v[:ipaddress]
+      end
+
     when 'ec2'
       @config[:layout][:backends].each do |k,v|
         v[:ebs_optimized] = true
