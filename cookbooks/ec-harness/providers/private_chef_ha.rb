@@ -62,7 +62,6 @@ action :install do
         recipe 'private-chef::provision'
         recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
         recipe 'private-chef::drbd' if
-          node['harness']['vm_config']['topology'] == 'ha' &&
           topo.is_backend?(vmname)
         recipe 'private-chef::provision_phase2'
         recipe 'private-chef::users' if

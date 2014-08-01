@@ -15,7 +15,11 @@ if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend
   include_recipe 'aws'
 
   private_chef_backend_storage 'ebs_shared_storage' do
-    action :ebs_shared
+    if topology.is_ha?
+      action :ebs_shared
+    else
+      action :ebs_standalone
+    end
     only_if { topology.is_backend?(node.name) }
     not_if { ::File.exists?('/var/opt/opscode/drbd/drbd_ready') }
   end

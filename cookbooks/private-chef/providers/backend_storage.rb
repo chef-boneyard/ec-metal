@@ -25,6 +25,13 @@ action :ebs_shared do
   new_resource.updated_by_last_action(true)
 end
 
+action :ebs_standalone do
+  attach_ebs_volume
+  create_lvm(disk_devmap[2], '/var/opt/opscode') # assume drbd/ebs volume is the third disk (EBS)
+  save_ebs_volumes_db
+  new_resource.updated_by_last_action(true)
+end
+
 action :ebs_save_databag do
   save_ebs_volumes_db
 end
@@ -161,7 +168,15 @@ def fstype
   end
 end
 
-def create_lvm(disks)
+def create_lvm(disks, mountpoint = nil)
+  if mountpoint && !Dir.exists?(mountpoint)
+    # stupid trick to make sure the partybus migration-level stuff still triggers
+    # (https://github.com/opscode/opscode-omnibus/blob/master/files/private-chef-cookbooks/private-chef/recipes/partybus.rb#L46)
+    # essentially use a different mode
+    # Note, lvm cookbook is dumb and resets this, so do it later on
+    stupid_chown_trick = true
+  end
+
   fs_type = fstype
   lvm_volume_group 'opscode' do
     physical_volumes disks
@@ -171,7 +186,16 @@ def create_lvm(disks)
       if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend_storage_type'] == 'ebs'
         filesystem fs_type
       end
+      # Only let lvm create/manage the mountpoint for standalone/tier servers
+      mount_point mountpoint if mountpoint
       stripes disks.length if disks.is_a?(Array)
+    end
+  end
+
+  if stupid_chown_trick
+    directory mountpoint do
+      mode '0775'
+      action :create
     end
   end
 end
@@ -274,7 +298,7 @@ def setup_drbd
 end
 
 def mount_ebs
-  mountpoint = topology.is_ha? ? '/var/opt/opscode/drbd/data' : '/var/opt/opscode'
+  mountpoint = '/var/opt/opscode/drbd/data'
   execute 'mount-ebs-volume' do
     command "mount /dev/mapper/opscode-drbd #{mountpoint}"
     action :run
