@@ -107,8 +107,8 @@ class GenerateConfig
 
     # TODO(jmink) handle upgrade packages correctly
     # TODO(jmink) Error handling
-    @config["default_package"] = ENV['EMC_TARGET_PACKAGE_NAME']
-    @config["manage_package"] = ENV['EMC_DEPENDENT_PACKAGE_NAME'] unless ENV['EMC_DEPENDENT_PACKAGE_NAME'].nil?
+    @config["default_package"] = ENV['ECM_TARGET_PACKAGE_NAME']
+    @config["manage_package"] = ENV['ECM_DEPENDENT_PACKAGE_NAME'] unless ENV['ECM_DEPENDENT_PACKAGE_NAME'].nil?
 
     @config[:packages] = {}
     set_topology()
@@ -139,11 +139,12 @@ class GenerateConfig
 
   def set_topology()
     @config[:layout] = { :topology => @options.topology }
-    # TODO(jmink) Fill out the whole structure
     case @options.topology
     when 'ha'
+      # TODO(jmink) ensure this produces the correct config
       generate_full_topology(:num_backends => 2, :num_frontends => 1)
     when 'standalone'
+      # TOOD(jmink)
     when 'tier'
       generate_full_topology(:num_backends => 1, :num_frontends => 1)
     end
@@ -159,8 +160,8 @@ class GenerateConfig
         :hostname => 'backend.opscode.piab',
         :ipaddress =>  '33.33.33.21'
       },
-      :backends => { },
-      :frontends => { }
+      :backends => {},
+      :frontends => {}
       }
 
     case @options.provider
