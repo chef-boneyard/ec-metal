@@ -178,7 +178,7 @@ def create_lvm(disks, mountpoint = nil)
   stupid_chown_trick = false
   if mountpoint && !Dir.exists?(mountpoint)
     # stupid trick to make sure the partybus migration-level stuff still triggers
-    # (https://github.com/opscode/opscode-omnibus/blob/master/files/private-chef-cookbooks/private-chef/recipes/partybus.rb#L46)
+    # until a better fix for OC-11297 has been developed
     # essentially use a different mode
     # Note, lvm cookbook is dumb and resets this, so do it later on
     stupid_chown_trick = true
@@ -199,7 +199,7 @@ def create_lvm(disks, mountpoint = nil)
     end
   end
 
-  if stupid_chown_trick
+  if stupid_chown_trick == true
     directory mountpoint do
       mode '0775'
       action :create
