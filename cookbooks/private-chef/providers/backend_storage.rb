@@ -176,7 +176,7 @@ def create_lvm(disks, mountpoint = nil)
   stupid_chown_trick = false
   if mountpoint && !Dir.exists?(mountpoint)
     # stupid trick to make sure the partybus migration-level stuff still triggers
-    # until a better fix for OC-11297 has been developed
+    # (https://github.com/opscode/opscode-omnibus/blob/master/files/private-chef-cookbooks/private-chef/recipes/partybus.rb#L46)
     # essentially use a different mode
     # Note, lvm cookbook is dumb and resets this, so do it later on
     stupid_chown_trick = true
@@ -197,7 +197,7 @@ def create_lvm(disks, mountpoint = nil)
     end
   end
 
-  if stupid_chown_trick == true
+  if stupid_chown_trick
     directory mountpoint do
       mode '0775'
       action :create
@@ -303,7 +303,7 @@ def setup_drbd
 end
 
 def mount_ebs
-  mountpoint = topology.is_ha? ? '/var/opt/opscode/drbd/data' : '/var/opt/opscode'
+  mountpoint = '/var/opt/opscode/drbd/data'
   execute 'mount-ebs-volume' do
     command "mount /dev/mapper/opscode-drbd #{mountpoint}"
     action :run
