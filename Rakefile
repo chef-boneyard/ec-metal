@@ -5,7 +5,8 @@ Dir["lib/tasks/*.rake"].each { |t| load t }
 task :default => [:up]
 
 # Environment variables to be consumed by ec-harness and friends
-harness_dir = ENV['HARNESS_DIR'] = File.dirname(__FILE__)
+harness_dir = ENV['HARNESS_DIR'] ||= File.dirname(__FILE__)
+repo_dir = ENV['REPO_PATH'] ||= File.join(harness_dir, 'chef-repo')
 
 # just in cases user has a different default Vagrant provider
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
@@ -77,8 +78,8 @@ task :config_copy do
 end
 
 task :keygen do
-  keydir = File.join(harness_dir, 'keys')
-  Dir.mkdir keydir unless Dir.exists? keydir
+  keydir = File.join(repo_dir, 'keys')
+  FileUtils.mkdir_p keydir
   if Dir["#{keydir}/*"].empty?
     system("ssh-keygen -t rsa -P '' -q -f #{keydir}/id_rsa")
   end
@@ -89,7 +90,7 @@ task :add_hosts do
   config = get_config
   config = fog_populate_ips(config) if config['provider'] == 'ec2'
   create_hosts_entries(config['layout'])
-  print_final_message(config, harness_dir)
+  print_final_message(config, repo_dir)
 end
 
 desc 'Remove hosts entries to /etc/hosts'
@@ -104,13 +105,13 @@ task :cachedir do
     cachedir = ENV['CACHE_PATH']
   else
     cachedir = File.join(harness_dir, 'cache')
-    Dir.mkdir cachedir unless Dir.exists?(cachedir)
+    FileUtils.mkdir_p cachedir
   end
   puts "Using package cache directory #{cachedir}"
 end
 
 task :berks_install do
-  cookbooks_path = File.join(harness_dir, 'vendor/cookbooks')
+  cookbooks_path = File.join(ENV['REPO_PATH'], 'vendor/cookbooks')
   system("rm -r #{cookbooks_path}") if Dir.exists?(cookbooks_path)
   system("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
 end

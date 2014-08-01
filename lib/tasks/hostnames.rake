@@ -62,7 +62,7 @@ EOH
   puts final_message
 end
 
-def print_final_message(private_chef_config, harness_dir)
+def print_final_message(private_chef_config, repo_dir)
   require_relative '../../cookbooks/ec-common/libraries/topo_helper'
 
   print_cool_text
@@ -78,7 +78,7 @@ def print_final_message(private_chef_config, harness_dir)
   else
     ssh_username = 'root'
   end
-  keydir = File.join(harness_dir, 'keys')
+  keydir = File.join(repo_dir, 'keys')
 
   topo = TopoHelper.new(ec_config: private_chef_config['layout'])
   topo.merged_topology.each do |node, attrs|
