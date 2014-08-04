@@ -9,3 +9,5 @@ gem 'cheffish',           '~> 0.6.0'
 gem 'berkshelf',          '~> 3.0'
 gem 'chef',               '~> 11.14.0.rc'
 
+gem 'rlet'
+

@@ -11,6 +11,9 @@ installer_file = node['private-chef']['installer_file']
 installer_name = ::File.basename(installer_file.split('?').first)
 installer_path = "#{Chef::Config[:file_cache_path]}/#{installer_name}"
 
+chef_package = EcMetal::ChefPackageInfo.new(installer_name)
+node_package = EcMetal::NodePackageHelper.new(node)
+
 if ::URI.parse(installer_file).absolute?
   remote_file installer_path do
     source installer_file
@@ -21,25 +24,50 @@ else
   installer_path = installer_file
 end
 
+if node_package.chef_installed?
+  if node_package.ec_installed?
+    if chef_package.server_type == :ec
+      # if package is newer than installed version
+        # install
+        # tag as an ec upgrade
+      # else
+        # fail
+      # end
+    end
+    if chef_package.server_type == :osc
+      # if package is :ec and version >= "12" || "11.1.99"
+        # install
+        # tag as an ec upgrade
+      # else
+        # fail
+      # end
+    end
+  end
+else
+  # install
+end
 
-# Detect package - chef-server or private-chef
+package installer_name do
+  action :nothing
+  source installer_path
+  provider Chef::Provider::Package::Dpkg if platform_family?('debian')
+  options '--nogpgcheck' if platform_family?('rhel') && node['platform_version'].to_i == 5
+end
 
-# nothing installed?
-# - just install current (osc or ec)
+file '/tmp/private-chef-perform-upgrade' do
+  action :nothing
+  owner 'root'
+  group 'root'
+  mode '0644'
+  content "Running upgrade of #{installer_name} at #{Time.now}"
+end
 
-# ec installed?
-# - upgrading to ec?
-#   - compare version logic
-# - upgrading to osc?
-#   - bomb
 
-# osc installed?
-# - upgrading to ec?
-#  - check version (>= version 12)
-# - upgrading to osc?
-#  - noop, not implementing this now
 
-if Gem::Version.new(PackageHelper.private_chef_installed_version(node)) > Gem::Version.new(PackageHelper.package_version(installer_name))
+
+
+
+if Gem::Version.new(PackageHelper.private_chef_installed_version(node)) > Gem::Version.new(chef_package.version)
   log "Installed package #{PackageHelper.private_chef_installed_version(node)} is newer than installer #{installer_name}"
 else
   package installer_name do
@@ -50,7 +78,7 @@ else
     action :install
   end
 
-  if Gem::Version.new(PackageHelper.private_chef_installed_version(node)) < Gem::Version.new(PackageHelper.package_version(installer_name)) &&
+  if Gem::Version.new(PackageHelper.private_chef_installed_version(node)) < Gem::Version.new(chef_package.version) &&
     PackageHelper.private_chef_installed_version(node) != '0.0.0'
     file '/tmp/private-chef-perform-upgrade' do
       action :create
