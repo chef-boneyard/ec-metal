@@ -1,5 +1,5 @@
 # Load harness attributes from the config file
-harness_dir = ENV['HARNESS_DIR']
+harness_dir = ENV['HARNESS_DIR'] || File.dirname(__FILE__)
 config_json = JSON.parse(File.read(File.join(harness_dir, ENV['ECM_CONFIG'] || 'config.json')))
 default['harness']['harness_dir'] = harness_dir
 default['harness']['provider'] = config_json['provider']
@@ -28,7 +28,7 @@ default['harness']['analytics_package'] = ENV['ANALYTICS_PACKAGE'] || config_jso
 default['harness']['manage_options'] = config_json['manage_options'] || {}
 
 # HARNESS_DIR is set by the Rakefile to the project root directory
-repo_path = ENV['REPO_PATH']
+repo_path = ENV['REPO_PATH'] || ::File.join(harness_dir, 'chef-repo')
 default['harness']['repo_path'] = repo_path
 default['harness']['vms_dir'] = File.join(harness_dir, 'vagrant_vms')
 

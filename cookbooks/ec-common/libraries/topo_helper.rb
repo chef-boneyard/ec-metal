@@ -2,7 +2,7 @@
 
 class TopoHelper
 
-  TOPO_TYPES = %w(backends frontends standalones analytics)
+  TOPO_TYPES = %w(backends frontends standalones analytics loadtesters)
 
   attr_accessor :ec_config, :include_layers, :exclude_layers
 
