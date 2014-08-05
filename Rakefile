@@ -45,6 +45,11 @@ task :upgrade => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   end
 end
 
+desc 'Spin up load-testing machines'
+task :loadtest => [:berks_install] do
+  system("#{harness_dir}/bin/chef-client -z -o ec-harness::loadtesters")
+end
+
 desc 'Destroy all VMs'
 task :destroy do
   system("#{harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
