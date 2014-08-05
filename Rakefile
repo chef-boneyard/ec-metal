@@ -101,8 +101,8 @@ task :remove_hosts do
 end
 
 task :cachedir do
-  if ENV['EM_CACHE_PATH'] && Dir.exists?(ENV['EM_CACHE_PATH'])
-    cachedir = ENV['EM_CACHE_PATH']
+  if ENV['ECM_CACHE_PATH'] && Dir.exists?(ENV['ECM_CACHE_PATH'])
+    cachedir = ENV['ECM_CACHE_PATH']
   else
     cachedir = File.join(harness_dir, 'cache')
     FileUtils.mkdir_p cachedir
