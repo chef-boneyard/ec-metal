@@ -29,6 +29,8 @@ action :ebs_standalone do
   attach_ebs_volume
   create_lvm(disk_devmap[3], '/var/opt/opscode') # assume drbd/ebs volume is the fourth disk (/dev/sdd)
   save_ebs_volumes_db
+  create_drbd_dirs
+  touch_drbd_ready
   new_resource.updated_by_last_action(true)
 end
 

@@ -1,9 +1,12 @@
-source "https://api.berkshelf.com"
+source "https://supermarket.getchef.com"
 
-cookbook 'apt', '~> 2.0'
-cookbook 'aws', '~> 2.3.0'
-cookbook 'hostsfile', '~> 2.0'
-cookbook 'lvm', '~> 1.0'
-cookbook 'yum', '~> 2.0'
+cookbook 'apt'
+cookbook 'aws'
+cookbook 'docker'
+cookbook 'hostsfile'
+cookbook 'lvm'
+cookbook 'yum'
+cookbook 'yum-elrepo'
+cookbook 'yum-epel'
 
 cookbook 'ec-tools', :git => 'https://github.com/patrick-wright/ec-tools'
