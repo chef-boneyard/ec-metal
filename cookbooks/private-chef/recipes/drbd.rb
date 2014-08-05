@@ -3,8 +3,8 @@ when 'debian'
   include_recipe 'apt'
   package "linux-image-extra-#{node['kernel']['release']}" if node['cloud'] && node['cloud']['provider'] == 'ec2'
 when 'rhel'
-  include_recipe 'yum'
-  include_recipe 'yum::elrepo'
+  include_recipe 'yum-epel'
+  include_recipe 'yum-elrepo'
   package 'psmisc'
 end
 
