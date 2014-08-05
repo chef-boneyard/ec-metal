@@ -34,6 +34,13 @@ manage_options = node['private-chef']['manage_options'].map { |key, value|
                    "#{key} #{value}"
                  }.join("\n")
 
+directory '/etc/opscode-manage' do
+  owner 'root'
+  group 'root'
+  mode '0755'
+  action :create
+end
+
 file '/etc/opscode-manage/manage.rb' do
   action :create
   owner 'root'
