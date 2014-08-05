@@ -9,6 +9,24 @@
 
 # Assumes Ubuntu 14.04, others to follow
 
+directory '/etc/chef/ohai/hints' do
+  owner "root"
+  group "root"
+  mode "0755"
+  action :create
+  recursive true
+end
+
+file '/etc/chef/ohai/hints/ec2.json' do
+  action :create
+  owner "root"
+  group "root"
+  mode "0644"
+end
+
+ohai_hint 'ec2'
+include_recipe 'ohai'
+
 rootdev = node.filesystem.select { |k,v| v['mount'] == '/' }.keys.first
 
 # Resize EBS root volume
@@ -88,42 +106,46 @@ execute 'container init' do
   "--force --trusted-certs /etc/chef/secure/certs/ " +
   "--server-url #{Chef::Config[:chef_server_url]} " +
   "--validation-key /etc/chef/validation.pem " +
-  "--validation-client-name ponyville-validator" +
-  "-r 'recipe[openssh]' -b"
+  "--validation-client-name ponyville-validator " +
+  "-r 'recipe[chef-client]'"
   action :run
-  not_if 'docker images |grep ponyville/ubuntu'
 end
 
 execute 'fucking ssl stfu' do
   command 'sed -i s/ssl_verify_mode.*/verify_api_cert\ false/ /var/chef/dockerfiles/ponyville/ubuntu/chef/client.rb'
   action :run
   not_if 'grep verify_api_cert /var/chef/dockerfiles/ponyville/ubuntu/chef/client.rb'
-  not_if 'docker images |grep ponyville/ubuntu'
 end
 
+file '/var/chef/dockerfiles/ponyville/ubuntu/chef/.node_name' do
+  action :create
+  owner "root"
+  group "root"
+  mode "0644"
+  content "#{node.name}\n"
+end
 
 execute 'container build' do
   command "knife container docker build ponyville/ubuntu || exit 0"
   action :run
-  not_if 'docker images |grep ponyville/ubuntu'
 end
 
-bash 'docker attack' do
-  user "root"
-  cwd "/root"
-  code <<-EOH
-  for i in {1..2000}; do docker run -d ponyville/ubuntu; done
-  EOH
-  not_if 'test -f /dockers_launched'
-end
+# bash 'docker attack' do
+#   user "root"
+#   cwd "/root"
+#   code <<-EOH
+#   for i in {1..2000}; do docker run -d ponyville/ubuntu; done
+#   EOH
+#   not_if 'test -f /dockers_launched'
+# end
 
-file "/dockers_launched" do
-  action :create_if_missing
-  owner "root"
-  group "root"
-  mode "0644"
-  content "#{Time.now}"
-end
+# file "/dockers_launched" do
+#   action :create_if_missing
+#   owner "root"
+#   group "root"
+#   mode "0644"
+#   content "#{Time.now}"
+# end
 
 
 

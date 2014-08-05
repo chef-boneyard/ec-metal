@@ -55,6 +55,8 @@ unless File.exists?("/srv/piab/dev_users_created")
     end
   end
 
+  topology = TopoHelper.new(ec_config: node['private-chef'])
+
   dev_users.each_pair do |name, options|
 
     # create the students .chef/ dir
@@ -81,7 +83,7 @@ EOH
       variables(
         :username => options['username'],
         :orgname => options['orgname'],
-        :server_fqdn => 'api.opscode.piab'
+        :server_fqdn => "api.#{topology.mydomainname}"
       )
       mode "0777"
       action :create
