@@ -72,6 +72,7 @@ action :install do
           topo.is_frontend?(vmname)
         recipe 'private-chef::pushy' if node['harness']['pushy_package']
         recipe 'private-chef::tools'
+        file '/etc/chef/ohai/hints/ec2.json', '/etc/hosts.equiv'  #fixme, ohai_hint - no dice.  hack workaround.
 
         converge true
       end
