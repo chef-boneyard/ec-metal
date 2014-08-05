@@ -73,8 +73,8 @@ machine_batch 'fly_my_pretties_fly' do
 
     node['harness']['vm_config']['loadtesters'].each do |vmname, config|
 
-      1.upto(20) do |i|
-        machine "irving-loadtester-#{i}" do
+      1.upto(10) do |i|
+        machine "#{ENV['USER']}-loadtester-#{i}" do
           add_machine_options node['harness']['provisioner_options'][vmname]
           attribute 'root_ssh', node['harness']['root_ssh'].to_hash
 

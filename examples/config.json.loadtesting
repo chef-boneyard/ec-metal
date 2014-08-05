@@ -30,6 +30,9 @@
 	      "depsolver_timeout": 50000,
 	      "db_pool_size": 200
       },
+      "oc_bifrost": {
+	      "db_pool_size": 200
+      },
       "opscode_certificate": {
 	      "num_workers": 8,
 	      "num_certificates_per_worker": 500

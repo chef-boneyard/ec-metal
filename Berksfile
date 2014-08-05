@@ -2,6 +2,7 @@ source "https://supermarket.getchef.com"
 
 cookbook 'apt'
 cookbook 'aws'
+cookbook 'chef-client'
 cookbook 'docker'
 cookbook 'hostsfile'
 cookbook 'lvm'

@@ -45,9 +45,24 @@ task :pivotal => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
 end
 
 desc 'Spin up load-testing machines'
-task :loadtest => [:berks_install] do
+task :loadtesters => [:berks_install] do
+  # arg run this twice for ohai hints - WHY
+  system("#{harness_dir}/bin/chef-client -z -o ec-harness::loadtesters")
   system("#{harness_dir}/bin/chef-client -z -o ec-harness::loadtesters")
 end
+
+desc 'Spin up load-testing machines'
+task :run_loadtest do
+  Dir.chdir(File.join(harness_dir, 'users', 'pinkiepie')) {
+    system("#{harness_dir}/bin/knife ssh 'name:*loadtester*' -a cloud.public_ipv4 'for i in {1..2000}; do sudo docker run -d ponyville/ubuntu; done' -x ubuntu -i #{repo_dir}/keys/id_rsa")
+  }
+end
+
+desc 'Destroy the load-testing machines'
+task :cleanup_loadtest do
+  system("#{harness_dir}/bin/chef-client -z -o ec-harness::loadtesters_destroy")
+end
+task :destroy_loadtest => :cleanup_loadtest
 
 desc 'Destroy all VMs'
 task :destroy do

@@ -52,6 +52,7 @@ if installer_name =~ /^private-chef/ # skip both osc and cs12
   end
 
   unless File.exists?("/srv/piab/dev_users_created")
+    topology = TopoHelper.new(ec_config: node['private-chef'])
 
     ruby_block "Waiting for first-time OPC initializtion" do
       block do
@@ -67,6 +68,18 @@ if installer_name =~ /^private-chef/ # skip both osc and cs12
         action :create
       end
 
+      # create a knife.rb file for the user
+      template "#{options['knife_config']}" do
+        source "knife.rb.erb"
+        variables(
+          :username => options['username'],
+          :orgname => options['orgname'],
+          :server_fqdn => "api.#{topology.mydomainname}"
+        )
+        mode "0777"
+        action :create
+      end
+
       # create an account on the OPC for the student
       execute "create OPC account #{name}" do
         command <<-EOH
@@ -78,19 +91,6 @@ if installer_name =~ /^private-chef/ # skip both osc and cs12
   EOH
         cwd opscode_account_path
       end
-
-      # create a knife.rb file for the user
-      template "#{options['knife_config']}" do
-        source "knife.rb.erb"
-        variables(
-          :username => options['username'],
-          :orgname => options['orgname'],
-          :server_fqdn => 'api.opscode.piab'
-        )
-        mode "0777"
-        action :create
-      end
-
     end
 
     # create the orgs and associate the users
