@@ -80,10 +80,10 @@ machine_batch 'fly_my_pretties_fly' do
 
           recipe 'docker_host::default'
           file '/etc/chef/validation.pem', chef_org_validation_pem
+          file '/etc/chef/ohai/hints/ec2.json', '/etc/hosts.equiv'  #fixme, make an empty file
           # converge true
         end
       end
 
     end
-
 end
