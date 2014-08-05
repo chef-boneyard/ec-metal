@@ -8,7 +8,9 @@ class TopoHelper
                   analytics_workers
                   backends
                   frontends
-                  standalones)
+                  standalones
+                  loadtesters
+                )
 
   attr_accessor :ec_config, :include_layers, :exclude_layers
 

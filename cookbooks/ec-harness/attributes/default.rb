@@ -28,7 +28,7 @@ default['harness']['analytics_package'] = ENV['ANALYTICS_PACKAGE'] || config_jso
 default['harness']['manage_options'] = config_json['manage_options'] || {}
 
 # HARNESS_DIR is set by the Rakefile to the project root directory
-repo_path = ENV['REPO_PATH']
+repo_path = ENV['REPO_PATH'] || ::File.join(harness_dir, 'chef-repo')
 default['harness']['repo_path'] = repo_path
 default['harness']['vms_dir'] = File.join(harness_dir, 'vagrant_vms')
 
