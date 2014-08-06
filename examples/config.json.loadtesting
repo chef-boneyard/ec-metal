@@ -3,7 +3,7 @@
   "ec2_options": {
     "region": "us-west-2",
     "vpc_subnet": "subnet-f28f7797",
-    "ami_id": "ami-f74338c7",
+    "ami_id": "ami-bdf48f8d",
     "ssh_username": "ubuntu",
     "backend_storage_type": "ebs",
     "ebs_disk_size": "100",
@@ -27,15 +27,15 @@
       },
       "opscode_erchef": {
 	      "depsolver_worker_count": 16,
-	      "depsolver_timeout": 50000,
-	      "db_pool_size": 200
+	      "depsolver_timeout": 120000,
+	      "db_pool_size": 400
       },
       "oc_bifrost": {
-	      "db_pool_size": 200
+	      "db_pool_size": 400
       },
       "opscode_certificate": {
 	      "num_workers": 8,
-	      "num_certificates_per_worker": 500
+	      "num_certificates_per_worker": 1000
       }
     },
    "standalones": {
