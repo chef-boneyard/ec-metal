@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+
+require 'date'
+
+granularity = :minute
+
+requests = Hash.new { |hash, key| hash[key] = 0 }
+
+ARGF.each do |line|
+  line.match(/\[(.+?)\]/)
+  second = Regexp.last_match[1].sub(':', ' ')
+  requests[second] += 1
+end
+
+def print_chart(requests)
+  largest_requests_per_second = requests.values.max
+  timestamps = requests.keys.sort do |a, b|
+    DateTime.parse(a) <=> DateTime.parse(b)
+  end
+  timestamps.each do |timestamp|
+    requests_per_second = requests[timestamp]
+    printf "%s %5d r/s [%-100s]\n", timestamp, requests_per_second,
+           '#' * (requests_per_second * 100 / largest_requests_per_second)
+  end
+end
+
+case granularity
+when :second
+  print_chart requests
+when :minute
+  avg_requests = Hash.new { |hash, key| hash[key] = 0 }
+  requests.each do |second, requests_per_second|
+    second.match(/(.+):\d\d(\s.+)/)
+    avg_requests[Regexp.last_match[1] + Regexp.last_match[2]] += requests_per_second
+  end
+  avg_requests.update(avg_requests) do |minute, requests_per_minute|
+    (requests_per_minute / 60.0).round
+  end
+  print_chart avg_requests
+end

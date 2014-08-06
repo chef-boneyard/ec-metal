@@ -47,15 +47,26 @@ end
 
 desc 'Spin up load-testing machines'
 task :loadtesters => [:berks_install] do
-  # arg run this twice for ohai hints - WHY
+  # run twice because AWS
   system("#{harness_dir}/bin/chef-client -z -o ec-harness::loadtesters")
   system("#{harness_dir}/bin/chef-client -z -o ec-harness::loadtesters")
 end
 
-desc 'Spin up load-testing machines'
+desc 'Run the load test'
 task :run_loadtest do
+  num_loadtesters = 40 # sync this number with loadtesters recipe
+  num_groups = 5
+  num_containers = 1000
   Dir.chdir(File.join(harness_dir, 'users', 'pinkiepie')) {
-    system("#{harness_dir}/bin/knife ssh 'name:*loadtester*' -a cloud.public_ipv4 'for i in {1..2000}; do sudo docker run -d ponyville/ubuntu; done' -x ubuntu -i #{repo_dir}/keys/id_rsa")
+    (1..num_loadtesters).group_by { |i| i%num_groups }.each do |k,v|
+      search_req = ""
+      v.map { |i| search_req += "name:*loadtester-#{i} OR " }
+      search_req.chomp!(' OR ')
+      puts "Starting group at #{Time.now}: #{search_req}"
+      system("#{harness_dir}/bin/knife ssh '#{search_req}' -a cloud.public_ipv4 'for i in {1..#{num_containers}}; do sudo docker run -d ponyville/ubuntu; done' -x ubuntu -i #{repo_dir}/keys/id_rsa")
+      puts "Finishing group at #{Time.now}: #{search_req}"
+      puts "----------------------------------------------------------------\n\n\n\n"
+    end
   }
 end
 

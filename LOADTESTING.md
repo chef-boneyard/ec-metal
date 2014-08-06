@@ -21,7 +21,8 @@ example config here: https://github.com/opscode/ec-metal/blob/irving/loadtesters
 * Make sure you read and understand what `ec-harness::loadtesters`  and `docker_host::default` do
 * Review the tuning settings implemented in config.json
 * Additional tuning is needed to handle large amounts of registering nodes, namely increasing `default['private_chef']['oc_chef_authz']['http_init_count']` and `default['private_chef']['oc_chef_authz']['http_max_count']` (cannot be tweaked in `private-chef.rb`, need to change the attributes/default file yourself)
-* A m3.2xlarge amazon machine can handle approx 2000 docker containers running chef-client
+* A m3.2xlarge loadtester amazon machine can handle running approx 1000 docker containers running the chef-client cookbook only (daemonized chef-client that runs every 30 minutes)
+* an m3.2xlarge standalone chef server can handle approx 8 simultaneous loadtesting machines firing up docker containers sequentially {1..1000}
 
 
 ## TODO
