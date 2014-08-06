@@ -26,7 +26,7 @@ with_chef_server chef_server_url,
 
 machine_batch 'destroy_all_the_loadtesters' do
   action :destroy
-      1.upto(10) do |i|
+      1.upto(node['harness']['num_loadtesters']) do |i|
         machine "#{ENV['USER']}-loadtester-#{i}"
       end
 end
