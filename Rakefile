@@ -81,6 +81,10 @@ task :cleanup_loadtest do
 end
 task :destroy_loadtest => :cleanup_loadtest
 
+task :pivotal => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+  system("#{harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
+end
+
 desc 'Destroy all VMs'
 task :destroy do
   sh("#{harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
