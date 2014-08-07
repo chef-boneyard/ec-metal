@@ -130,6 +130,31 @@ end
 
 # bin/knife opc -c chef-repo/pivotal/knife-pivotal.rb user list
 action :pivotal do
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'])
+  machine_file '/etc/opscode/pivotal.pem' do
+    local_path ::File.join(node['harness']['repo_path'], 'pivotal', 'pivotal.pem')
+    machine topo.bootstrap_node_name
+    action :download
+  end
+
+  bootstrap_node_data = search(:node, "name:#{topo.bootstrap_node_name}")
+  ipaddress = nil
+  if node['harness']['provider'] == 'ec2'
+    ipaddress = bootstrap_node_data[0][:ec2][:public_ipv4]
+  elsif node['harness']['provider'] == 'vagrant'
+   ipaddress = bootstrap_node_data[0] # get this
+  end
+
+  template ::File.join(node['harness']['repo_path'], 'pivotal', 'knife-pivotal.rb') do
+    source 'knife-pivotal.rb.erb'
+    variables ({
+      :ipaddress => ipaddress
+    })
+  end
+end
+
+# bin/knife opc -c chef-repo/pivotal/knife-pivotal.rb user list
+action :pivotal do
 
   directory ::File.join(node['harness']['repo_path'], 'pivotal')
 
