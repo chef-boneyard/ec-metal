@@ -132,6 +132,12 @@ action :pivotal do
 
   topo = TopoHelper.new(ec_config: node['harness']['vm_config'])
 
+  machine_execute 'read pivotal.pem for vagrant' do
+    command 'sudo chmod 644 /etc/opscode/pivotal.pem'
+    machine topo.bootstrap_node_name
+    only_if { node['harness']['provider'] == 'vagrant' }
+  end
+
   machine_file '/etc/opscode/pivotal.pem' do
     local_path ::File.join(node['harness']['repo_path'], 'pivotal', 'pivotal.pem')
     machine topo.bootstrap_node_name
