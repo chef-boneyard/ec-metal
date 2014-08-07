@@ -73,7 +73,9 @@ action :install do
         recipe 'private-chef::pushy' if node['harness']['pushy_package']
         recipe 'private-chef::tools'
         recipe 'private-chef::loadbalancer' if topo.is_frontend?(vmname)
-        file '/etc/chef/ohai/hints/ec2.json', '/etc/hosts.equiv'  #fixme, ohai_hint - no dice.  hack workaround.
+        # ohai_hints { 'ec2' } 
+        # but this does
+        file '/etc/chef/ohai/hints/ec2.json', { :content => '' } # work around until chef-metal-fog PR is merged
 
         converge true
       end
