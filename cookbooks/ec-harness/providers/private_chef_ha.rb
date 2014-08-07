@@ -151,6 +151,8 @@ action :pivotal do
     ipaddress = bootstrap_node_data[0][:ec2][:public_ipv4]
   elsif node['harness']['provider'] == 'vagrant'
     ipaddress = bootstrap_node_data[0][:network][:interfaces][:eth1][:routes][0][:src]
+  else
+    raise ArgumentError, "Unsupported provider #{node['harness']['provider']}. Can't get ip address."
   end
 
   template ::File.join(node['harness']['repo_path'], 'pivotal', 'knife-pivotal.rb') do
