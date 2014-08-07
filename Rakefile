@@ -39,6 +39,11 @@ task :upgrade => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
 end
 
+desc "Copies pivotal.pem from chef server and generates knife.rb in the repo dir"
+task :pivotal => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+  system("#{harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
+end
+
 desc 'Destroy all VMs'
 task :destroy do
   system("#{harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
