@@ -60,7 +60,10 @@ topo.merged_topology.each do |vmname, config|
           'Ebs.VolumeType' => 'gp2',
           'Ebs.DeleteOnTermination' => "true"},
         {'DeviceName' => '/dev/sdb', 'VirtualName' => 'ephemeral0'}
-      ]
+      ],
+      :tags => {
+        'EcMetal' => node['harness']['ec2']['ec_metal_tag']
+      }
     }
   }
 
