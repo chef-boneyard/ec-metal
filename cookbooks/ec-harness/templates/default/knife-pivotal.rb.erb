@@ -1,0 +1,7 @@
+dirname = ::File.dirname(__FILE__)
+base_url = 'https://<%= @ipaddress %>'
+
+node_name 'pivotal'
+client_key ::File.join(dirname, 'pivotal.pem')
+chef_server_url base_url
+chef_server_root base_url # used by knife opc

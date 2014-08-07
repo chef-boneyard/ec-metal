@@ -3,9 +3,6 @@ DEPENDENCIES
   aws
   chef-client
   docker
-  ec-tools
-    git: https://github.com/patrick-wright/ec-tools
-    revision: ca7a04b6c1cdc2cba11b57894280bd67a4256204
   hostsfile
   lvm
   yum
