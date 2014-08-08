@@ -27,6 +27,8 @@ file '/opt/opscode/sv/opscode-webui/keepalive_me' do
   action :delete
 end
 
+directory '/etc/opscode-manage'
+
 # string values need to be Strings in manage.rb
 # this will likely break if ruby expressions are set in the config, TODO
 manage_options = node['private-chef']['manage_options'].map { |key, value|
