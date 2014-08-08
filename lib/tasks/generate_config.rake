@@ -17,7 +17,7 @@ class GenerateConfig
 
   # TODO(jmink) Move this data to a shared location
   EC2_DATA = {
-    :default_subnet_id => 'subnet-fc73b499',
+    :default_subnet_id => 'subnet-22679d47',
     :default_region => 'us-west-2',
     :image_map => {
 
@@ -149,9 +149,28 @@ class GenerateConfig
       generate_full_topology(:num_backends => 2, :num_frontends => 1)
     when 'standalone'
       # TOOD(jmink)
+      generate_standalone_topology()
     when 'tier'
       generate_full_topology(:num_backends => 1, :num_frontends => 1)
     end
+  end
+
+  # adding this just to get something end to end in CI
+  def generate_standalone_topology()
+    name = 'pwcsta'
+    # Define provider agnostic layout
+    @config[:layout] = { :topology => @options.topology,
+      :api_fqdn => 'api.opscode.aws',
+      :manage_fqdn => 'manage.opscode.aws',
+      :analytics_fqdn => 'analytics.opscode.aws',
+      :standalones => {
+        "#{name}-standalone" => {
+          :hostname => "#{name}-standalone.centos.aws",
+          :ebs_optimized => true,
+          :instance_type => 'm3.xlarge'
+        }
+      }
+    }
   end
 
   def generate_full_topology(options)
