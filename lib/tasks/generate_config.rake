@@ -20,6 +20,7 @@ class GenerateConfig
     :default_subnet_id => 'subnet-fc73b499',
     :default_region => 'us-west-2',
     :image_map => {
+
       # Debian
       'debian-6' => 'ami-8ef27fbe', # ebs-magnetic
       'debian-7' => 'ami-40760270', # ebs-magnetic
@@ -45,6 +46,9 @@ class GenerateConfig
       # RedHat 32-bit
       'rhel-5-i386' => 'ami-62e27c52', # ebs-magnetic
       'rhel-6-i386' => 'ami-dc8ffaec', # ebs-magnetic
+
+      # Centos
+      'el-6'     => 'ami-937502a3', #ebs-magnetic
 
       # SLES
       'sles-11-sp2' => 'ami-e42da0d4', # ebs-magnetic
