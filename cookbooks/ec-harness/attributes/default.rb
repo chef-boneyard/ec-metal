@@ -39,3 +39,5 @@ default['harness']['vm_mountpoint'] = '/tmp/cache'
 # SSH key distribution for inter-machine trust
 default['harness']['root_ssh']['privkey'] = File.read(File.join(repo_path, 'keys', 'id_rsa'))
 default['harness']['root_ssh']['pubkey'] = File.read(File.join(repo_path, 'keys', 'id_rsa.pub'))
+
+default['harness']['fog']['keypair_name'] = ENV['ECM_KEYPAIR_NAME'] || "#{ENV['USER']}@#{::File.basename(harness_dir)}"
