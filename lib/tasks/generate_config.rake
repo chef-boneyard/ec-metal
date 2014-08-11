@@ -138,6 +138,9 @@ class GenerateConfig
           :ami_id => ami,
           :ssh_username => 'root',
           :use_private_ip_for_ssh => false }
+
+      @config['ec2_options']['keypair_name'] = ENV['ECM_KEYPAIR_NAME'] unless ENV['ECM_KEYPAIR_NAME'].nil?
+
     end
   end
 
