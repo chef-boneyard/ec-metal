@@ -49,7 +49,6 @@ desc 'Spin up load-testing machines'
 task :loadtesters => [:berks_install] do
   # run twice because AWS
   system("#{harness_dir}/bin/chef-client -z -o ec-harness::loadtesters")
-  system("#{harness_dir}/bin/chef-client -z -o ec-harness::loadtesters")
 end
 
 desc 'Run the load test'
