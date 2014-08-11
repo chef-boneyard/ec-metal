@@ -31,6 +31,13 @@ execute 'Remove /mnt from fstab' do
   only_if 'grep /mnt /etc/fstab'
 end
 
+# hostsfile
+hostsfile_entry node.ipaddress do
+  hostname node.name
+  aliases node['fqdn'] if node['fqdn']
+  unique true
+end
+
 case node['platform_family']
 when 'rhel'
   %w(gcc libxml2-devel libxslt-devel).each do |develpkg|
@@ -98,7 +105,7 @@ execute 'container init' do
   "--validation-client-name ponyville-validator" +
   "-r 'recipe[openssh]' -b"
   action :run
-  not_if 'docker images |grep ponyville/ubuntu'
+  notifies :run, "execute[container build]"
 end
 
 execute 'fucking ssl stfu' do
@@ -116,7 +123,12 @@ file '/var/chef/dockerfiles/ponyville/ubuntu/chef/.node_name' do
 end
 
 execute 'container build' do
-  command "knife container docker build ponyville/ubuntu --no-berks || exit 0"
-  action :run
-  not_if 'docker images |grep ponyville/ubuntu'
+  command "knife container docker build ponyville/ubuntu --no-berks -c /etc/chef/client.rb"
+  action :nothing
+  notifies :run, "execute[container verify]"
+end
+
+execute "container verify" do
+  command 'docker run ponyville/ubuntu "chef-init --verify"'
+  action :nothing
 end
