@@ -39,4 +39,7 @@ end
     unless VALID_VARIANTS.include? args.variant
       abort("ERROR: #{args.variant} not recognized.  Valid variants are #{VALID_VARIANTS.join(', ')}")
     end
+
+      @config['ec2_options']['keypair_name'] = ENV['ECM_KEYPAIR_NAME'] unless ENV['ECM_KEYPAIR_NAME'].nil?
+
   end
