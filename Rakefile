@@ -79,10 +79,8 @@ task :keygen do
   keydir = File.join(repo_dir, 'keys')
   FileUtils.mkdir_p keydir
   if Dir["#{keydir}/*"].empty?
-    system("ssh-keygen -t rsa -P '' -q -f #{keydir}/id_rsa")
-    if ENV['ECM_KEYPAIR_NAME']
-      system("ssh-keygen -C #{ENV['ECM_KEYPAIR_NAME']} -P '' -q -f #{keydir}/id_rsa")
-    end
+    comment = ENV['ECM_KEYPAIR_NAME'].nil? ? "" : "-C #{ENV['ECM_KEYPAIR_NAME']}"
+    system("ssh-keygen #{comment} -P '' -q -f #{keydir}/id_rsa")
   end
 end
 
