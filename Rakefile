@@ -80,7 +80,9 @@ task :keygen do
   FileUtils.mkdir_p keydir
   if Dir["#{keydir}/*"].empty?
     comment = ENV['ECM_KEYPAIR_NAME'].nil? ? "" : "-C #{ENV['ECM_KEYPAIR_NAME']}"
-    system("ssh-keygen #{comment} -P '' -q -f #{keydir}/id_rsa")
+    command = "ssh-keygen #{comment} -P '' -q -f #{keydir}/id_rsa"
+    puts "Keygen: #{command}"
+    system(command)
   end
 end
 
