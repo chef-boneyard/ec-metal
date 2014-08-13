@@ -72,6 +72,7 @@ action :install do
           topo.is_frontend?(vmname)
         recipe 'private-chef::pushy' if node['harness']['pushy_package']
         recipe 'private-chef::tools'
+        recipe 'private-chef::loadbalancer' if topo.is_frontend?(vmname)
 
         converge true
       end
