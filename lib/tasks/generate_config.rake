@@ -184,51 +184,34 @@ class GenerateConfig
   # Lower priority:
   # Figure out how to get a unique ip for the backend VIP (HA only)
   # Irving has the most context on this (https://chef.leankit.com/Boards/View/97159481#workflow-view)
+
+  # EC2 notes:
+  # Look at example files for defaults
+  # Think about using smaller instances/test (near term)
+  # http://docs.getchef.com/enterprise/install_server_be.html
+
   def generate_full_topology(options)
-    # Define provider agnostic layout
     @config[:layout] = { :topology => @options.topology,
       :api_fqdn => 'api.opscode.piab',
       :manage_fqdn => 'manage.opscode.piab',
       :analytics_fqdn => 'analytics.opscode.piab',
-      :backend_vip => {
-        :hostname => 'backend.opscode.piab',
-        :ipaddress =>  '33.33.33.21'
-      },
       :backends => {},
       :frontends => {}
       }
 
-    case @options.provider
-    when 'vagrant'
-
-      ip = 21
-      cluster_ip = 5
       options[:num_backends].times do |n|
-        backend =
-        {
-          :hostname => "backend#{n}.opscode.piab",
-          :memory => '2560',
-          :cpus => '2',
-          :ipaddress => "33.33.33.#{ip}",
-          :cluster_ipaddress => "33.33.34.#{cluster_ip}"
-        }
+        backend = @options.provider == 'vagrant' ? generate_vagrant_backend(n) : generate_ec2_backend(n)
         backend[:bootstrap] = true if n == 0
         @config[:layout][:backends]["backend#{n}"] = backend
-        ip += 1
-        cluster_ip += 1
       end
+
       options[:num_frontends].times do |n|
-        @config[:layout][:frontends]["frontend#{n}"] = {
-          :hostname => "frontend#{n}.opscode.piab",
-          :memory => '1024',
-          :cpus => '1',
-          :ipaddress => "33.33.33.#{ip}",
-        }
-        ip += 1
+        @config[:layout][:frontends]["frontend#{n}"] =
+          @options.provider == 'vagrant' ? generate_vagrant_frontend(n) : generate_ec2_backend(n)
       end
 
       if options[:num_backends] > 1
-        vip = { :hostname => "backend.#{@options.platform}.vagrant",
+        vip = { :hostname => "backend.opscode.piab",
                 :ipaddress => "33.33.33.20" }
       else
         backend_name = @config[:layout][:backends].keys.first
@@ -243,12 +226,42 @@ class GenerateConfig
         :heartbeat_device => "eth1"
        }
 
-      add_vagrant_host_mapping()
-    when 'ec2'
-      # Look at example files for defaults
-      # Think about using smaller instances/test (near term)
-      # http://docs.getchef.com/enterprise/install_server_be.html
-    end
+      add_vagrant_host_mapping() if @options.provider == 'vagrant'
+  end
+
+  def generate_vagrant_backend(n)
+    {
+      :hostname => "backend#{n}.opscode.piab",
+      :memory => '2560',
+      :cpus => '2',
+      :ipaddress => "33.33.33.#{21+n}",
+      :cluster_ipaddress => "33.33.34.#{5+n}"
+    }
+  end
+
+  def generate_ec2_backend(n)
+    {
+      :hostname => "backend#{n}.opscode.piab",
+      :instance_type => "c3.xlarge",
+      :ebs_optimized => true
+    }
+  end
+
+  def generate_vagrant_frontend(n)
+    {
+       :hostname => "frontend#{n}.opscode.piab",
+       :memory => '1024',
+       :cpus => '1',
+       :ipaddress => "33.33.33.#{21 + @config[:layout][:backends].keys.size + n}",
+    }
+  end
+
+  def generate_ec2_frontend(n)
+    {
+      :hostname => "frontend#{n}.opscode.piab",
+      :ebs_optimized => false,
+      :instance_type => "m3.medium"
+    }
   end
 
   def add_vagrant_host_mapping
