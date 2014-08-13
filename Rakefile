@@ -45,16 +45,18 @@ task :pivotal => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
 end
 
 desc 'Spin up load-testing machines'
-task :loadtesters => [:berks_install] do
+task :loadtesters do
   # run twice because AWS
   system("#{harness_dir}/bin/chef-client -z -o ec-harness::loadtesters")
 end
+task :setup_loadtest => :loadtesters
 
 desc 'Run the load test'
 task :run_loadtest do
-  num_loadtesters = 40 # sync this number with loadtesters recipe
-  num_groups = 5
-  num_containers = 1000
+  config = get_config
+  num_loadtesters = config['loadtesters']['num_loadtesters']
+  num_groups = config['loadtesters']['num_groups']
+  num_containers = config['loadtesters']['num_containers']
   Dir.chdir(File.join(harness_dir, 'users', 'pinkiepie')) {
     (1..num_loadtesters).group_by { |i| i%num_groups }.each do |k,v|
       search_req = ""
