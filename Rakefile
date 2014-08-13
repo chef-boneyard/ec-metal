@@ -87,7 +87,7 @@ end
 
 desc "Copies pivotal.pem from chef server and generates knife.rb in the repo dir"
 task :pivotal => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
-  system("#{harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
+  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
 end
 
 desc 'Destroy all VMs'
