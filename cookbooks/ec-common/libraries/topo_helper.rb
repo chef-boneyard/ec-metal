@@ -100,6 +100,10 @@ class TopoHelper
     bootstrap_node.values.first['hostname']
   end
 
+  def bootstrap_host_ip
+    bootstrap_node.values.first['ipaddress']
+  end
+
   def bootstrap_node
     if found_topo_types.include?('backends')
       @ec_config['backends']

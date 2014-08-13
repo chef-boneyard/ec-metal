@@ -16,11 +16,17 @@ server "<%= options['hostname'] || "#{name}.opscode.piab" %>",
   :role => "frontend"
 <% end -%>
 
+<% if node['private-chef']['topology'] == 'ha' -%>
 <% if node['private-chef']['backend_vip'] -%>
 backend_vip "<%= node['private-chef']['backend_vip']['hostname'] || "backend.opscode.piab" %>",
  :ipaddress => "<%= node['private-chef']['backend_vip']['ipaddress'] %>",
  :device => "<%= node['private-chef']['backend_vip']['device'] %>",
  :heartbeat_device => "<%= node['private-chef']['backend_vip']['heartbeat_device'] %>"
+<% end -%>
+<% elsif node['private-chef']['topology'] == 'tier' -%>
+<% topology = TopoHelper.new(ec_config: node['private-chef']) -%>
+backend_vip "<%= topology.bootstrap_host_name %>",
+ :ipaddress => "<%= topology.bootstrap_host_ip %>"
 <% end -%>
 
 api_fqdn "<%= node['private-chef']['api_fqdn'] %>"
