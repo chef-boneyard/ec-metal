@@ -176,6 +176,14 @@ class GenerateConfig
     }
   end
 
+
+  # Differences between HA & tiered:
+  # HA has a seperate backend VIP
+  # Tiered has a backend VIP section, which just points to the single backend
+
+  # Lower priority:
+  # Figure out how to get a unique ip for the backend VIP (HA only)
+  # Irving has the most context on this (https://chef.leankit.com/Boards/View/97159481#workflow-view)
   def generate_full_topology(options)
     # Define provider agnostic layout
     @config[:layout] = { :topology => @options.topology,
@@ -219,29 +227,44 @@ class GenerateConfig
         ip += 1
       end
 
-      @config[:layout][:virtual_hosts] = {
-        "private-chef.opscode.piab" => "33.33.33.23",
-        "manage.opscode.piab" => "33.33.33.23",
-        "api.opscode.piab" => "33.33.33.23",
-        "analytics.opscode.piab" => "33.33.33.23",
-        "backend.opscode.piab" => "33.33.33.21"
-      }
-      @config[:layout][:backends].each do |k,v|
-        @config[:layout][:virtual_hosts][v[:hostname]] = v[:ipaddress]
-      end
-      @config[:layout][:frontends].each do |k,v|
-        @config[:layout][:virtual_hosts][v[:hostname]] = v[:ipaddress]
+      if options[:num_backends] > 1
+        vip = { :hostname => "backend.#{@options.platform}.vagrant",
+                :ipaddress => "33.33.33.20" }
+      else
+        backend_name = @config[:layout][:backends].keys.first
+        vip = @config[:layout][:backends][backend_name]
       end
 
+      @config[:layout][:backend_vip] = {
+        :hostname => vip[:hostname],
+        :ipaddress => vip[:ipaddress],
+        # TODO(jmink) figure out a smarter way to determine devices
+        :device => "eth0",
+        :heartbeat_device => "eth1"
+       }
+
+      add_vagrant_host_mapping()
     when 'ec2'
-      @config[:layout][:backends].each do |k,v|
-        v[:ebs_optimized] = true
-        v[:instance_type] = '??'
-      end
-      @config[:layout][:frontends].each do |k,v|
-        v[:ebs_optimized] = true
-        v[:instance_type] = '??'
-      end
+      # Look at example files for defaults
+      # Think about using smaller instances/test (near term)
+      # http://docs.getchef.com/enterprise/install_server_be.html
+    end
+  end
+
+  def add_vagrant_host_mapping
+    @config[:layout][:virtual_hosts] = {
+      "private-chef.opscode.piab" => "33.33.33.23",
+      "manage.opscode.piab" => "33.33.33.23",
+      "api.opscode.piab" => "33.33.33.23",
+      "analytics.opscode.piab" => "33.33.33.23",
+      "backend.opscode.piab" => "33.33.33.21",
+      @config[:layout][:backend_vip][:hostname] => @config[:layout][:backend_vip][:ipaddress]
+    }
+    @config[:layout][:backends].each do |k,v|
+      @config[:layout][:virtual_hosts][v[:hostname]] = v[:ipaddress]
+    end
+    @config[:layout][:frontends].each do |k,v|
+      @config[:layout][:virtual_hosts][v[:hostname]] = v[:ipaddress]
     end
   end
 end
