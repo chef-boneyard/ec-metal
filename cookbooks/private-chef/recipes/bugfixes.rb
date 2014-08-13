@@ -120,13 +120,13 @@ cookbook_file '/opt/opscode/embedded/upgrades/001/009_migrate_authz.rb' do
   action :nothing
 end
 
-# yet-unreported: bump up ['private_chef']['oc_chef_authz']['http_init_count']
-cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/attributes/default.rb' do
-  source 'attributes-default.rb'
+# yet-unreported: enabling tweaking of oc_chef_authz attributes for erchef
+cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/libraries/private_chef.rb' do
+  source 'libraries-private_chef.rb'
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && topology.is_backend?(node.name) }
+  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
