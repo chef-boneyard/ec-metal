@@ -39,6 +39,11 @@ class FogHelper
     @elb.load_balancers.get(id) ? true : false
   end
 
+  def get_elb_dns_name(id)
+    @elb ||= get_elb
+    @elb.load_balancers.get(id).dns_name
+  end
+
   def get_root_blockdevice
     ami_desc = describe_ami.first
     ami_desc['blockDeviceMapping'].

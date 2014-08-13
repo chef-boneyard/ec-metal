@@ -74,6 +74,7 @@ action :install do
         # ohai_hints { 'ec2' } 
         # but this does
         file '/etc/chef/ohai/hints/ec2.json', { :content => '' } # work around until chef-metal-fog PR is merged
+        recipe 'private-chef::loadbalancer' if topo.is_frontend?(vmname)
 
         converge true
       end
