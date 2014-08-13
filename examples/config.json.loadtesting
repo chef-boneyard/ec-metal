@@ -14,6 +14,11 @@
   "reporting_package": "https://s3.amazonaws.com/opscode-private-chef/ubuntu/12.04/x86_64/opscode-reporting_1.1.5-1_amd64.deb",
   "apply_ec_bugfixes": true,
   "lemme_doit": false,
+  "loadtesters": {
+    "num_loadtesters": 50,
+    "num_groups": 5,
+    "num_containers": 800
+  },
   "packages": {
   },
   "layout": {

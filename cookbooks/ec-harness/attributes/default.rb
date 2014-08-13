@@ -41,4 +41,4 @@ default['harness']['root_ssh']['privkey'] = File.read(File.join(repo_path, 'keys
 default['harness']['root_ssh']['pubkey'] = File.read(File.join(repo_path, 'keys', 'id_rsa.pub'))
 
 # load testers
-default['harness']['num_loadtesters'] = 40
+default['harness']['loadtesters'] = config_json['loadtesters']
