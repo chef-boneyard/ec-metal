@@ -115,3 +115,9 @@ if node['harness']['provider'] == 'ec2' && node['harness']['ec2']['elb'] == true
   #fog.get_iam.delete_server_certificate('api.precise.aws')
   #fog.get_elb.load_balancers.get('ip-ub-backend1-precise-aws').destroy
 end
+
+
+if node['harness']['provider'] == 'ec2' && node['harness']['ec2']['elb'] == true
+  #fog.get_iam.delete_server_certificate('api.precise.aws')
+  #fog.get_elb.load_balancers.get('ip-ub-backend1-precise-aws').destroy
+end
