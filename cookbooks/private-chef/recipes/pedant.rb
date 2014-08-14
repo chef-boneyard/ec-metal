@@ -8,12 +8,12 @@ execute 'run pedant' do
   only_if { node['run-pedant'] }
 end
 
-execute 'run pedant in default-org mode' do
-  if node['osc-install']
-    fail '--default-org mode is not available for OSC'
-  else
-    command '/opt/opscode/bin/private-chef-ctl test --use-default-org'
+# OSC does not have orgs and does not understand default orgs
+# Perhaps add a log message here
+unless node['osc-install']
+  execute 'run pedant in default-org mode' do
+    command '/opt/opscode/bin/private-chef-ctl test --use-default-org --smoke'
+    action :run
+    only_if { node['run-pedant'] && node['private-chef']['default_orgname'] }
   end
-  action :run
-  only_if { node['run-pedant'] && node['private-chef']['default_orgname'] }
 end
