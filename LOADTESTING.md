@@ -33,7 +33,33 @@ loadtester size/count/wave size tuning settings in config.json:
 
 ## Performance Characteristics
 
-* an m3.2xlarge standalone chef server can handle approx 8 simultaneous loadtesting machines firing up docker containers sequentially {1..1000}
+### Standalone performance test
 
+* 1x m3.2xlarge BE  (Ubuntu 14.04.1 hvm-ssd,  8 vCPU, 30 GB RAM)
+* 40x m3.2xlarge loadtesters ( Ubuntu 14.04.1 hvm-ssd, ~1000 Docker containers each)
+* 8 simultaneous loadtesting machines firing up docker containers sequentially {1..1000}
+  * 40k nodes registered in ~3.5 hours
+  * all nodes continue to check in every 30 minutes with a 300 second splay
+
+### Tier performance test
+Using example config: https://github.com/opscode/ec-metal/blob/irving/loadtesters/examples/config.json.loadtesting-tier
+
+* 4x m3.xlarge FE  (Ubuntu 14.04.1 hvm-ssd,  4 vCPU, 15 GB RAM)
+* 1x m3.2xlarge BE  (Ubuntu 14.04.1 hvm-ssd,  8 vCPU, 30 GB RAM)
+* 60x m3.2xlarge loadtesters ( Ubuntu 14.04.1 hvm-ssd, ~700 Docker containers each)
+  * 40k nodes registered in ~1.75 hours
+  * all nodes continue to check in every 30 minutes with a 300 second splay
+
+* During test
+  - average 30% CPU util on BE,  60% util on FE
+  - Average 7500 requests/minute (125/second)
+  - Average request latency 120ms
+  - total 12 (twelve) 500 errors
+
+* After test
+  - average 16% CPU util on BE,  30% util on FE
+  - Average 6000 requests/minute (100/second)
+  - Average request latency 60ms
+  - no 500 errors
 
 ## TODO
