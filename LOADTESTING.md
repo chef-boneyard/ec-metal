@@ -27,7 +27,7 @@ loadtester size/count/wave size tuning settings in config.json:
 
 ## Notes
 
-* Make sure you read and understand what `ec-harness::loadtesters`  and `docker_host::default` do
+* Make sure you read and understand what `ec-harness::loadtesters`  and `loadtester_host::default` do
 * Review the tuning settings implemented in config.json
 * A m3.2xlarge loadtester amazon machine can handle running approx 1000 docker containers running the chef-client cookbook only (daemonized chef-client that runs every 30 minutes)
 
