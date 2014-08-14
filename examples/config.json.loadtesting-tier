@@ -17,7 +17,7 @@
   "lemme_doit": false,
   "loadtesters": {
     "num_loadtesters": 60,
-    "num_groups": 3,
+    "num_groups": 5,
     "num_containers": 700
   },
   "packages": {
