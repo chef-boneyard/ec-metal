@@ -22,11 +22,16 @@ class GenerateConfig
     # TODO(jmink) Error handling
     @config["default_package"] = ENV['ECM_TARGET_PACKAGE_NAME']
     @config["manage_package"] = ENV['ECM_DEPENDENT_PACKAGE_NAME'] unless ENV['ECM_DEPENDENT_PACKAGE_NAME'].nil?
+    @config['run_pedant'] = !(ENV['ECM_RUN_PEDANT'].nil? || ENV['ECM_RUN_PEDANT'].empty?)
 
     @config[:packages] = {}
     set_topology()
 
     # TODO(jmink) Deal with any weird open source bits & ensure upgrade is set up correctly
+  end
+
+  def default_orgname
+    ENV['ECM_DEFAULT_ORGNAME']
   end
 
   def set_provider_data()
@@ -52,6 +57,7 @@ class GenerateConfig
     # Define provider agnostic layout
     @config[:layout] = { :topology => @options.topology,
       :api_fqdn => 'api.opscode.aws',
+      :default_orgname => default_orgname,
       :manage_fqdn => 'manage.opscode.aws',
       :analytics_fqdn => 'analytics.opscode.aws',
       :standalones => {
@@ -72,6 +78,7 @@ class GenerateConfig
   def generate_full_topology(options)
     @config[:layout] = { :topology => @options.topology,
       :api_fqdn => 'api.opscode.piab',
+      :default_orgname => default_orgname,
       :manage_fqdn => 'manage.opscode.piab',
       :analytics_fqdn => 'analytics.opscode.piab',
       :backends => {},
@@ -80,7 +87,8 @@ class GenerateConfig
 
       options[:num_backends].times do |n|
         backend = generate_backend(n)
-        backend[:bootstrap] = true if n == 0 @config[:layout][:backends]["backend#{n}"] = backend
+        backend[:bootstrap] = true if n == 0
+        @config[:layout][:backends]["backend#{n}"] = backend
       end
       options[:num_frontends].times do |n|
         @config[:layout][:frontends]["frontend#{n}"] = generate_frontend(n)
