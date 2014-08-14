@@ -68,16 +68,7 @@ class GenerateConfig
   # Differences between HA & tiered:
   # HA has a seperate backend VIP
   # Tiered has a backend VIP section, which just points to the single backend
-
-  # Lower priority:
-  # Figure out how to get a unique ip for the backend VIP (HA only)
-  # Irving has the most context on this (https://chef.leankit.com/Boards/View/97159481#workflow-view)
-
-  # EC2 notes:
-  # Look at example files for defaults
-  # Think about using smaller instances/test (near term)
-  # http://docs.getchef.com/enterprise/install_server_be.html
-
+  # Standalone has no backend VIP section
   def generate_full_topology(options)
     @config[:layout] = { :topology => @options.topology,
       :api_fqdn => 'api.opscode.piab',
@@ -89,10 +80,8 @@ class GenerateConfig
 
       options[:num_backends].times do |n|
         backend = generate_backend(n)
-        backend[:bootstrap] = true if n == 0
-        @config[:layout][:backends]["backend#{n}"] = backend
+        backend[:bootstrap] = true if n == 0 @config[:layout][:backends]["backend#{n}"] = backend
       end
-
       options[:num_frontends].times do |n|
         @config[:layout][:frontends]["frontend#{n}"] = generate_frontend(n)
       end
