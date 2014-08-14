@@ -91,8 +91,7 @@ class GenerateConfig
 
       options[:num_backends].times do |n|
         backend = generate_backend(n)
-        backend[:bootstrap] = true if n == 0
-        @config[:layout][:backends]["backend#{n}"] = backend
+        backend[:bootstrap] = true if n == 0 @config[:layout][:backends]["backend#{n}"] = backend
       end
       options[:num_frontends].times do |n|
         @config[:layout][:frontends]["frontend#{n}"] = generate_frontend(n)
