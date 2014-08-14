@@ -95,7 +95,7 @@ Follow the instructions specific to the environment of your choosing.
 1. Copy `config.json.example` to `config.json`
 1. Edit Vagrant [config.json](#vagrant_conf)
   * **Note on memory:** HA topologies with DRBD can be demanding on your system. Usage has showed the backend systems require at least 2.5G RAM and the frontend requires at least 1G RAM to order to install and operate nominally.
-1. Download the private-chef packages to the ec-metal/cache directory or point to your own installer cache with `$CACHE_PATH`
+1. Download the private-chef packages to the ec-metal/cache directory or point to your own installer cache with `$ECM_CACHE_PATH`
 1. Run [rake tasks](#tasks)
 
 <a name="vagrant_conf" />

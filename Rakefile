@@ -17,43 +17,43 @@ end
 
 desc 'Install required Gems into the vendor/bundle directory'
 task :bundle do
-  system('bundle install --path vendor/bundle --binstubs')
+  sh('bundle install --path vendor/bundle --binstubs')
 end
 
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
 task :up => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
-  system("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha")
+  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha")
 end
 task :start => :up
 
 desc 'Bring the VMs online and then UPGRADE TORTURE'
 task :upgrade_torture => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
-  system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade_torture")
+  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade_torture")
 end
 
 desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
 task :upgrade => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
-  system("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
+  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
 end
 
 desc "Copies pivotal.pem from chef server and generates knife.rb in the repo dir"
 task :pivotal => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
-  system("#{harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
+  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
 end
 
 desc 'Destroy all VMs'
 task :destroy do
-  system("#{harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
+  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
 end
 task :cleanup => :destroy
 
 desc 'SSH to a machine like so: rake ssh[backend1]'
 task :ssh, [:machine] do |t,arg|
   Dir.chdir(File.join(harness_dir, 'vagrant_vms')) {
-    system("vagrant ssh #{arg.machine}")
+    sh("vagrant ssh #{arg.machine}")
   }
 end
 
@@ -62,7 +62,7 @@ end
   desc "Equivalent to running: vagrant #{command}"
   task :"#{command}" do
     Dir.chdir(File.join(harness_dir, 'vagrant_vms')) {
-      system("vagrant #{command}")
+      sh("vagrant #{command}")
     }
   end
 end
@@ -79,7 +79,10 @@ task :keygen do
   keydir = File.join(repo_dir, 'keys')
   FileUtils.mkdir_p keydir
   if Dir["#{keydir}/*"].empty?
-    system("ssh-keygen -t rsa -P '' -q -f #{keydir}/id_rsa")
+    comment = ENV['ECM_KEYPAIR_NAME'].nil? ? "" : "-C #{ENV['ECM_KEYPAIR_NAME']}"
+    command = "ssh-keygen #{comment} -P '' -q -f #{keydir}/id_rsa"
+    puts "Keygen: #{command}"
+    sh(command)
   end
 end
 
@@ -99,8 +102,8 @@ task :remove_hosts do
 end
 
 task :cachedir do
-  if ENV['CACHE_PATH'] && Dir.exists?(ENV['CACHE_PATH'])
-    cachedir = ENV['CACHE_PATH']
+  if ENV['ECM_CACHE_PATH'] && Dir.exists?(ENV['ECM_CACHE_PATH'])
+    cachedir = ENV['ECM_CACHE_PATH']
   else
     cachedir = File.join(harness_dir, 'cache')
     FileUtils.mkdir_p cachedir
@@ -110,8 +113,8 @@ end
 
 task :berks_install do
   cookbooks_path = File.join(ENV['REPO_PATH'], 'vendor/cookbooks')
-  system("rm -r #{cookbooks_path}") if Dir.exists?(cookbooks_path)
-  system("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
+  sh("rm -r #{cookbooks_path}") if Dir.exists?(cookbooks_path)
+  sh("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
 end
 
 # Fix to work with topohelper
@@ -133,7 +136,7 @@ end
 #         end
 #         cmd = "ssh #{ssh_username}@#{attrs['ipaddress']} -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \"#{arg[:command]}\""
 #         puts "Executing '#{arg[:command]}' on #{arg[:machine]}"
-#         system(cmd)
+#         sh(cmd)
 #       end
 #     end
 #   end

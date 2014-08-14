@@ -16,6 +16,7 @@ repo = ENV['REPO_PATH']
 FileUtils.mkdir_p(repo)
 chef_repo_path repo
 keys_dir = ::File.join(repo, 'keys')
+keypair_name = ENV['ECM_KEYPAIR_NAME']
 FileUtils.mkdir_p(keys_dir)
 log_level                :info
 log_location             STDOUT
@@ -27,7 +28,10 @@ cookbook_path            [::File.join(harness_dir, 'cookbooks'),
                          ]
 verify_api_cert          true
 private_key_paths	 [keys_dir]
-private_keys		 "#{ENV['USER']}@#{::File.basename(harness_dir)}" => ::File.join(keys_dir, 'id_rsa')
-public_keys		 "#{ENV['USER']}@#{::File.basename(harness_dir)}" => ::File.join(keys_dir, 'id_rsa.pub')
+
+keypair_name ||= "#{ENV['USER']}@#{::File.basename(harness_dir)}"
+private_keys   keypair_name => ::File.join(keys_dir, 'id_rsa')
+public_keys    keypair_name => ::File.join(keys_dir, 'id_rsa.pub')
+
 chef_zero		 :port => find_open_port
 lockfile                 ::File.join(harness_dir, 'chef-client-running.pid')

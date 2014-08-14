@@ -33,7 +33,11 @@ with_driver "fog:AWS:default:#{node['harness']['ec2']['region']}"
 with_machine_options :ssh_username => node['harness']['ec2']['ssh_username'],
   :use_private_ip_for_ssh => node['harness']['ec2']['use_private_ip_for_ssh']
 
-keypair_name = "#{ENV['USER']}@#{::File.basename(node['harness']['harness_dir'])}"
+
+# override all keypair settings if passed as env var
+node.set['harness']['ec2']['keypair_name'] = ENV['ECM_KEYPAIR_NAME'] unless ENV['ECM_KEYPAIR_NAME'].nil?
+
+keypair_name = node['harness']['ec2']['keypair_name'] || "#{ENV['USER']}@#{::File.basename(harness_dir)}"
 
 fog_key_pair keypair_name do
   private_key_path File.join(repo_path, 'keys', 'id_rsa')
