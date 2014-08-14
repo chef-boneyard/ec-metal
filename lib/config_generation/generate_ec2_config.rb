@@ -2,6 +2,11 @@ require './lib/config_generation/generate_config.rb'
 
 class GenerateEc2Config < GenerateConfig
 
+  # EC2 notes:
+  # Think about using smaller instances/test (near term)
+  # This is based on:
+  # http://docs.getchef.com/enterprise/install_server_be.html
+
   # TODO(jmink) Move this data to a shared location
   EC2_DATA = {
     :default_subnet_id => 'subnet-c88354ad',
