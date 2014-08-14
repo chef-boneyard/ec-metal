@@ -7,13 +7,12 @@ include_recipe "ec-harness::#{node['harness']['provider']}"
 topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['loadtesters'])
 if node['harness']['ec2']
   fog = FogHelper.new(region: node['harness']['ec2']['region'])
+  elb_name = topo.bootstrap_host_name.gsub(/[.]/, '-')
 end
 
 # use bootstrap_host_name - it should be in /etc/hosts already
 # rsync the /srv/piab/users dir down to harness dir
 # use pem from signing dir
-
-elb_name = topo.bootstrap_host_name.gsub(/[.]/, '-')
 
 private_key_path = ::File.join(node['harness']['repo_path'], 'keys', 'id_rsa')
 users_path = ::File.join(node['harness']['harness_dir'], 'users')
@@ -87,7 +86,7 @@ machine_batch 'fly_my_pretties_fly' do
           add_machine_options node['harness']['provisioner_options'][vmname]
           attribute 'root_ssh', node['harness']['root_ssh'].to_hash
 
-          recipe 'docker_host::default'
+          recipe 'loadtester_host::default'
           file '/etc/chef/validation.pem', chef_org_validation_pem
           file '/etc/chef/ohai/hints/ec2.json', '/etc/hosts.equiv'  #fixme, make an empty file
           # converge true
