@@ -57,15 +57,20 @@ task :run_loadtest do
   num_loadtesters = config['loadtesters']['num_loadtesters']
   num_groups = config['loadtesters']['num_groups']
   num_containers = config['loadtesters']['num_containers']
+  subwave_size = 100
   Dir.chdir(File.join(harness_dir, 'users', 'pinkiepie')) {
-    (1..num_loadtesters).group_by { |i| i%num_groups }.each do |k,v|
-      search_req = ""
-      v.map { |i| search_req += "name:*loadtester-#{i} OR " }
-      search_req.chomp!(' OR ')
-      puts "Starting group at #{Time.now}: #{search_req}"
-      system("#{harness_dir}/bin/knife ssh '#{search_req}' -a cloud.public_ipv4 'for i in {1..#{num_containers}}; do sudo docker run -d ponyville/ubuntu; done' -x ubuntu -i #{repo_dir}/keys/id_rsa")
-      puts "Finishing group at #{Time.now}: #{search_req}"
-      puts "----------------------------------------------------------------\n\n\n\n"
+    1.upto(num_containers/subwave_size).each do
+    # Each subwave (100 nodes)
+      (1..num_loadtesters).group_by { |i| i%num_groups }.each do |k,v|
+      # each group
+        search_req = ""
+        v.map { |i| search_req += "name:*loadtester-#{i} OR " }
+        search_req.chomp!(' OR ')
+        puts "Starting group at #{Time.now}: #{search_req}"
+        system("#{harness_dir}/bin/knife ssh '#{search_req}' -a cloud.public_ipv4 'for i in {1..#{subwave_size}}; do sudo docker run -d ponyville/ubuntu; done' -x ubuntu -i #{repo_dir}/keys/id_rsa")
+        puts "Finishing group at #{Time.now}: #{search_req}"
+        puts "----------------------------------------------------------------\n\n\n\n"
+      end
     end
   }
 end
