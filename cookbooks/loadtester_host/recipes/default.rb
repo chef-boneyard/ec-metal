@@ -52,8 +52,22 @@ end
 # hostsfile
 hostsfile_entry node.ipaddress do
   hostname node.name
-  aliases node['fqdn'] if node['fqdn']
+  aliases [node['fqdn']] if node['fqdn']
   unique true
+end
+
+execute 'force-hostname' do
+  command "hostname #{node.name}"
+  action :run
+  not_if { node.name == `/bin/hostname` }
+end
+
+file '/etc/hostname' do
+  action :create
+  owner 'root'
+  group 'root'
+  mode '0644'
+  content "#{node.name}\n"
 end
 
 case node['platform_family']
@@ -114,9 +128,11 @@ directory '/etc/chef/secure/certs' do
   recursive true
 end
 
+docker_repo = 'ponyville'
 
 execute 'container init' do
-  command "knife container docker init ponyville/ubuntu --include-credentials " +
+  command "knife container docker init #{docker_repo}/ubuntu --include-credentials " +
+  "-f chef/ubuntu-14.04 " +
   "--force --trusted-certs /etc/chef/secure/certs/ " +
   "--server-url #{Chef::Config[:chef_server_url]} " +
   "--validation-key /etc/chef/validation.pem " +
@@ -124,30 +140,30 @@ execute 'container init' do
   "-r 'recipe[chef-client]'"
   action :run
   notifies :run, "execute[container build]"
-  not_if "docker images | grep ponyville/ubuntu"
+  not_if "docker images | grep #{docker_repo}/ubuntu"
 end
 
 execute 'fucking ssl stfu' do
-  command 'sed -i s/ssl_verify_mode.*/verify_api_cert\ false/ /var/chef/dockerfiles/ponyville/ubuntu/chef/client.rb'
+  command 'sed -i s/ssl_verify_mode.*/verify_api_cert\ false/ /var/chef/dockerfiles/' + docker_repo + '/ubuntu/chef/client.rb'
   action :run
-  not_if 'grep verify_api_cert /var/chef/dockerfiles/ponyville/ubuntu/chef/client.rb'
+  not_if "grep verify_api_cert /var/chef/dockerfiles/#{docker_repo}/ubuntu/chef/client.rb"
 end
 
-file '/var/chef/dockerfiles/ponyville/ubuntu/chef/.node_name' do
+file "/var/chef/dockerfiles/#{docker_repo}/ubuntu/chef/.node_name" do
   action :create
   owner "root"
   group "root"
   mode "0644"
   content "build-#{node.name}\n"
-end
+ end
 
 execute 'container build' do
-  command "knife container docker build ponyville/ubuntu --no-berks -c /etc/chef/client.rb"
+  command "knife container docker build #{docker_repo}/ubuntu --no-berks -c /etc/chef/client.rb"
   action :nothing
   notifies :run, "execute[container verify]"
 end
 
 execute "container verify" do
-  command 'docker run ponyville/ubuntu "chef-init --verify"'
+  command "docker run #{docker_repo}/ubuntu '--verify'"
   action :nothing
 end

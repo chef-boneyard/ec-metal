@@ -7,6 +7,7 @@ require 'chef/config'
 topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['loadtesters'])
 if node['harness']['ec2']
   fog = FogHelper.new(region: node['harness']['ec2']['region'])
+  elb_name = topo.bootstrap_host_name.gsub(/[.]/, '-')
 end
 
 # use bootstrap_host_name - it should be in /etc/hosts already
