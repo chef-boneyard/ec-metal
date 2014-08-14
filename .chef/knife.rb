@@ -28,10 +28,12 @@ cookbook_path            [::File.join(harness_dir, 'cookbooks'),
                          ]
 verify_api_cert          true
 private_key_paths	 [keys_dir]
-if keypair_name
+if keypair_name.nil?
+  private_keys   "#{ENV['USER']}@#{::File.basename(harness_dir)}" => ::File.join(keys_dir, 'id_rsa')
+  public_keys    "#{ENV['USER']}@#{::File.basename(harness_dir)}" => ::File.join(keys_dir, 'id_rsa.pub')
+else
   private_keys   keypair_name => ::File.join(keys_dir, 'id_rsa')
   public_keys    keypair_name => ::File.join(keys_dir, 'id_rsa.pub')
-else
   private_keys   "#{ENV['USER']}@#{::File.basename(harness_dir)}" => ::File.join(keys_dir, 'id_rsa')
   public_keys    "#{ENV['USER']}@#{::File.basename(harness_dir)}" => ::File.join(keys_dir, 'id_rsa.pub')
 end
