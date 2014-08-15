@@ -30,6 +30,10 @@ class GenerateConfig
     # TODO(jmink) Deal with any weird open source bits & ensure upgrade is set up correctly
   end
 
+  # default_orgname mode allows you to set an OSC-compatible by designating one org as
+  # the default org. This setting enables default_org on the chef-server brought up by
+  # ec-metal. If run_pedant is true, it will also run a second Pedant test in default-org
+  # mode to test out those routes.
   def default_orgname
     ENV['ECM_DEFAULT_ORGNAME']
   end
