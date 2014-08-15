@@ -16,6 +16,7 @@ class GenerateConfig
 
 
   def modify_config()
+    @config['provider'] = @options.provider
     set_provider_data()
 
     # TODO(jmink) handle upgrade packages correctly
