@@ -68,6 +68,12 @@ class GenerateEc2Config < GenerateConfig
     }
   }
 
+  PLATFORM_TO_SSH_USER = {
+    'rhel' => 'ec2-user',
+    'ubuntu' => 'ubuntu',
+  }
+  DEFAULT_SSH_USER = 'root'
+
   def set_provider_data()
     ami = EC2_DATA[:image_map][@options.platform]
     abort("Invalid platform.  Can not determine ami") if ami.nil?
@@ -75,10 +81,17 @@ class GenerateEc2Config < GenerateConfig
         :region => EC2_DATA[:default_region],
         :vpc_subnet => EC2_DATA[:default_subnet_id],
         :ami_id => ami,
-        :ssh_username => 'root',
+        :ssh_username => ssh_username(@options.platform),
         :use_private_ip_for_ssh => false }
 
     @config['ec2_options']['keypair_name'] = ENV['ECM_KEYPAIR_NAME'] unless ENV['ECM_KEYPAIR_NAME'].nil?
+  end
+
+  def ssh_username(platform)
+    PLATFORM_TO_SSH_USER.keys.each do |key|
+      return PLATFORM_TO_SSH_USER[key] if platform.include? key
+    end
+    DEFAULT_SSH_USER
   end
 
   def generate_backend(n)
