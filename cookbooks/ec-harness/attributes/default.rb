@@ -6,7 +6,7 @@ default['harness']['provider'] = config_json['provider']
 default['harness']['vagrant'] = config_json['vagrant_options']
 default['harness']['ec2'] = config_json['ec2_options']
 default['harness']['vm_config'] = config_json['layout']
-default['harness']['default_package'] = ENV['DEFAULT_PACKAGE'] || config_json['default_package']
+default['harness']['default_package'] = ENV['ECM_DEFAULT_PACKAGE'] || config_json['default_package']
 default['harness']['run_pedant'] = config_json['run_pedant'] || false
 default['harness']['osc_install'] = config_json['osc_install'] || false
 default['harness']['osc_upgrade'] = config_json['osc_upgrade'] || false
@@ -19,10 +19,10 @@ default['harness']['apply_ec_bugfixes'] = config_json['apply_ec_bugfixes']
 default['harness']['vm_config']['lemme_doit'] = config_json['lemme_doit'] || false
 
 # addon packages
-default['harness']['manage_package'] = ENV['MANAGE_PACKAGE'] || config_json['manage_package']
-default['harness']['reporting_package'] = ENV['REPORTING_PACKAGE'] || config_json['reporting_package']
-default['harness']['pushy_package'] = ENV['PUSHY_PACKAGE'] || config_json['pushy_package']
-default['harness']['analytics_package'] = ENV['ANALYTICS_PACKAGE'] || config_json['analytics_package']
+default['harness']['manage_package'] = ENV['ECM_MANAGE_PACKAGE'] || config_json['manage_package']
+default['harness']['reporting_package'] = ENV['ECM_REPORTING_PACKAGE'] || config_json['reporting_package']
+default['harness']['pushy_package'] = ENV['ECM_PUSHY_PACKAGE'] || config_json['pushy_package']
+default['harness']['analytics_package'] = ENV['ECM_ANALYTICS_PACKAGE'] || config_json['analytics_package']
 
 # manage options
 default['harness']['manage_options'] = config_json['manage_options'] || {}
