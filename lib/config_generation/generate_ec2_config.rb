@@ -9,7 +9,7 @@ class GenerateEc2Config < GenerateConfig
 
   # TODO(jmink) Move this data to a shared location
   EC2_DATA = {
-    :default_subnet_id => 'subnet-c88354ad',
+    :default_subnet_id => 'subnet-de2c3898',
     :default_region => 'us-west-2',
     :image_map => {
 
