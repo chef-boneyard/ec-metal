@@ -21,7 +21,7 @@ task :bundle do
 end
 
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
-task :up => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+task :up => [:print_enviornment, :keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
   sh("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha")
 end
@@ -34,7 +34,7 @@ task :upgrade_torture => [:keygen, :cachedir, :config_copy, :bundle, :berks_inst
 end
 
 desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
-task :upgrade => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+task :upgrade => [:print_enviornment, :keygen, :cachedir, :config_copy, :bundle, :berks_install] do
   create_users_directory
   sh("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
 end
@@ -57,6 +57,13 @@ task :ssh, [:machine] do |t,arg|
   }
 end
 
+desc "Print all ec-metal enviornment variables"
+task :print_enviornment do
+  puts "================== ec-metal ENV ==========================="
+  ENV.each { |k,v| puts "#{k} = #{v}" if k.include?("ECM_") }
+  puts "==========================================================="
+end
+
 # Vagrant standard but useful commands
 %w(status halt suspend resume).each do |command|
   desc "Equivalent to running: vagrant #{command}"
@@ -68,10 +75,12 @@ end
 end
 
 task :config_copy do
-  config_file = File.join(harness_dir, 'config.json')
-  config_ex_file = File.join(harness_dir, 'examples', 'config.json.example')
-  unless File.exists?(config_file)
-    FileUtils.cp(config_ex_file, config_file)
+  unless ENV['ECM_CONFIG'] && File.exists?(ENV['ECM_CONFIG'])
+    config_file = File.join(harness_dir, 'config.json')
+    config_ex_file = File.join(harness_dir, 'examples', 'config.json.example')
+    unless File.exists?(config_file)
+      FileUtils.cp(config_ex_file, config_file)
+    end
   end
 end
 
