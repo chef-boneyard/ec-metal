@@ -87,6 +87,12 @@ end
 task :keygen do
   keydir = File.join(repo_dir, 'keys')
   FileUtils.mkdir_p keydir
+
+  unless ENV['ECM_KEYPAIR_PATH'].nil?
+    FileUtils.copy("#{ENV['ECM_KEYPAIR_PATH']}/id_rsa", "#{keydir}/id_rsa")
+    FileUtils.copy("#{ENV['ECM_KEYPAIR_PATH']}/id_rsa.pub", "#{keydir}/id_rsa.pub")
+  end
+
   if Dir["#{keydir}/*"].empty?
     comment = ENV['ECM_KEYPAIR_NAME'].nil? ? "" : "-C #{ENV['ECM_KEYPAIR_NAME']}"
     command = "ssh-keygen #{comment} -P '' -q -f #{keydir}/id_rsa"
