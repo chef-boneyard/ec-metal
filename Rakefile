@@ -90,6 +90,7 @@ task :keygen do
 
   if Dir["#{keydir}/*"].empty? && !ENV['ECM_KEYPAIR_PATH'].nil?
     FileUtils.copy("#{ENV['ECM_KEYPAIR_PATH']}/id_rsa", "#{keydir}/id_rsa")
+    FileUtils.copy("#{keydir}/id_rsa", "#{keydir}/#{ENV['ECM_KEYPAIR_NAME']}") unless ENV['ECM_KEYPAIR_NAME'].nil?
     FileUtils.copy("#{ENV['ECM_KEYPAIR_PATH']}/id_rsa.pub", "#{keydir}/id_rsa.pub")
   end
 
@@ -127,7 +128,7 @@ task :cachedir do
 end
 
 task :berks_install do
-  cookbooks_path = File.join(ENV['REPO_PATH'], 'vendor/cookbooks')
+  cookbooks_path = File.join(repo_dir, 'vendor/cookbooks')
   sh("rm -r #{cookbooks_path}") if Dir.exists?(cookbooks_path)
   sh("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
 end
