@@ -88,7 +88,7 @@ task :keygen do
   keydir = File.join(repo_dir, 'keys')
   FileUtils.mkdir_p keydir
 
-  unless ENV['ECM_KEYPAIR_PATH'].nil?
+  if Dir["#{keydir}/*"].empty? && !ENV['ECM_KEYPAIR_PATH'].nil?
     FileUtils.copy("#{ENV['ECM_KEYPAIR_PATH']}/id_rsa", "#{keydir}/id_rsa")
     FileUtils.copy("#{ENV['ECM_KEYPAIR_PATH']}/id_rsa.pub", "#{keydir}/id_rsa.pub")
   end
