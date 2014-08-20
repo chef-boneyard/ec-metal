@@ -9,7 +9,7 @@ VALID_PROVIDERS = ['vagrant', 'ec2']
 
 # TODO(jmink) Take another look at these variable names/how they're passed in
 desc 'Create a config based on passed in vars'
-task :create_config, [:topology, :variant, :version, :platform, :provider] => [:config_copy, :bundle] do |t,args|
+task :create_config, [:topology, :variant, :platform, :provider] => [:config_copy, :bundle] do |t,args|
   args.with_defaults(:topology => 'standalone', :variant => 'private_chef',
       :platform => 'ubuntu-12.04', :provider => 'vagrant')
 
@@ -24,7 +24,7 @@ task :create_config, [:topology, :variant, :version, :platform, :provider] => [:
 end
 
   def validate_arguments(args)
-    if args.topology.nil? || args.variant.nil? || args.version.nil? || args.platform.nil? || args.provider.nil?
+    if args.topology.nil? || args.variant.nil? || args.platform.nil? || args.provider.nil?
       abort("ERROR: All arguments required")
     end
 
