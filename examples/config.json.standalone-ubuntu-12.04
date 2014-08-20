@@ -1,0 +1,34 @@
+{
+  "provider": "vagrant",
+  "vagrant_options": {
+    "box": "chef/ubuntu-12.04",
+    "disk2_size": "2"
+  },
+  "default_package": "/Users/isafarnik/Downloads/private-chef_11.1.8+20140820170121.git.72.1715fb0-1_amd64.deb",
+  "manage_package": "/Users/isafarnik/Downloads/ec/opscode-manage_1.5.4-1_amd64.deb",
+  "run_pedant": true,
+  "packages": {
+  },
+  "layout": {
+    "topology": "standalone",
+    "default_orgname": "o-1",
+    "api_fqdn": "api.opscode.piab",
+    "manage_fqdn": "manage.opscode.piab",
+    "analytics_fqdn": "analytics.opscode.piab",
+    "standalones": {
+      "standalone1": {
+        "hostname": "standalone1.opscode.piab",
+        "ipaddress": "33.33.33.23",
+        "memory": "2048",
+        "cpus": "2"
+      }
+    },
+    "virtual_hosts": {
+      "private-chef.opscode.piab": "33.33.33.23",
+      "manage.opscode.piab": "33.33.33.23",
+      "api.opscode.piab": "33.33.33.23",
+      "analytics.opscode.piab": "33.33.33.23",
+      "standalone1.opscode.piab": "33.33.33.23"
+    }
+  }
+}
