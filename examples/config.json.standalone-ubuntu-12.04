@@ -11,7 +11,7 @@
   },
   "layout": {
     "topology": "standalone",
-    "default_orgname": "o-1",
+    "default_orgname": "opc-1",
     "api_fqdn": "api.opscode.piab",
     "manage_fqdn": "manage.opscode.piab",
     "analytics_fqdn": "analytics.opscode.piab",
