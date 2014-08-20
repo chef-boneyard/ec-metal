@@ -4,8 +4,8 @@
     "box": "chef/ubuntu-12.04",
     "disk2_size": "2"
   },
-  "default_package": "/Users/isafarnik/Downloads/private-chef_11.1.8+20140820170121.git.72.1715fb0-1_amd64.deb",
-  "manage_package": "/Users/isafarnik/Downloads/ec/opscode-manage_1.5.4-1_amd64.deb",
+  "default_package": "private-chef_11.1.8+20140820170121.git.72.1715fb0-1_amd64.deb",
+  "manage_package": "opscode-manage_1.5.4-1_amd64.deb",
   "run_pedant": true,
   "packages": {
   },
