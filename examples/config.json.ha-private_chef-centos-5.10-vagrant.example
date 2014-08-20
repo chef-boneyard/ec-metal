@@ -1,0 +1,62 @@
+{
+  "provider": "vagrant",
+  "vagrant_options": {
+    "box": "opscode-centos-5.10",
+    "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-5.10_chef-provisionerless.box",
+    "disk2_size": "2"
+  },
+  "default_package": "private-chef-11.1.8+20140820170121.git.72.1715fb0-1.el5.x86_64.rpm",
+  "manage_package": "opscode-manage-1.5.4-1.el5.x86_64.rpm",
+  "run_pedant": true,
+  "packages": {
+  },
+  "layout": {
+    "topology": "ha",
+    "api_fqdn": "api.centos.vagrant",
+    "manage_fqdn": "manage.centos.vagrant",
+    "analytics_fqdn": "analytics.centos.vagrant",
+    "backend_vip": {
+      "hostname": "backend.centos.vagrant",
+      "ipaddress": "33.33.33.20",
+      "heartbeat_device": "eth2",
+      "device": "eth1"
+    },
+    "backends": {
+      "backend1": {
+        "hostname": "backend1.centos.vagrant",
+        "ipaddress": "33.33.33.21",
+        "cluster_ipaddress": "33.33.34.5",
+        "memory": "2560",
+        "cpus": "2",
+        "bootstrap": true
+      },
+      "backend2": {
+        "hostname": "backend2.centos.vagrant",
+        "ipaddress": "33.33.33.22",
+        "cluster_ipaddress": "33.33.34.6",
+        "memory": "2560",
+        "cpus": "2",
+        "bootstrap": false
+      }
+    },
+    "frontends": {
+      "frontend1": {
+        "hostname": "frontend1.centos.vagrant",
+        "ipaddress": "33.33.33.23",
+        "memory": "1024",
+        "cpus": "1"
+      }
+    },
+    "virtual_hosts": {
+      "private-chef.centos.vagrant": "33.33.33.23",
+      "manage.centos.vagrant": "33.33.33.23",
+      "api.centos.vagrant": "33.33.33.23",
+      "analytics.centos.vagrant": "33.33.33.23",
+      "backend.centos.vagrant": "33.33.33.20",
+      "backend1.centos.vagrant": "33.33.33.21",
+      "backend2.centos.vagrant": "33.33.33.22",
+      "frontend1.centos.vagrant": "33.33.33.23"
+    }
+  }
+}
+
