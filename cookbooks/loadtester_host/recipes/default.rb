@@ -137,7 +137,7 @@ execute 'container init' do
   "--server-url #{Chef::Config[:chef_server_url]} " +
   "--validation-key /etc/chef/validation.pem " +
   "--validation-client-name ponyville-validator " +
-  "-r 'recipe[chef-client]'"
+  "-r 'recipe[loadtester_guest]'"
   action :run
   notifies :run, "execute[container build]"
   not_if "docker images | grep #{docker_repo}/ubuntu"
@@ -149,6 +149,7 @@ execute 'fucking ssl stfu' do
   not_if "grep verify_api_cert /var/chef/dockerfiles/#{docker_repo}/ubuntu/chef/client.rb"
 end
 
+# override the builder nodename, for concurrent builds
 file "/var/chef/dockerfiles/#{docker_repo}/ubuntu/chef/.node_name" do
   action :create
   owner "root"
