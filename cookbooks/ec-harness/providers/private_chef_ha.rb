@@ -61,7 +61,7 @@ action :install do
         recipe 'private-chef::hostsfile'
         recipe 'private-chef::provision'
         recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
-        recipe 'private-chef::drbd' if topo.is_backend?(vmname) and topo.is_ha?(vmname)
+        recipe 'private-chef::drbd' if topo.is_backend?(vmname) and topo.is_ha?
         recipe 'private-chef::provision_phase2'
         recipe 'private-chef::users' if vmname == topo.bootstrap_node_name &&
           node['harness']['osc_install'] == false
