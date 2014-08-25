@@ -57,7 +57,7 @@ end
 #   owner 'root'
 #   group 'root'
 #   mode '0644'
-#   only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && topology.is_backend?(node.name) }
+#   only_if { PackageHelper.private_chef_installed_version(node).match('^11.1') && topology.is_backend?(node.name) }
 #   subscribes :create, "package[#{installer_name}]", :immediately
 #   action :nothing
 # end
