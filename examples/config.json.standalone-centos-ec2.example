@@ -1,0 +1,37 @@
+{
+  "provider": "ec2",
+  "ec2_options": {
+    "region": "us-east-1",
+    "ami_id": "ami-54ac4d3c",
+    "vpc_subnet": "subnet-57df2a0e",
+    "ssh_username": "root",
+    "use_private_ip_for_ssh": false
+  },
+  "default_package": "https://s3-us-west-2.amazonaws.com/opscode-pkgcache-us-west-2/EC/private-chef-1.4.11-1.el6.x86_64.rpm",
+  "run_pedant": true,
+  "packages": {
+  },
+  "layout": {
+    "topology": "standalone",
+    "default_orgname": "osc-1",
+    "api_fqdn": "api.opscode.piab",
+    "manage_fqdn": "manage.opscode.piab",
+    "analytics_fqdn": "analytics.opscode.piab",
+    "standalones": {
+      "standalone1": {
+        "hostname": "standalone1.opscode.piab",
+        "instance_type": "c3.xlarge",
+        "ipaddress": "33.33.33.23",
+        "memory": "1024",
+        "cpus": "2"
+      }
+    },
+    "virtual_hosts": {
+      "private-chef.opscode.piab": "33.33.33.23",
+      "manage.opscode.piab": "33.33.33.23",
+      "api.opscode.piab": "33.33.33.23",
+      "analytics.opscode.piab": "33.33.33.23",
+      "standalone1.opscode.piab": "33.33.33.23"
+    }
+  }
+}

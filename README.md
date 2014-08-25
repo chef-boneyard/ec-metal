@@ -92,10 +92,11 @@ Follow the instructions specific to the environment of your choosing.
 <a name="vagrant" />
 ## Running Virtualbox with Vagrant
 1. Install Vagrant and Virtualbox (tested on Vagrant 1.5 and 1.6)
-1. Copy `config.json.example` to `config.json`
+1. Copy one of the `examples/config.json.*` files to `config.json`
 1. Edit Vagrant [config.json](#vagrant_conf)
   * **Note on memory:** HA topologies with DRBD can be demanding on your system. Usage has showed the backend systems require at least 2.5G RAM and the frontend requires at least 1G RAM to order to install and operate nominally.
 1. Download the private-chef packages to the ec-metal/cache directory or point to your own installer cache with `$ECM_CACHE_PATH`
+  1. http://artifactory.playground.releng.opscode.us/
 1. Run [rake tasks](#tasks)
 
 <a name="vagrant_conf" />
@@ -114,7 +115,7 @@ The `layouts` object should not need to be changed in most cases.
 <a name="aws" />
 ## Running ec2 on AWS
 1. Create the .aws/config file as described here: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#d0e726
-  
+
   ```
   [default]
   region = us-east-1
@@ -137,26 +138,26 @@ The `layouts` object should not need to be changed in most cases.
   ```
   # CREATING THE VPC USING THE CLI TOOLS
   aws ec2 create-vpc --cidr-block "33.33.0.0/16"
-  # note your VpcId
-  aws ec2 modify-vpc-attribute --vpc-id vpc-myvpcid --enable-dns-hostnames
+  # note your VpcId, save as $vpc_myvpcid
+  aws ec2 modify-vpc-attribute --vpc-id $vpc_myvpcid --enable-dns-hostnames
   # now create a subnet
-  aws ec2 create-subnet --vpc-id vpc-myvpcid --cidr-block "33.33.33.0/24"
-  # note your SubnetId
+  aws ec2 create-subnet --vpc-id $vpc_myvpcid --cidr-block "33.33.33.0/24"
+  # note your SubnetId, save as $subnet_mysubnetid
   aws ec2 create-internet-gateway
-  # note your InternetGatewayId
-  aws ec2 attach-internet-gateway --internet-gateway-id igw-myigwid --vpc-id vpc-myvpcid
+  # note your InternetGatewayId, save as $igw_myigwid
+  aws ec2 attach-internet-gateway --internet-gateway-id $igw_myigwid --vpc-id $vpc_myvpcid
   # should be true
-  aws ec2 describe-route-tables
-  # note the RouteTableId assigned to your VpcId
-  aws ec2 create-route --route-table-id rtb-myrtbid --destination "0.0.0.0/0" --gateway-id igw-myigwid
+  aws ec2 describe-route-tables  --filters Name=vpc-id,Values=$vpc_myvpcid
+  # note the RouteTableId assigned to your VpcId, save as $rtb_myrtbid
+  aws ec2 create-route --route-table-id $rtb_myrtbid --destination "0.0.0.0/0" --gateway-id $igw_myigwid
 
   # ADJUSTING THE SECURITY GROUPS to allow ssh, http, https
   # find the default security group for your VPC
-  aws ec2 describe-security-groups --filters Name=vpc-id,Values=vpc-b4c52dd1
-  # note the GroupId
-  aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --port 22 --cidr "0.0.0.0/0"
-  aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --port 80 --cidr "0.0.0.0/0"
-  aws ec2 authorize-security-group-ingress --group-id sg-mysgid --protocol tcp --port 443 --cidr "0.0.0.0/0"
+  aws ec2 describe-security-groups --filters Name=vpc-id,Values=$vpc_myvpcid
+  # note the GroupId, save as $sg_mysgid
+  aws ec2 authorize-security-group-ingress --group-id $sg_mysgid --protocol tcp --port 22 --cidr "0.0.0.0/0"
+  aws ec2 authorize-security-group-ingress --group-id $sg_mysgid --protocol tcp --port 80 --cidr "0.0.0.0/0"
+  aws ec2 authorize-security-group-ingress --group-id $sg_mysgid --protocol tcp --port 443 --cidr "0.0.0.0/0"
   ```
 1. Set the new vpc subnet ID and backend_vip ipaddress in your config.json.
 
@@ -166,7 +167,7 @@ The `layouts` object should not need to be changed in most cases.
 |-----|-------------|
 | region | aws region name |
 | vpc_subnet | aws subnet name |
-| ami_id | aws image id | 
+| ami_id | aws image id |
 | backend_vip -> ipaddress | aws vpc ip |
 
 **WARNING: The current EC2 configuration uses ephemeral disks which ARE LOST WHEN YOU SHUT DOWN THE NODE**
