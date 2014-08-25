@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'chef-metal',         '~> 0.12.0'
+gem 'chef-metal',         '~> 0.14.1'
 gem 'chef-metal-vagrant', '~> 0.5.0'
 gem 'chef-metal-fog',     '~> 0.6.0'
 gem 'cheffish',           '~> 0.6.0'
