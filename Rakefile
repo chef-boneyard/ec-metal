@@ -1,5 +1,6 @@
 require 'json'
 require 'fileutils'
+require './cookbooks/ec-common/libraries/topo_helper.rb'
 Dir["lib/tasks/*.rake"].each { |t| load t }
 
 task :default => [:up]
@@ -145,30 +146,27 @@ task :csshx do
   csshx(config, repo_dir)
 end
 
-# Fix to work with topohelper
-# desc "Runs remote commands via ssh.  Usage remote[servername, 'command args string']"
-# # "knife-opc user create rockawesome patrick wright patrick@getchef.com password"
-# # "knife-opc org create myorg2 supercoolorg -a rockawesome"
-# task :remote, [:machine, :command] do |t, arg|
-#   configip = fog_populate_ips(get_config)
-#   %w(backends frontends standalones).each do |whichend|
-#     configip['layout'][whichend].each do |node,attrs|
-#       if node == arg[:machine]
-#         case configip['provider']
-#           when 'ec2'
-#             ssh_username = configip['ec2_options']['ssh_username'] || 'ec2-user'
-#           when 'vagrant'
-#             ssh_username = 'vagrant'
-#           else
-#             ssh_username = 'root'
-#         end
-#         cmd = "ssh #{ssh_username}@#{attrs['ipaddress']} -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \"#{arg[:command]}\""
-#         puts "Executing '#{arg[:command]}' on #{arg[:machine]}"
-#         sh(cmd)
-#       end
-#     end
-#   end
-# end
+desc "Copy a file/directory from local to the machine indicated"
+task :scp, [:machine, :source_path, :remote_path] do |t,arg|
+  topo = TopoHelper.new(:ec_config => get_config)
+  machine = topo.merged_topology[machine]
+  abort("Machine #{arg.machine} not found") if machine.nil?
+
+  sh %Q{ scp -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \
+         #{arg.source_path} #{ssh_user()}@#{machine['ipaddress']}:#{remote_path} }
+end
+
+def ssh_user()
+  config = get_config()
+  case config['provider']
+    when 'ec2'
+      config['ec2_options']['ssh_username'] || 'ec2-user'
+    when 'vagrant'
+      'vagrant'
+    else
+      'root'
+  end
+end
 
 # task :ec2_to_file do
 #   file = File.open('ec2_ips', 'w')
