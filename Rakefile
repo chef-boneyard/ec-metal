@@ -1,5 +1,6 @@
 require 'json'
 require 'fileutils'
+require './cookbooks/ec-common/libraries/topo_helper.rb'
 Dir["lib/tasks/*.rake"].each { |t| load t }
 
 task :default => [:up]
@@ -162,6 +163,35 @@ end
 #     end
 #   end
 # end
+
+desc "Open csshx to the nodes of the server."
+task :csshx do
+  config = get_config
+  config = fog_populate_ips(config) if config['provider'] == 'ec2'
+  csshx(config, repo_dir)
+end
+
+desc "Copy a file/directory from local to the machine indicated"
+task :scp, [:machine, :source_path, :remote_path] do |t,arg|
+  topo = TopoHelper.new(:ec_config => get_config)
+  machine = topo.merged_topology[machine]
+  abort("Machine #{arg.machine} not found") if machine.nil?
+
+  sh %Q{ scp -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \
+         #{arg.source_path} #{ssh_user()}@#{machine['ipaddress']}:#{remote_path} }
+end
+
+def ssh_user()
+  config = get_config()
+  case config['provider']
+    when 'ec2'
+      config['ec2_options']['ssh_username'] || 'ec2-user'
+    when 'vagrant'
+      'vagrant'
+    else
+      'root'
+  end
+end
 
 # task :ec2_to_file do
 #   file = File.open('ec2_ips', 'w')
