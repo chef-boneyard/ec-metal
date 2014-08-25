@@ -47,6 +47,9 @@ module EcMetal
       end
     end
 
+    def set_provider_data()
+      raise "Unimplemented.  Should be overwritten in child class"
+    end
 
     def modify_config()
       @config['provider'] = @options.provider
@@ -54,15 +57,16 @@ module EcMetal
 
       # TODO(jmink) handle upgrade packages correctly
       # TODO(jmink) Error handling
-      @config["default_package"] = ENV['ECM_TARGET_PACKAGE_NAME']
-      @config["manage_package"] = ENV['ECM_DEPENDENT_PACKAGE_NAME'] unless ENV['ECM_DEPENDENT_PACKAGE_NAME'].nil?
-      @config['run_pedant'] = !(ENV['ECM_RUN_PEDANT'].nil? || ENV['ECM_RUN_PEDANT'].empty?)
+      @config["default_package"] = ECMetal::Config.target_package
+      @config["manage_package"] = ECMetal::Config.manage_package unless ECMetal::Config.manage_package.nil?
+      @config['run_pedant'] = ECMetal::Config.run_pedant
 
       @config[:packages] = {}
       set_topology()
 
       # TODO(jmink) Deal with any weird open source bits & ensure upgrade is set up correctly
     end
+
 
     # default_orgname mode allows you to set an OSC-compatible by designating one org as
     # the default org. This setting enables default_org on the chef-server brought up by
@@ -76,6 +80,7 @@ module EcMetal
       raise "Unimplemented.  Should be overwritten in child class"
     end
 
+
     def set_topology()
       @config[:layout] = { :topology => @options.topology }
       case @options.topology
@@ -88,26 +93,25 @@ module EcMetal
         generate_full_topology(:num_backends => 1, :num_frontends => 1)
       end
     end
-
+    #
     # adding this just to get something end to end in CI
     def generate_standalone_topology()
       name = 'pwcsta'
       # Define provider agnostic layout
       @config[:layout] = { :topology => @options.topology,
-        :api_fqdn => 'api.opscode.aws',
-        :default_orgname => default_orgname,
-        :manage_fqdn => 'manage.opscode.aws',
-        :analytics_fqdn => 'analytics.opscode.aws',
-        :standalones => {
-          "#{name}-standalone" => {
-            :hostname => "#{name}-standalone.centos.aws",
-            :ebs_optimized => true,
-            :instance_type => 'm3.xlarge'
-          }
-        }
+                           :api_fqdn => 'api.opscode.aws',
+                           :default_orgname => ECMetal::Config.default_orgname,
+                           :manage_fqdn => 'manage.opscode.aws',
+                           :analytics_fqdn => 'analytics.opscode.aws',
+                           :standalones => {
+                             "#{name}-standalone" => {
+                               :hostname => "#{name}-standalone.centos.aws",
+                               :ebs_optimized => true,
+                               :instance_type => 'm3.xlarge'
+                             }
+                           }
       }
     end
-
 
     # Differences between HA & tiered:
     # HA has a seperate backend VIP
@@ -115,40 +119,40 @@ module EcMetal
     # Standalone has no backend VIP section
     def generate_full_topology(options)
       @config[:layout] = { :topology => @options.topology,
-        :api_fqdn => 'api.opscode.piab',
-        :default_orgname => default_orgname,
-        :manage_fqdn => 'manage.opscode.piab',
-        :analytics_fqdn => 'analytics.opscode.piab',
-        :backends => {},
-        :frontends => {}
-        }
+                           :api_fqdn => 'api.opscode.piab',
+                           :default_orgname => ECMetal::Config.default_orgname,
+                           :manage_fqdn => 'manage.opscode.piab',
+                           :analytics_fqdn => 'analytics.opscode.piab',
+                           :backends => {},
+                           :frontends => {}
+      }
 
-        options[:num_backends].times do |n|
-          backend = generate_backend(n)
-          backend[:bootstrap] = true if n == 0
-          @config[:layout][:backends]["backend#{n}"] = backend
-        end
-        options[:num_frontends].times do |n|
-          @config[:layout][:frontends]["frontend#{n}"] = generate_frontend(n)
-        end
+      options[:num_backends].times do |n|
+        backend = generate_backend(n)
+        backend[:bootstrap] = true if n == 0
+        @config[:layout][:backends]["backend#{n}"] = backend
+      end
+      options[:num_frontends].times do |n|
+        @config[:layout][:frontends]["frontend#{n}"] = generate_frontend(n)
+      end
 
-        if options[:num_backends] > 1
-          vip = { :hostname => "backend.opscode.piab",
-                  :ipaddress => "33.33.33.20" }
-        else
-          backend_name = @config[:layout][:backends].keys.first
-          vip = @config[:layout][:backends][backend_name]
-        end
+      if options[:num_backends] > 1
+        vip = { :hostname => "backend.opscode.piab",
+                :ipaddress => "33.33.33.20" }
+      else
+        backend_name = @config[:layout][:backends].keys.first
+        vip = @config[:layout][:backends][backend_name]
+      end
 
-        @config[:layout][:backend_vip] = {
-          :hostname => vip[:hostname],
-          :ipaddress => vip[:ipaddress],
-          # TODO(jmink) figure out a smarter way to determine devices
-          :device => "eth0",
-          :heartbeat_device => "eth1"
-         }
+      @config[:layout][:backend_vip] = {
+        :hostname => vip[:hostname],
+        :ipaddress => vip[:ipaddress],
+        # TODO(jmink) figure out a smarter way to determine devices
+        :device => "eth0",
+        :heartbeat_device => "eth1"
+      }
 
-        provider_specific_config_modification()
+      provider_specific_config_modification()
     end
 
     # @returns a hash which represents the nth backend

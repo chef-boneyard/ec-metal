@@ -1,19 +1,20 @@
 require 'json'
 require 'fileutils'
 require './cookbooks/ec-common/libraries/topo_helper.rb'
+require 'lib/ec-metal/config'
 Dir["lib/tasks/*.rake"].each { |t| load t }
 
 task :default => [:up]
 
 # Environment variables to be consumed by ec-harness and friends
-harness_dir = ENV['HARNESS_DIR'] ||= File.dirname(__FILE__)
-repo_dir = ENV['REPO_PATH'] ||= File.join(harness_dir, 'chef-repo')
+harness_dir = ECMetal::Config.harness_dir
+repo_dir = ECMetal::Config.repo_path
 
 # just in cases user has a different default Vagrant provider
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 
 def get_config
-  JSON.parse(File.read(ENV['ECM_CONFIG'] || 'config.json'))
+  JSON.parse(File.read(ECMetal::Config.test_config))
 end
 
 desc 'Install required Gems into the vendor/bundle directory'
@@ -96,7 +97,7 @@ task :keygen do
   end
 
   if Dir["#{keydir}/*"].empty?
-    comment = ENV['ECM_KEYPAIR_NAME'].nil? ? "" : "-C #{ENV['ECM_KEYPAIR_NAME']}"
+    comment = ECMetal::Config.keypair_name.nil? ? "" : "-C #{ECMeta::Config.keypair_name}"
     command = "ssh-keygen #{comment} -P '' -q -f #{keydir}/id_rsa"
     puts "Keygen: #{command}"
     sh(command)
@@ -119,12 +120,8 @@ task :remove_hosts do
 end
 
 task :cachedir do
-  if ENV['ECM_CACHE_PATH'] && Dir.exists?(ENV['ECM_CACHE_PATH'])
-    cachedir = ENV['ECM_CACHE_PATH']
-  else
-    cachedir = File.join(harness_dir, 'cache')
-    FileUtils.mkdir_p cachedir
-  end
+  cache_dir = ECMetal::Config.cache_dir
+  FileUtils.mkdir_p cache_dir unless Dir.exists? cache_dir
   puts "Using package cache directory #{cachedir}"
 end
 
