@@ -57,6 +57,11 @@ task :ssh, [:machine] do |t,arg|
   }
 end
 
+desc "Run a command on a machine like so: rake execute[backend1] 'ls'"
+task :execute, [:machine, :command] do |t,arg|
+  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::execute -N #{arg.machine} #{arg.command}")
+end
+
 desc "Print all ec-metal enviornment variables"
 task :print_enviornment do
   puts "================== ec-metal ENV ==========================="
