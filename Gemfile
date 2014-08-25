@@ -10,3 +10,5 @@ gem 'chef',               '~> 11.14.0'
 
 gem 'knife-opc',          '~> 0.1.0'
 gem 'rake'
+
+gem 'mixlib-config'
