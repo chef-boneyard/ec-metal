@@ -110,11 +110,21 @@ class GenerateConfig
         :hostname => vip[:hostname],
         :ipaddress => vip[:ipaddress],
         # TODO(jmink) figure out a smarter way to determine devices
-        :device => "eth0",
-        :heartbeat_device => "eth1"
+        :device => backend_vip_device,
+        :heartbeat_device => backend_vip_heartbeat_device
        }
 
       provider_specific_config_modification()
+  end
+
+  # @returns a string which represents the backend vip device
+  def backend_vip_device
+    raise "Unimplemented.  Should be overwritten in child class"
+  end
+
+  # @returns a string which represents the backend vip heartbeat device
+  def backend_vip_heartbeat_device
+    raise "Unimplemented.  Should be overwritten in child class"
   end
 
   # @returns a hash which represents the nth backend
