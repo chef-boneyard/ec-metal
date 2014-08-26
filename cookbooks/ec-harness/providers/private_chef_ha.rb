@@ -59,7 +59,7 @@ action :install do
 
         recipe 'private-chef::hostname'
         recipe 'private-chef::hostsfile'
-        recipe 'private-chef::rhel' if node['platform_family'] == 'rhel'
+        recipe 'private-chef::rhel'
         recipe 'private-chef::provision'
         recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
         recipe 'private-chef::drbd' if topo.is_backend?(vmname) and !topo.is_standalone?(vmname)
