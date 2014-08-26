@@ -45,7 +45,7 @@ action :cloud_create do
 end
 
 action :install do
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['analytics', 'loadtesters'])
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: analytics_layers.push('loadtesters'))
   topo.merged_topology.each do |vmname, config|
     machine_batch vmname do
       action [:converge]
