@@ -2,6 +2,7 @@ installer_file = node['private-chef']['installer_file']
 installer_name = ::File.basename(installer_file.split('?').first)
 
 topology = TopoHelper.new(ec_config: node['private-chef'])
+pc_version = PackageHelper.package_version(installer_name)
 
 # OC-11490 bug fix
 cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/keepalived.rb' do
@@ -9,7 +10,8 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/keepalived.r
   owner 'root'
   group 'root'
   mode '0755'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && topology.is_backend?(node.name) }
+  only_if { pc_version >= '11.0.0' && pc_version < '11.2.0' }
+  only_if { topology.is_backend?(node.name) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -20,7 +22,8 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/partybus.rb'
   owner 'root'
   group 'root'
   mode '0755'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && topology.is_backend?(node.name) }
+  only_if { pc_version >= '11.0.0' && pc_version < '11.2.0' }
+  only_if { topology.is_backend?(node.name) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -31,7 +34,7 @@ cookbook_file '/opt/opscode/bin/private-chef-ctl' do
   owner 'root'
   group 'root'
   mode '0755'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') }
+  only_if { pc_version >= '11.0.0' && pc_version < '11.2.0' }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -42,7 +45,8 @@ cookbook_file '/opt/opscode/embedded/cookbooks/enterprise/definitions/component_
   owner 'root'
   group 'root'
   mode '0755'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && topology.is_backend?(node.name) }
+  only_if { pc_version >= '11.0.0' && pc_version < '11.2.0' }
+  only_if { topology.is_backend?(node.name) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -64,7 +68,8 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/redis_lb.rb'
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && topology.is_backend?(node.name) }
+  only_if { pc_version >= '11.0.0' && pc_version < '11.2.0' }
+  only_if { topology.is_backend?(node.name) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -75,7 +80,8 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/recipes/default.rb' 
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && topology.is_backend?(node.name) }
+  only_if { pc_version >= '11.0.0' && pc_version < '11.2.0' }
+  only_if { topology.is_backend?(node.name) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -85,7 +91,8 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/resources/keepalived
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && topology.is_backend?(node.name) }
+  only_if { pc_version >= '11.0.0' && pc_version < '11.2.0' }
+  only_if { topology.is_backend?(node.name) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -95,7 +102,8 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/providers/keepalived
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && topology.is_backend?(node.name) }
+  only_if { pc_version >= '11.0.0' && pc_version < '11.2.0' }
+  only_if { topology.is_backend?(node.name) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
@@ -106,8 +114,8 @@ cookbook_file '/opt/opscode/embedded/upgrades/001/009_migrate_authz.rb' do
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') && topology.is_backend?(node.name) }
-  subscribes :create, "package[#{installer_name}]", :immediately
+  only_if { pc_version >= '11.0.0' && pc_version < '11.2.0' }
+  only_if { topology.is_backend?(node.name) }
   action :nothing
 end
 
