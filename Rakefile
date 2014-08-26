@@ -58,11 +58,6 @@ task :ssh, [:machine] do |t,arg|
   }
 end
 
-desc "Run a command on a machine like so: rake execute[backend1] 'ls'"
-task :execute, [:machine, :command] do |t,arg|
-  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::execute -N #{arg.machine} #{arg.command}")
-end
-
 desc "Print all ec-metal enviornment variables"
 task :print_enviornment do
   puts "================== ec-metal ENV ==========================="
@@ -171,14 +166,23 @@ task :csshx do
   csshx(config, repo_dir)
 end
 
+desc "Execute a command on a remote machine"
+task :execute, [:machine, :command] do |t,arg|
+  sh %Q{ssh -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \
+        #{ssh_user()}@#{machine(arg.machine)['ipaddress']} #{arg.command} }
+end
+
 desc "Copy a file/directory from local to the machine indicated"
 task :scp, [:machine, :source_path, :remote_path] do |t,arg|
-  topo = TopoHelper.new(:ec_config => get_config)
-  machine = topo.merged_topology[machine]
-  abort("Machine #{arg.machine} not found") if machine.nil?
+  sh %Q{scp -r -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \
+        #{arg.source_path} #{ssh_user()}@#{machine(arg.machine)['ipaddress']}:#{arg.remote_path} }
+end
 
-  sh %Q{ scp -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \
-         #{arg.source_path} #{ssh_user()}@#{machine['ipaddress']}:#{remote_path} }
+def machine(machine_name)
+  topo = TopoHelper.new(:ec_config => get_config)
+  machine = topo.merged_topology[machine_name]
+  abort("Machine #{machine_name} not found") if machine.nil?
+  return machine
 end
 
 def ssh_user()
