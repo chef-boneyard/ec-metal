@@ -16,6 +16,7 @@ end
 package installer_name do
   source installer_path
   provider Chef::Provider::Package::Dpkg if platform?("ubuntu","debian")
+  options '--nogpgcheck' if platform_family?('rhel') && node['platform_version'].to_i == 5
   action :install
 end
 
