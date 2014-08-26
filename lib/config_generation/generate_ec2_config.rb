@@ -99,4 +99,12 @@ class GenerateEc2Config < GenerateConfig
 
   def provider_specific_config_modification
   end
+
+  def backend_vip_device
+    "eth0"
+  end
+
+  def backend_vip_heartbeat_device
+    "eth0"
+  end
 end
