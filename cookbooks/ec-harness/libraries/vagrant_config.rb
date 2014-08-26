@@ -19,7 +19,7 @@ class VagrantConfigHelper
       config.vm.provider 'virtualbox' do |v|
         v.customize [
           'modifyvm', :id,
-          '--name', "#{vmname}",
+          '--name', "#{config['hostname']}",
           '--memory', "#{config['memory']}",
           '--cpus', "#{config['cpus']}",
           '--natdnshostresolver1', 'on',
