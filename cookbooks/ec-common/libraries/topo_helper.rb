@@ -2,7 +2,14 @@
 
 class TopoHelper
 
-  TOPO_TYPES = %w(backends frontends standalones analytics loadtesters)
+  TOPO_TYPES = %w(analytics_backends
+                  analytics_frontends
+                  analytics_standalones
+                  analytics_workers
+                  backends
+                  frontends
+                  standalones
+                  loadtesters)
 
   attr_accessor :ec_config, :include_layers, :exclude_layers
 
@@ -75,8 +82,16 @@ class TopoHelper
     is_topo_type?(nodename, 'frontends')
   end
 
-  def is_analytics?(nodename)
-    is_topo_type?(nodename, 'analytics')
+  def is_analytics_standalones?(nodename)
+    is_topo_type?(nodename, 'analytics_standalones')
+  end
+
+  def is_analytics_backends?(nodename)
+    is_topo_type?(nodename, 'analytics_backends')
+  end
+
+  def is_analytics_frontends?(nodename)
+    is_topo_type?(nodename, 'analytics_frontends')
   end
 
   def is_standalone?(nodename)
@@ -113,6 +128,27 @@ class TopoHelper
     end
   end
 
+  def analytics_bootstrap_node_name
+    analytics_bootstrap_node.keys.first
+  end
+
+  def analytics_bootstrap_host_name
+    analytics_bootstrap_node.values.first['hostname']
+  end
+
+  def analytics_bootstrap_host_ip
+    analytics_bootstrap_node.values.first['ipaddress']
+  end
+
+  def analytics_bootstrap_node
+    if found_topo_types.include?('analytics_backends')
+      @ec_config['analytics_backends']
+        .select { |node, attrs| attrs['bootstrap'] == true }
+    elsif found_topo_types.include?('analytics_standalones')
+      @ec_config['analytics_standalones']
+    end
+  end
+
   def mydomainname
     merged_topology
       .values
@@ -142,5 +178,4 @@ class TopoHelper
 
     true # no filters, return true by default
   end
-
 end

@@ -64,8 +64,8 @@ action :install do
         recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
         recipe 'private-chef::drbd' if topo.is_backend?(vmname) and !topo.is_standalone?(vmname)
         recipe 'private-chef::provision_phase2'
-        # recipe 'private-chef::users' if vmname == topo.bootstrap_node_name &&
-        #   node['harness']['osc_install'] == false
+        recipe 'private-chef::users' if vmname == topo.bootstrap_node_name &&
+          node['harness']['osc_install'] == false
         recipe 'private-chef::reporting' if node['harness']['reporting_package']
         recipe 'private-chef::manage' if node['harness']['manage_package'] &&
           topo.is_frontend?(vmname)
@@ -81,14 +81,16 @@ action :install do
     end
   end
 
-  if node['harness']['analytics_package'] && node['harness']['vm_config']['analytics']
-    node['harness']['vm_config']['analytics'].each do |vmname, config|
+  if node['harness']['analytics_package'] && is_analytics?
+    topo_analytics = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: analytics_layers)
+    topo_analytics.merged_topology.each do |vmname, config|
       machine_batch vmname do
         action [:converge]
 
         machine vmname do
           add_machine_options node['harness']['provisioner_options'][vmname]
           attribute 'private-chef', privatechef_attributes
+          attribute 'analytics', analytics_attributes
           attribute 'root_ssh', node['harness']['root_ssh'].to_hash
 
           recipe 'private-chef::hostname'
@@ -104,7 +106,7 @@ action :install do
 end
 
 action :pedant do
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['analytics', 'loadtesters'])
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: analytics_layers.push('loadtesters'))
   topo.merged_topology.each do |vmname, config|
     machine_batch vmname do
       action [:converge]
@@ -232,6 +234,17 @@ def privatechef_attributes
   attributes
 end
 
+def analytics_attributes
+  packages = package_attributes
+  attributes = node['harness']['vm_config'].to_hash
+  attributes['configuration'] ||= {}
+  attributes['installer_file'] = packages['ec']
+  unless packages['analytics'] == nil
+    attributes['analytics_installer_file'] = packages['analytics']
+  end
+  attributes
+end
+
 def cloud_attributes(provider)
   cloud_attrs = node['harness'][provider].to_hash
   cloud_attrs['provider'] = provider
@@ -261,4 +274,18 @@ def package_attributes
   packages['analytics'] = installer_path(node['harness']['analytics_package'])
 
   packages
+end
+
+def is_analytics?
+ (node['harness']['vm_config']['analytics_backends'] ||
+  node['harness']['vm_config']['analytics_frontends'] ||
+  node['harness']['vm_config']['analytics_standalones'] ||
+  node['harness']['vm_config']['analytics_workers'])
+end
+
+def analytics_layers
+  ['analytics_backends',
+   'analytics_frontends',
+   'analytics_standalones',
+   'analytics_workers']
 end
