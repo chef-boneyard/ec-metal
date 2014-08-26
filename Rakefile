@@ -169,18 +169,19 @@ end
 desc "Execute a command on a remote machine"
 task :execute, [:machine, :command] do |t,arg|
   sh %Q{ssh -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \
-        #{ssh_user()}@#{machine(arg.machine)['ipaddress']} #{arg.command} }
+        #{ssh_user()}@#{machine(arg.machine)['hostname']} #{arg.command} }
 end
 
 desc "Copy a file/directory from local to the machine indicated"
 task :scp, [:machine, :source_path, :remote_path] do |t,arg|
   sh %Q{scp -r -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \
-        #{arg.source_path} #{ssh_user()}@#{machine(arg.machine)['ipaddress']}:#{arg.remote_path} }
+        #{arg.source_path} #{ssh_user()}@#{machine(arg.machine)['hostname']}:#{arg.remote_path} }
 end
 
 def machine(machine_name)
-  topo = TopoHelper.new(:ec_config => get_config)
-  machine = topo.merged_topology[machine_name]
+  topo = TopoHelper.new(:ec_config => get_config['layout'])
+  merged_topo = topo.merged_topology
+  machine = merged_topo[machine_name]
   abort("Machine #{machine_name} not found") if machine.nil?
   return machine
 end
