@@ -68,6 +68,8 @@ action :install do
         recipe 'private-chef::users' if
           vmname == topo.bootstrap_node_name
         recipe 'private-chef::provision_phase2'
+        recipe 'private-chef::users' if vmname == topo.bootstrap_node_name &&
+          node['harness']['osc_install'] == false
         recipe 'private-chef::reporting' if node['harness']['reporting_package']
         recipe 'private-chef::manage' if node['harness']['manage_package'] &&
           topo.is_frontend?(vmname)
@@ -112,7 +114,7 @@ action :install do
 end
 
 action :pedant do
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['analytics', 'loadtesters'])
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: analytics_layers.push('loadtesters'))
   topo.merged_topology.each do |vmname, config|
     machine_batch vmname do
       action [:converge]
