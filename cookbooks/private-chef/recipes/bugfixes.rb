@@ -104,7 +104,6 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/providers/keepalived
   mode '0644'
   only_if { pc_version >= '11.0.0' && pc_version < '11.2.0' }
   only_if { topology.is_backend?(node.name) }
-  subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
 
