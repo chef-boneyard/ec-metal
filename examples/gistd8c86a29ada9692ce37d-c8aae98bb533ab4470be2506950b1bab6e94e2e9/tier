@@ -1,0 +1,50 @@
+{
+  "provider": "vagrant",
+  "vagrant_options": {
+    "box": "opscode-centos-5.10",
+    "disk2_size": "2"
+  },
+  "run_pedant": true,
+  "packages": {
+  },
+  "layout": {
+    "topology": "tier",
+    "api_fqdn": "api.opscode.piab",
+    "default_orgname": null,
+    "manage_fqdn": "manage.opscode.piab",
+    "analytics_fqdn": "analytics.opscode.piab",
+    "backends": {
+      "backend0": {
+        "hostname": "backend0.opscode.piab",
+        "memory": "2560",
+        "cpus": "2",
+        "ipaddress": "33.33.33.21",
+        "cluster_ipaddress": "33.33.34.5",
+        "bootstrap": true
+      }
+    },
+    "frontends": {
+      "frontend0": {
+        "hostname": "frontend0.opscode.piab",
+        "memory": "1024",
+        "cpus": "1",
+        "ipaddress": "33.33.33.22"
+      }
+    },
+    "backend_vip": {
+      "hostname": "backend0.opscode.piab",
+      "ipaddress": "33.33.33.21",
+      "device": "eth0",
+      "heartbeat_device": "eth1"
+    },
+    "virtual_hosts": {
+      "private-chef.opscode.piab": "33.33.33.21",
+      "manage.opscode.piab": "33.33.33.21",
+      "api.opscode.piab": "33.33.33.21",
+      "analytics.opscode.piab": "33.33.33.21",
+      "backend.opscode.piab": "33.33.33.21",
+      "backend0.opscode.piab": "33.33.33.21",
+      "frontend0.opscode.piab": "33.33.33.22"
+    }
+  }
+}
