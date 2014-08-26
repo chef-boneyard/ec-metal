@@ -105,6 +105,6 @@ class GenerateEc2Config < GenerateConfig
   end
 
   def backend_vip_heartbeat_device
-    "eth1"
+    "eth0"
   end
 end
