@@ -1,2 +1,25 @@
-analytics_fqdn "<%= node['private-chef']['analytics_fqdn'] %>"
-topology 'standalone'
+analytics_fqdn "<%= node['analytics']['analytics_fqdn'] %>"
+
+topology "<%= node['analytics']['analytics_topology'] %>"
+
+<% (node['analytics']['analytics_backends'] || {}).each_pair do |name, options| -%>
+server "<%= options['hostname'] || "#{name}.opscode.piab" %>",
+  :ipaddress => "<%= options['ipaddress'] %>",
+  <% if options['cluster_ipaddress'] -%>
+  :cluster_ipaddress => "<%= options['cluster_ipaddress'] %>",
+  <% end -%>
+  :role => "backend",
+  :bootstrap => <%= options['bootstrap'] || false %>
+<% end -%>
+
+<% (node['analytics']['analytics_frontends'] || {}).each_pair do |name, options| -%>
+server "<%= options['hostname'] || "#{name}.opscode.piab" %>",
+  :ipaddress => "<%= options['ipaddress'] %>",
+  :role => "frontend"
+<% end -%>
+
+<% if node['analytics']['analytics_topology'] == 'tier' -%>
+  <% topology = TopoHelper.new(ec_config: node['analytics']) -%>
+  backend_vip "<%= topology.analytics_bootstrap_host_name %>",
+    :ipaddress => "<%= topology.analytics_bootstrap_host_ip %>"
+<% end -%>
