@@ -58,7 +58,7 @@ task :run_loadtest do
   num_loadtesters = config['loadtesters']['num_loadtesters']
   num_groups = config['loadtesters']['num_groups']
   num_containers = config['loadtesters']['num_containers']
-  subwave_size = 50
+  subwave_size = 8
   Dir.chdir(File.join(harness_dir, 'users', 'pinkiepie')) {
     1.upto(num_containers/subwave_size).each do
     # Each subwave (100 nodes)
