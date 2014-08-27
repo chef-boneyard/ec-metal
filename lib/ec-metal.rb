@@ -2,5 +2,5 @@
 
 require 'config_generation/generate_config.rb'
 
-class EcMetal
+module EcMetal
 end
