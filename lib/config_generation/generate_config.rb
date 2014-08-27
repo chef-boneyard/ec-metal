@@ -6,8 +6,8 @@
 module EcMetal
   class GenerateConfig
 
-    require './lib/config_generation/generate_ec2_config.rb'
-    require './lib/config_generation/generate_vagrant_config.rb'
+    require_relative 'generate_ec2_config'
+    require_relative 'generate_vagrant_config'
 
     VALID_TOPOS = ['ha', 'standalone', 'tier']
     VALID_VARIANTS = ['private_chef', 'chef_server']
