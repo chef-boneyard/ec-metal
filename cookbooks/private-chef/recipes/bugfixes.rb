@@ -119,3 +119,15 @@ cookbook_file '/opt/opscode/embedded/upgrades/001/009_migrate_authz.rb' do
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
+
+# opscode-omnibus PR 422 temp monkeypatch
+cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/libraries/private_chef.rb' do
+  source 'libraries_private_chef.rb'
+  owner 'root'
+  group 'root'
+  mode '0644'
+  only_if { pc_version >= '11.2.0' && pc_version < '11.2.1' }
+  only_if { topology.is_backend?(node.name) }
+  subscribes :create, "package[#{installer_name}]", :immediately
+  action :nothing
+end
