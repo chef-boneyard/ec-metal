@@ -2,7 +2,6 @@
 # It creates a config file for ec-metal to consume and is driven by the 'generate_config' rake task
 # It's behavior is modified by several env vars
 
-
 module EcMetal
   class GenerateConfig
     VALID_TOPOS = ['ha', 'standalone', 'tier']
@@ -21,7 +20,7 @@ module EcMetal
     def initialize(args, file_name)
       validate_arguments(args)
       @options = args
-      @config = {}
+      @config = ECMetal::Config.to_hash
       modify_config()
       # TODO(jmink) Error handling?
       File.open(file_name, 'w') do |file|
@@ -55,18 +54,11 @@ module EcMetal
       @config['provider'] = @options.provider
       set_provider_data()
 
-      # TODO(jmink) handle upgrade packages correctly
-      # TODO(jmink) Error handling
-      @config["default_package"] = ECMetal::Config.target_package
-      @config["manage_package"] = ECMetal::Config.manage_package unless ECMetal::Config.manage_package.nil?
-      @config['run_pedant'] = ECMetal::Config.run_pedant
-
       @config[:packages] = {}
       set_topology()
 
       # TODO(jmink) Deal with any weird open source bits & ensure upgrade is set up correctly
     end
-
 
     # default_orgname mode allows you to set an OSC-compatible by designating one org as
     # the default org. This setting enables default_org on the chef-server brought up by

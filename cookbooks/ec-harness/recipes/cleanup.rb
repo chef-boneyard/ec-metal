@@ -1,17 +1,19 @@
 # encoding: utf-8
 
-include_recipe "ec-harness::#{node['harness']['provider']}"
+harness = data_bag_item 'harness', 'config'
 
-ec_harness_private_chef_ha "destroy_#{node['harness']['default_package']}_on_#{node['harness']['provider']}" do
+include_recipe "ec-harness::#{harness['provider']}"
+
+ec_harness_private_chef_ha "destroy_#{harness['default_package']}_on_#{harness['provider']}" do
   action :destroy
 end
 
-if node['harness']['provider'] == 'ec2' && node['harness']['ec2']['backend_storage_type'] == 'ebs'
+if harness['provider'] == 'ec2' && harness['ec2']['backend_storage_type'] == 'ebs'
 
   ruby_block 'destroy_ebs_volume' do
     block do
       # get the EBS data volume id
-      topology = TopoHelper.new(ec_config: node['harness']['vm_config'])
+      topology = TopoHelper.new(ec_config: harness['vm_config'])
 
       begin
         item = data_bag_item('ebs_volumes_db', topology.bootstrap_host_name)
@@ -21,7 +23,7 @@ if node['harness']['provider'] == 'ec2' && node['harness']['ec2']['backend_stora
       end
 
       if ebs_vol_id
-        fog_helper = FogHelper.new(region: node['harness']['ec2']['region'])
+        fog_helper = FogHelper.new(region: harness['ec2']['region'])
         begin
           fog_helper.get_aws.delete_volume(ebs_vol_id)
           num_attempts ||= 0
@@ -57,12 +59,12 @@ if node['harness']['provider'] == 'ec2' && node['harness']['ec2']['backend_stora
   end
 
 end
-if node['harness']['provider'] == 'ec2' && node['harness']['ec2']['backend_storage_type'] == 'ebs'
+if harness['provider'] == 'ec2' && harness['ec2']['backend_storage_type'] == 'ebs'
 
   ruby_block 'destroy_ebs_volume' do
     block do
       # get the EBS data volume id
-      topology = TopoHelper.new(ec_config: node['harness']['vm_config'])
+      topology = TopoHelper.new(ec_config: harness['layout'])
 
       begin
         item = data_bag_item('ebs_volumes_db', topology.bootstrap_host_name)
@@ -72,7 +74,7 @@ if node['harness']['provider'] == 'ec2' && node['harness']['ec2']['backend_stora
       end
 
       if ebs_vol_id
-        fog_helper = FogHelper.new(region: node['harness']['ec2']['region'])
+        fog_helper = FogHelper.new(region: harness['ec2']['region'])
         begin
           fog_helper.get_aws.delete_volume(ebs_vol_id)
           num_attempts ||= 0

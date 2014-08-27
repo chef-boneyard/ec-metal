@@ -1,11 +1,13 @@
 # encoding: utf-8
 
-include_recipe "ec-harness::#{node['harness']['provider']}"
+harness = data_bag_item 'harness', 'config'
 
-ec_harness_private_chef_ha "install_#{node['harness']['default_package']}_on_#{node['harness']['provider']}" do
+include_recipe "ec-harness::#{harness['provider']}"
+
+ec_harness_private_chef_ha "install_#{harness['default_package']}_on_#{harness['provider']}" do
   action :install
 end
 
-ec_harness_private_chef_ha "run_pedant_on_#{node['harness']['provider']}" do
+ec_harness_private_chef_ha "run_pedant_on_#{harness['provider']}" do
   action :pedant
 end

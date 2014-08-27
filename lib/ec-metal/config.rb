@@ -14,6 +14,12 @@ module ECMetal
     # Path to cache holding chef-server packages
     default(:cache_dir)  { ENV['ECM_CACHE_PATH'] || File.join(harness_dir, 'cache') }
 
+    # Path to directory holding vagrant vms
+    default(:vms_dir)    { File.join(harness_dir, 'vagrant_vms') }
+
+    # Path to ssh keys
+    default(:keys_dir)   { File.join(repo_path, 'keys') }
+
     ## Layout and Topo
     # This file contains the various config for the tests
     default(:test_config) { ENV['ECM_CONFIG'] || 'config.json' }
@@ -31,7 +37,23 @@ module ECMetal
     default(:run_pedant)  { !(ENV['ECM_RUN_PEDANT'].nil? || ENV['ECM_RUN_PEDANT'].empty?) }
 
     # Keypair name
-    default :keypair_name, ENV['ECM_KEYPAIR_NAME']
+    default(:keypair_name) { ENV['ECM_KEYPAIR_NAME'] || "#{ENV['USER']}@#{::File.basename(harness_dir)}" }
+
+    def self.to_hash
+      {
+        'harness_dir' => harness_dir,
+        'repo_path'   => repo_path,
+        'host_cache_dir' => cache_dir,
+        'vms_dir'     => vms_dir,
+        'keys_dir'    => keys_dir,
+        'package_name' => target_package,
+        'default_orgname' => default_orgname,
+        'keypair_name' => keypair_name,
+        'run_pedant' => run_pedant,
+        'manage_package' => manage_package
+      }
+
+    end
 
   end
 end

@@ -4,6 +4,7 @@ module EcMetal
   class GenerateVagrantConfig < GenerateConfig
 
     def set_provider_data()
+      @config['provider'] = 'vagrant'
       @config["vagrant_options"] = {
           :box => "opscode-#{@options.platform}",
           :disk2_size => '2',

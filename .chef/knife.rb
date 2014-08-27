@@ -1,3 +1,4 @@
+require './lib/ec-metal/config'
 def find_open_port
   port = 8889
   begin
@@ -11,12 +12,13 @@ def find_open_port
 end
 
 current_dir = ::File.dirname(__FILE__)
-harness_dir = ENV['HARNESS_DIR']
-repo = ENV['REPO_PATH']
+harness_dir = ECMetal::Config.harness_dir
+repo = ECMetal::Config.repo_path
+
 FileUtils.mkdir_p(repo)
 chef_repo_path repo
-keys_dir = ::File.join(repo, 'keys')
-keypair_name = ENV['ECM_KEYPAIR_NAME']
+keys_dir = ECMetal::Config.keys_dir
+keypair_name = ECMetal::Config.keypair_name
 FileUtils.mkdir_p(keys_dir)
 log_level                :info
 log_location             STDOUT
@@ -29,7 +31,6 @@ cookbook_path            [::File.join(harness_dir, 'cookbooks'),
 verify_api_cert          true
 private_key_paths	 [keys_dir]
 
-keypair_name ||= "#{ENV['USER']}@#{::File.basename(harness_dir)}"
 private_keys   keypair_name => ::File.join(keys_dir, 'id_rsa')
 public_keys    keypair_name => ::File.join(keys_dir, 'id_rsa.pub')
 

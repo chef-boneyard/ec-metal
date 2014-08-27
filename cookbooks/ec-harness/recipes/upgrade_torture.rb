@@ -1,12 +1,13 @@
 # encoding: utf-8
 
-include_recipe "ec-harness::#{node['harness']['provider']}"
+harness = data_bag_item 'harness', 'config'
+include_recipe "ec-harness::#{harness['provider']}"
 
 # TODO: Figure out an idempotent way to do this
-node['harness']['packages'].each do |name, packagefile|
+harness['packages'].each do |name, packagefile|
 
-  unless name == node['harness']['packages'].keys.first
-    ec_harness_private_chef_ha "stop_all_but_bootstrap_on_#{node['harness']['provider']}" do
+  unless name == harness['packages'].keys.first
+    ec_harness_private_chef_ha "stop_all_but_bootstrap_on_#{harness['provider']}" do
       action :stop_all_but_master
     end
   end

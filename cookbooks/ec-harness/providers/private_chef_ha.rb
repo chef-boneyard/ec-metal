@@ -10,6 +10,14 @@ end
 
 use_inline_resources
 
+def harness_config
+  data_bag_item 'harness', 'config'
+end
+
+def root_ssh
+  data_bag_itme 'harness', 'root_ssh'
+end
+
 def cloud_machine_created?(vmname)
   rest = Chef::ServerAPI.new()
   begin
@@ -25,16 +33,17 @@ end
 
 action :cloud_create do
  # Dumb hack to populate all of our machines first, for dynamic name/IP provisioners
+  harness = harness_config
   machine_batch 'cloud_create' do
     action [:converge]
-    topo = TopoHelper.new(ec_config: node['harness']['vm_config'])
+    topo = TopoHelper.new(ec_config: harness['layout'])
     topo.merged_topology.each do |vmname, config|
 
       next if cloud_machine_created?(vmname)
       machine vmname do
         add_machine_options node['harness']['provisioner_options'][vmname]
         attribute 'private-chef', privatechef_attributes
-        attribute 'root_ssh', node['harness']['root_ssh'].to_hash
+        attribute 'root_ssh', root_ssh.to_hash
         attribute 'cloud', cloud_attributes('ec2')
         recipe 'private-chef::hostname'
         recipe 'private-chef::ec2'
@@ -45,7 +54,8 @@ action :cloud_create do
 end
 
 action :install do
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['analytics'])
+  harness = harness_config
+  topo = TopoHelper.new(ec_config: harness['layout'], exclude_layers: ['analytics'])
   topo.merged_topology.each do |vmname, config|
     machine_batch vmname do
       action [:converge]
@@ -53,22 +63,22 @@ action :install do
       machine vmname do
         add_machine_options node['harness']['provisioner_options'][vmname]
         attribute 'private-chef', privatechef_attributes
-        attribute 'root_ssh', node['harness']['root_ssh'].to_hash
-        attribute 'osc-install', node['harness']['osc_install']
-        attribute 'osc-upgrade', node['harness']['osc_upgrade']
+        attribute 'root_ssh', root_ssh.to_hash
+        attribute 'osc-install', harness['osc_install']
+        attribute 'osc-upgrade', harness['osc_upgrade']
 
         recipe 'private-chef::hostname'
         recipe 'private-chef::hostsfile'
         recipe 'private-chef::provision'
-        recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
+        recipe 'private-chef::bugfixes' if harness['apply_ec_bugfixes'] == true
         recipe 'private-chef::drbd' if topo.is_backend?(vmname) and topo.is_ha?
         recipe 'private-chef::provision_phase2'
         recipe 'private-chef::users' if vmname == topo.bootstrap_node_name &&
           node['harness']['osc_install'] == false
-        recipe 'private-chef::reporting' if node['harness']['reporting_package']
-        recipe 'private-chef::manage' if node['harness']['manage_package'] &&
+        recipe 'private-chef::reporting' if harness['reporting_package']
+        recipe 'private-chef::manage' if harness['manage_package'] &&
           topo.is_frontend?(vmname)
-        recipe 'private-chef::pushy' if node['harness']['pushy_package']
+        recipe 'private-chef::pushy' if harness['pushy_package']
         recipe 'private-chef::tools'
         # this doesn't work 
         # ohai_hints { 'ec2' } 
@@ -80,15 +90,15 @@ action :install do
     end
   end
 
-  if node['harness']['analytics_package'] && node['harness']['vm_config']['analytics']
-    node['harness']['vm_config']['analytics'].each do |vmname, config|
+  if harness['analytics_package'] && harness['vm_config']['analytics']
+    harness['layout']['analytics'].each do |vmname, config|
       machine_batch vmname do
         action [:converge]
 
         machine vmname do
           add_machine_options node['harness']['provisioner_options'][vmname]
           attribute 'private-chef', privatechef_attributes
-          attribute 'root_ssh', node['harness']['root_ssh'].to_hash
+          attribute 'root_ssh', root_ssh.to_hash
 
           recipe 'private-chef::hostname'
           recipe 'private-chef::hostsfile'
@@ -103,7 +113,8 @@ action :install do
 end
 
 action :pedant do
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['analytics'])
+  harness = harness_config
+  topo = TopoHelper.new(ec_config: harness['layout'], exclude_layers: ['analytics'])
   topo.merged_topology.each do |vmname, config|
     machine_batch vmname do
       action [:converge]
@@ -111,9 +122,9 @@ action :pedant do
       machine vmname do
         add_machine_options node['harness']['provisioner_options'][vmname]
         attribute 'private-chef', privatechef_attributes
-        attribute 'root_ssh', node['harness']['root_ssh'].to_hash
-        attribute 'osc-install', node['harness']['osc_install']
-        attribute 'run-pedant', node['harness']['run_pedant']
+        attribute 'root_ssh', root_ssh.to_hash
+        attribute 'osc-install', harness['osc_install']
+        attribute 'run-pedant', harness['run_pedant']
 
         recipe 'private-chef::pedant'
 
@@ -126,18 +137,19 @@ end
 # bin/knife opc -c chef-repo/pivotal/knife-pivotal.rb user list
 action :pivotal do
 
-  directory ::File.join(node['harness']['repo_path'], 'pivotal')
+  harness = harness_config
+  directory ::File.join(harness['repo_path'], 'pivotal')
 
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'])
+  topo = TopoHelper.new(ec_config: harness['layout'])
 
   machine_execute 'read pivotal.pem for vagrant' do
     command 'sudo chmod 644 /etc/opscode/pivotal.pem'
     machine topo.bootstrap_node_name
-    only_if { node['harness']['provider'] == 'vagrant' }
+    only_if { harness['provider'] == 'vagrant' }
   end
 
   machine_file '/etc/opscode/pivotal.pem' do
-    local_path ::File.join(node['harness']['repo_path'], 'pivotal', 'pivotal.pem')
+    local_path ::File.join(harness['repo_path'], 'pivotal', 'pivotal.pem')
     machine topo.bootstrap_node_name
     action :download
   end
@@ -145,15 +157,15 @@ action :pivotal do
   bootstrap_node_data = search(:node, "name:#{topo.bootstrap_node_name}")
 
   ipaddress = nil
-  if node['harness']['provider'] == 'ec2'
+  if harness['provider'] == 'ec2'
     ipaddress = bootstrap_node_data[0][:ec2][:public_ipv4]
-  elsif node['harness']['provider'] == 'vagrant'
+  elsif harness['provider'] == 'vagrant'
     ipaddress = bootstrap_node_data[0][:network][:interfaces][:eth1][:routes][0][:src]
   else
-    raise ArgumentError, "Unsupported provider #{node['harness']['provider']}. Can't get ip address."
+    raise ArgumentError, "Unsupported provider #{harness['provider']}. Can't get ip address."
   end
 
-  template ::File.join(node['harness']['repo_path'], 'pivotal', 'knife-pivotal.rb') do
+  template ::File.join(harness['repo_path'], 'pivotal', 'knife-pivotal.rb') do
     source 'knife-pivotal.rb.erb'
     variables ({
       :ipaddress => ipaddress
@@ -162,7 +174,8 @@ action :pivotal do
 end
 
 action :stop_all_but_master do
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['analytics'])
+  harness = harness_config
+  topo = TopoHelper.new(ec_config: harness['layout'], exclude_layers: ['analytics'])
   topo.merged_topology.each do |vmname, config|
     next if config['bootstrap'] == true # all backends minus bootstrap
 
@@ -176,7 +189,8 @@ action :stop_all_but_master do
 end
 
 action :start_non_bootstrap do
-  topo_be = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: ['backends'])
+  harness = harness_config
+  topo_be = TopoHelper.new(ec_config: harness['layout'], include_layers: ['backends'])
   topo_be.merged_topology.each do |vmname, config|
     next if config['bootstrap'] == true # all backends minus bootstrap
 
@@ -186,7 +200,7 @@ action :start_non_bootstrap do
     end
   end
 
-  topo_fe = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: ['frontends'])
+  topo_fe = TopoHelper.new(ec_config: harness['layout'], include_layers: ['frontends'])
   topo_fe.merged_topology.each do |vmname, config|
     machine_execute "p-c-c_start_on_#{vmname}" do
       command '/opt/opscode/bin/private-chef-ctl start ; exit 0'
@@ -209,8 +223,9 @@ def installer_path(ec_package)
 end
 
 def privatechef_attributes
+  harness = harness_config
   packages = package_attributes
-  attributes = node['harness']['vm_config'].to_hash
+  attributes = harness['layout'].to_hash
   attributes['configuration'] = {} unless attributes['configuration']
   attributes['installer_file'] = packages['ec']
   unless packages['manage'] == nil
@@ -248,16 +263,17 @@ end
 
 def package_attributes
   packages = {}
+  harness = harness_config
 
   if new_resource.ec_package
     packages['ec'] = installer_path(new_resource.ec_package)
   else
-    packages['ec'] = installer_path(node['harness']['default_package'])
+    packages['ec'] = installer_path(harness['default_package'])
   end
-  packages['manage'] = installer_path(node['harness']['manage_package'])
-  packages['reporting'] = installer_path(node['harness']['reporting_package'])
-  packages['pushy'] = installer_path(node['harness']['pushy_package'])
-  packages['analytics'] = installer_path(node['harness']['analytics_package'])
+  packages['manage'] = installer_path(harness['manage_package'])
+  packages['reporting'] = installer_path(harness['reporting_package'])
+  packages['pushy'] = installer_path(harness['pushy_package'])
+  packages['analytics'] = installer_path(harness['analytics_package'])
 
   packages
 end

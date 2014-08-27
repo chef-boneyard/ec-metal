@@ -12,10 +12,12 @@ class VagrantConfigHelper
     #   disk is an SSD.  This should be fine for most of our recent Macs, but I'm
     #   not sure if there's any actual benefit for ext4
 
+    harness = data_bag_item 'harness', 'config'
+
     vagrant_config = <<-ENDCONFIG
       config.vm.network 'private_network', ip: "#{config['ipaddress']}"
       config.vm.hostname = "#{config['hostname']}"
-      config.vm.synced_folder "#{node['harness']['host_cache_path']}", "#{node['harness']['vm_mountpoint']}"
+      config.vm.synced_folder "#{harness['host_cache_path']}", "#{node['harness']['vm_mountpoint']}"
       config.vm.provider 'virtualbox' do |v|
         v.customize [
           'modifyvm', :id,
@@ -37,7 +39,7 @@ class VagrantConfigHelper
 
     if node['harness']['vm_config']['topology'] == 'ha' &&
       node['harness']['vm_config']['backends'].include?(vmname)
-      vm_disk2 = ::File.join(node['harness']['vms_dir'], vmname, 'disk2.vmdk')
+      vm_disk2 = ::File.join(harness['vms_dir'], vmname, 'disk2.vmdk')
       disk2_size = node['harness']['vagrant']['disk2_size'] || 2
       vagrant_config += <<-ENDCONFIG
       config.vm.network 'private_network', ip: "#{config['cluster_ipaddress']}"

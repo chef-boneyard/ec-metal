@@ -9,6 +9,7 @@ task :default => [:up]
 # Environment variables to be consumed by ec-harness and friends
 harness_dir = ECMetal::Config.harness_dir
 repo_dir = ECMetal::Config.repo_path
+harness_data_bag_dir = File.join(ECMetal::Config.repo_path, 'data_bags', 'harness')
 
 # just in cases user has a different default Vagrant provider
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
@@ -23,31 +24,33 @@ task :bundle do
 end
 
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
-task :up => [:print_enviornment, :keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+task :up => :setup do
   create_users_directory
   sh("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha")
 end
 task :start => :up
 
 desc 'Bring the VMs online and then UPGRADE TORTURE'
-task :upgrade_torture => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+task :upgrade_torture => :setup do
   create_users_directory
   sh("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade_torture")
 end
 
 desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
-task :upgrade => [:print_enviornment, :keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+task :upgrade => :setup do
   create_users_directory
   sh("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
 end
 
 desc "Copies pivotal.pem from chef server and generates knife.rb in the repo dir"
-task :pivotal => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+task :pivotal => :setup do
   sh("#{harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
 end
 
+task :setup => [:print_environment, :keygen, :cachedir, :config_copy, :config_data_bag, :bundle, :berks_install]
+
 desc 'Destroy all VMs'
-task :destroy do
+task :destroy => :config_data_bag do
   sh("#{harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
 end
 task :cleanup => :destroy
@@ -60,7 +63,7 @@ task :ssh, [:machine] do |t,arg|
 end
 
 desc "Print all ec-metal enviornment variables"
-task :print_enviornment do
+task :print_environment do
   puts "================== ec-metal ENV ==========================="
   ENV.each { |k,v| puts "#{k} = #{v}" if k.include?("ECM_") }
   puts "==========================================================="
@@ -86,8 +89,9 @@ task :config_copy do
   end
 end
 
-task :keygen do
-  keydir = File.join(repo_dir, 'keys')
+task :keygen => :data_bag_dir do
+  keydir = ECMetal::Config.keys_dir
+  key_data_bag_item = File.join(repo_dir, 'data_bags', 'harness', 'root_ssh')
   FileUtils.mkdir_p keydir
 
   if Dir["#{keydir}/*"].empty? && !ENV['ECM_KEYPAIR_PATH'].nil?
@@ -102,6 +106,12 @@ task :keygen do
     puts "Keygen: #{command}"
     sh(command)
   end
+  puts "Adding keys to #{key_data_bag_item}"
+  key_data = {
+    'privkey' => File.read(File.join(keydir, 'id_rsa')),
+    'pubkey'  => File.read(File.join(keydir, 'id_rsa.pub'))
+  }
+  File.write(key_data_bag_item, key_data)
 end
 
 desc 'Add hosts entries to /etc/hosts'
@@ -122,7 +132,7 @@ end
 task :cachedir do
   cache_dir = ECMetal::Config.cache_dir
   FileUtils.mkdir_p cache_dir unless Dir.exists? cache_dir
-  puts "Using package cache directory #{cachedir}"
+  puts "Using package cache directory #{cache_dir}"
 end
 
 task :berks_install do
@@ -161,6 +171,19 @@ def ssh_user()
     else
       'root'
   end
+end
+
+task :data_bag_dir do
+  harness_data_bag_dir = File.join(ECMetal::Config.repo_path, 'data_bags', 'harness')
+  FileUtils.mkdir_p harness_data_bag_dir
+end
+
+task :config_data_bag => :data_bag_dir do
+  config_file = ECMetal::Config.test_config
+  data_bag_item = File.join(harness_data_bag_dir, 'config.json')
+  FileUtils.mkdir_p harness_data_bag_dir
+  puts "Copying config file #{config_file} to #{data_bag_item}"
+  sh("cp #{config_file} #{data_bag_item}")
 end
 
 # task :ec2_to_file do
