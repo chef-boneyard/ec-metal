@@ -43,13 +43,25 @@ action :create do
           ipaddress = node.ipaddress
           log "Using IP address #{ipaddress} for myself: #{vmname}"
 
-          # point the API fqdn at myself on each host, so p-c-c test runs against me
-          hostsfile_aliases = ["api.#{topo.mydomainname}"]
+          # set a "special" alias pointed at ourself
+          if topo.is_analytics?(node.name)
+            hostsfile_aliases = ["analytics.#{topo.mydomainname}"]
+          else
+            # point the API fqdn at myself on each host, so p-c-c test runs against me
+            hostsfile_aliases = ["api.#{topo.mydomainname}"]
+          end
+
         else
           log "Searching for the IP address of #{vmname}"
           ipaddress = search_ipaddress(vmname)
           log "Discovered node #{vmname} IP: #{ipaddress}"
-          hostsfile_aliases = []
+
+          # on analytics nodes, point api. at the frontend
+          if topo.is_analytics?(node.name) && topo.is_frontend?(vmname)
+            hostsfile_aliases = ["api.#{topo.mydomainname}"]
+          else
+            hostsfile_aliases = []
+          end
         end
         node.set['private-chef'][whichend][vmname]['ipaddress'] = ipaddress
 
