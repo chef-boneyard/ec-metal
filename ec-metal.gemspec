@@ -1,16 +1,20 @@
-$:.push File.expand_path('../lib', __FILE__)
+# -*- encoding: utf-8 -*-
+$:.push File.expand_path('lib', __FILE__)
+require 'ec-metal'
 
 Gem::Specification.new do |s|
-  s.name        = 'ec-metal'
+  s.name        = "ec-metal"
   s.version     = '0.0.0'
-  s.date        = '2014-08-27'
-  s.summary     = "Sets up a chef server either open source or enterprise"
-  s.description = "Sets up a chef server either open source or enterprise"
-  s.authors     = ["Chef Software Inc"]
-  s.email       = 'legal@getchef.com'
-j s.files       = ["lib/ec_metal.rb"]
+  s.authors     = ['Chef Software, Inc.']
+  s.email       = ['legal@getchef.com']
+  s.homepage    = "http://github.com/opscode/ec-metal"
+  s.summary     = %q{Open Source software for use with Chef}
+  s.description = %q{A tool for spinning up chef servers}
+
+  s.rubyforge_project = "ec-metal"
+
+  s.files         = `git ls-files`.split("\n")
+  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ['lib']
-  s.homepage    =
-    'https://github.com/opscode/ec-metal'
-  s.license       = 'MIT'
 end
