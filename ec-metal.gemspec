@@ -6,9 +6,10 @@ Gem::Specification.new do |s|
   s.date        = '2014-08-27'
   s.summary     = "Sets up a chef server either open source or enterprise"
   s.description = "Sets up a chef server either open source or enterprise"
-  s.authors     = ["Irving Popovetsky", "Jeremiah Snapp", "Patrick Wright", "Jessica Mink"]
-  s.email       = 'irving@getchef.com'
-  s.files       = ["lib/ec_metal.rb"]
+  s.authors     = ["Chef Software Inc"]
+  s.email       = 'legal@getchef.com'
+j s.files       = ["lib/ec_metal.rb"]
+  s.require_paths = ['lib']
   s.homepage    =
     'https://github.com/opscode/ec-metal'
   s.license       = 'MIT'
