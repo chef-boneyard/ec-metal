@@ -1,4 +1,4 @@
-require './lib/config_generation/generate_config.rb'
+require_relative 'generate_config'
 
 module EcMetal
   class GenerateVagrantConfig < GenerateConfig
