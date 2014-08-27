@@ -1,7 +1,6 @@
 require 'json'
 
-require './lib/config_generation/generate_ec2_config.rb'
-require './lib/config_generation/generate_vagrant_config.rb'
+require './lib/config_generation/generate_config.rb'
 
 
 # TODO(jmink) Take another look at these variable names/how they're passed in

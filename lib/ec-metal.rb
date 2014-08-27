@@ -1,3 +1,6 @@
 # Dummy class to help turn this into a gem
-class EcMetal
+
+require 'config_generation/generate_config.rb'
+
+module EcMetal
 end
