@@ -1,13 +1,10 @@
 require 'json'
 require 'fileutils'
 require './cookbooks/ec-common/libraries/topo_helper.rb'
+require_relative 'lib/api.rb'
 Dir["lib/tasks/*.rake"].each { |t| load t }
 
 task :default => [:up]
-
-# Environment variables to be consumed by ec-harness and friends
-harness_dir = ENV['HARNESS_DIR'] ||= File.dirname(__FILE__)
-repo_dir = ENV['REPO_PATH'] ||= File.join(harness_dir, 'chef-repo')
 
 # just in cases user has a different default Vagrant provider
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
@@ -18,89 +15,66 @@ end
 
 desc 'Install required Gems into the vendor/bundle directory'
 task :bundle do
-  sh('bundle install --path vendor/bundle --binstubs')
+  EcMetal::Api.bundle
 end
 
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
 task :up => [:print_enviornment, :keygen, :cachedir, :config_copy, :bundle, :berks_install] do
-  create_users_directory
-  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha")
+  EcMetal::Api.up
 end
 task :start => :up
 
 desc 'Bring the VMs online and then UPGRADE TORTURE'
 task :upgrade_torture => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
-  create_users_directory
-  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade_torture")
+  EcMetal::Api.create_users_directory
+  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::upgrade_torture")
 end
 
 desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
 task :upgrade => [:print_enviornment, :keygen, :cachedir, :config_copy, :bundle, :berks_install] do
-  create_users_directory
-  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
+  EcMetal::Api.create_users_directory
+  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
 end
 
 desc "Copies pivotal.pem from chef server and generates knife.rb in the repo dir"
 task :pivotal => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
-  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
+  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
 end
 
 desc 'Destroy all VMs'
 task :destroy do
-  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
+  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
 end
 task :cleanup => :destroy
 
 desc 'SSH to a machine like so: rake ssh[backend1]'
 task :ssh, [:machine] do |t,arg|
-  Dir.chdir(File.join(harness_dir, 'vagrant_vms')) {
+  Dir.chdir(File.join(EcMetal::Api.harness_dir, 'vagrant_vms')) {
     sh("vagrant ssh #{arg.machine}")
   }
 end
 
 desc "Print all ec-metal enviornment variables"
 task :print_enviornment do
-  puts "================== ec-metal ENV ==========================="
-  ENV.each { |k,v| puts "#{k} = #{v}" if k.include?("ECM_") }
-  puts "==========================================================="
+  EcMetal::Api.print_enviornment
 end
 
 # Vagrant standard but useful commands
 %w(status halt suspend resume).each do |command|
   desc "Equivalent to running: vagrant #{command}"
   task :"#{command}" do
-    Dir.chdir(File.join(harness_dir, 'vagrant_vms')) {
+    Dir.chdir(File.join(EcMetal::Api.harness_dir, 'vagrant_vms')) {
       sh("vagrant #{command}")
     }
   end
 end
 
 task :config_copy do
-  unless ENV['ECM_CONFIG'] && File.exists?(ENV['ECM_CONFIG'])
-    config_file = File.join(harness_dir, 'config.json')
-    config_ex_file = File.join(harness_dir, 'examples', 'config.json.example')
-    unless File.exists?(config_file)
-      FileUtils.cp(config_ex_file, config_file)
-    end
-  end
+  EcMetal::Api.config_copy
 end
 
 task :keygen do
-  keydir = File.join(repo_dir, 'keys')
-  FileUtils.mkdir_p keydir
-
-  if Dir["#{keydir}/*"].empty? && !ENV['ECM_KEYPAIR_PATH'].nil?
-    FileUtils.copy("#{ENV['ECM_KEYPAIR_PATH']}/id_rsa", "#{keydir}/id_rsa")
-    FileUtils.copy("#{keydir}/id_rsa", "#{keydir}/#{ENV['ECM_KEYPAIR_NAME']}") unless ENV['ECM_KEYPAIR_NAME'].nil?
-    FileUtils.copy("#{ENV['ECM_KEYPAIR_PATH']}/id_rsa.pub", "#{keydir}/id_rsa.pub")
-  end
-
-  if Dir["#{keydir}/*"].empty?
-    comment = ENV['ECM_KEYPAIR_NAME'].nil? ? "" : "-C #{ENV['ECM_KEYPAIR_NAME']}"
-    command = "ssh-keygen #{comment} -P '' -q -f #{keydir}/id_rsa"
-    puts "Keygen: #{command}"
-    sh(command)
-  end
+  EcMetal::Api.keygen
 end
 
 desc 'Add hosts entries to /etc/hosts'
@@ -108,7 +82,7 @@ task :add_hosts do
   config = get_config
   config = fog_populate_ips(config) if config['provider'] == 'ec2'
   create_hosts_entries(config['layout'])
-  print_final_message(config, repo_dir)
+  print_final_message(config, EcMetal::Api.repo_dir)
 end
 
 desc 'Remove hosts entries to /etc/hosts'
@@ -119,19 +93,11 @@ task :remove_hosts do
 end
 
 task :cachedir do
-  if ENV['ECM_CACHE_PATH'] && Dir.exists?(ENV['ECM_CACHE_PATH'])
-    cachedir = ENV['ECM_CACHE_PATH']
-  else
-    cachedir = File.join(harness_dir, 'cache')
-    FileUtils.mkdir_p cachedir
-  end
-  puts "Using package cache directory #{cachedir}"
+  EcMetal::Api.cachedir
 end
 
 task :berks_install do
-  cookbooks_path = File.join(repo_dir, 'vendor/cookbooks')
-  sh("rm -r #{cookbooks_path}") if Dir.exists?(cookbooks_path)
-  sh("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
+  EcMetal::Api.berks_install
 end
 
 desc "Open csshx to the nodes of the server."
@@ -143,13 +109,13 @@ end
 
 desc "Execute a command on a remote machine"
 task :execute, [:machine, :command] do |t,arg|
-  sh %Q{ssh -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \
+  sh %Q{ssh -o StrictHostKeyChecking=no -i #{File.join(EcMetal::Api.harness_dir, 'keys')}/id_rsa \
         #{ssh_user()}@#{machine(arg.machine)['hostname']} #{arg.command} }
 end
 
 desc "Copy a file/directory from local to the machine indicated"
 task :scp, [:machine, :source_path, :remote_path] do |t,arg|
-  sh %Q{scp -r -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \
+  sh %Q{scp -r -o StrictHostKeyChecking=no -i #{File.join(EcMetal::Api.harness_dir, 'keys')}/id_rsa \
         #{arg.source_path} #{ssh_user()}@#{machine(arg.machine)['hostname']}:#{arg.remote_path} }
 end
 

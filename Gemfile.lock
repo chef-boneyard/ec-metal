@@ -248,4 +248,5 @@ DEPENDENCIES
   chef-metal-vagrant (~> 0.5.0)
   cheffish (~> 0.6.0)
   knife-opc (~> 0.1.0)
+  mixlib-shellout
   rake
