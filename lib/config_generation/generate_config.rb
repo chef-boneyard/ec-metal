@@ -5,6 +5,10 @@
 
 module EcMetal
   class GenerateConfig
+
+    require_relative 'generate_ec2_config'
+    require_relative 'generate_vagrant_config'
+
     VALID_TOPOS = ['ha', 'standalone', 'tier']
     VALID_VARIANTS = ['private_chef', 'chef_server']
     VALID_PROVIDERS = ['vagrant', 'ec2']
