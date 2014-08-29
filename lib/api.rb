@@ -3,9 +3,12 @@ require 'pathname'
 
 module EcMetal
   class Api
+
+    MINUTE_IN_DEC_SECS = 600
+
     def self.up
       create_users_directory
-      run("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha")
+      run("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
     end
 
     # TODO(jmink) Make private once all main apis are in this file
@@ -73,7 +76,7 @@ module EcMetal
     end
 
     def self.bundle
-      run('bundle install --path vendor/bundle --binstubs')
+      run('bundle install --path vendor/bundle --binstubs', 3*MINUTE_IN_DEC_SECS)
     end
 
     # Environment variables to be consumed by ec-harness and friends
@@ -89,15 +92,16 @@ module EcMetal
     private
 
     # Shells out, ensures error messages are recorded and throws an exception on non-zero responses
-    def self.run(command)
+    # timeout is in tenths of seconds (default 600 last checked)
+    def self.run(command, timeout = nil)
       puts "#{command} from #{harness_dir}"
-      cwd = harness_dir
-      env = ENV
 
+      shellout_params = {:cwd => harness_dir, :env => ENV}
+      shellout_params[:timeout] = timeout unless timeout.nil?
 
       Bundler.with_clean_env do
         # TODO(jmink) determine why this env var needs to be set externally
-        run = Mixlib::ShellOut.new("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{command}", :cwd => cwd, :env => env)
+        run = Mixlib::ShellOut.new("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{command}", shellout_params)
         run.run_command
         puts run.stdout
         puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
