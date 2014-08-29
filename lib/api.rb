@@ -91,11 +91,16 @@ module EcMetal
     # Shells out, ensures error messages are recorded and throws an exception on non-zero responses
     def self.run(command)
       puts "#{command} from #{harness_dir}"
-      run = Mixlib::ShellOut.new(command, :cwd => harness_dir, :env => ENV)
-      run.run_command
-      puts run.stdout
-      puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
-      run.error!
+      cwd = harness_dir
+      env = ENV
+
+      Bundler.with_clean_env do
+        run = Mixlib::ShellOut.new(command, :cwd => cwd, :env => env)
+        run.run_command
+        puts run.stdout
+        puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
+        run.error!
+      end
     end
   end
 end
