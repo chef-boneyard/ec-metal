@@ -8,13 +8,15 @@ module EcMetal
 
     def self.up
       create_users_directory
+      ENV['HARENSS_DIR'] = harenss_dir
+      ENV['REPO_PATH'] = repo_dir
       run("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
     end
 
     # TODO(jmink) Make private once all main apis are in this file
     # Also look through and determine what else should be made private
     def self.create_users_directory
-      FileUtils.mkdir_p(File.join(ENV['HARNESS_DIR'], 'users'))
+      FileUtils.mkdir_p(File.join(harness_dir, 'users'))
     end
 
     # Do all the basic env setup required for the up, upgrade, etc commands
