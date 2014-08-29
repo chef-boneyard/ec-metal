@@ -94,8 +94,10 @@ module EcMetal
       cwd = harness_dir
       env = ENV
 
+
       Bundler.with_clean_env do
-        run = Mixlib::ShellOut.new(command, :cwd => cwd, :env => env)
+        # TODO(jmink) determine why this env var needs to be set externally
+        run = Mixlib::ShellOut.new("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{command}", :cwd => cwd, :env => env)
         run.run_command
         puts run.stdout
         puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
