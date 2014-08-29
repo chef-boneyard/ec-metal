@@ -69,8 +69,7 @@ module EcMetal
     def self.berks_install
       cookbooks_path = File.join(repo_dir, 'vendor/cookbooks')
       run("rm -r #{cookbooks_path}") if Dir.exists?(cookbooks_path)
-      # TODO(jmink) determine why this env var needs to be set externally
-      run("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{harness_dir}/bin/berks vendor #{cookbooks_path}")
+      run("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
     end
 
     def self.bundle
@@ -95,8 +94,10 @@ module EcMetal
       cwd = harness_dir
       env = ENV
 
+
       Bundler.with_clean_env do
-        run = Mixlib::ShellOut.new(command, :cwd => cwd, :env => env)
+        # TODO(jmink) determine why this env var needs to be set externally
+        run = Mixlib::ShellOut.new("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{command}", :cwd => cwd, :env => env)
         run.run_command
         puts run.stdout
         puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
