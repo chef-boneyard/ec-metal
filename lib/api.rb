@@ -69,7 +69,8 @@ module EcMetal
     def self.berks_install
       cookbooks_path = File.join(repo_dir, 'vendor/cookbooks')
       run("rm -r #{cookbooks_path}") if Dir.exists?(cookbooks_path)
-      run("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
+      # TODO(jmink) determine why this env var needs to be set externally
+      run("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{harness_dir}/bin/berks vendor #{cookbooks_path}")
     end
 
     def self.bundle
