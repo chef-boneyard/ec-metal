@@ -8,7 +8,7 @@ module EcMetal
 
     def self.up
       create_users_directory
-      ENV['HARENSS_DIR'] = harenss_dir
+      ENV['HARENSS_DIR'] = harness_dir
       ENV['REPO_PATH'] = repo_dir
       run("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
     end
