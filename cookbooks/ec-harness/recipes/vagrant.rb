@@ -12,7 +12,8 @@ directory repo_path
 with_chef_local_server :chef_repo_path => repo_path,
   :cookbook_path => [File.join(harness_dir, 'cookbooks'),
                      File.join(repo_path, 'cookbooks'),
-    File.join(repo_path, 'vendor', 'cookbooks') ]
+    File.join(repo_path, 'vendor', 'cookbooks') ],
+    :port => 9010.upto(9999)
 
 with_machine_options :vagrant_options => {
   'vm.box' => node['harness']['vagrant']['box'],
