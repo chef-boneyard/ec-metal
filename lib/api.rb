@@ -79,7 +79,7 @@ module EcMetal
     end
 
     def self.bundle
-      run('bundle install --path vendor/bundle --binstubs', 3*MINUTE_IN_DEC_SECS)
+      run('bundle install --path $PWD/vendor/bundle --binstubs', 3*MINUTE_IN_DEC_SECS)
     end
 
     # Environment variables to be consumed by ec-harness and friends
