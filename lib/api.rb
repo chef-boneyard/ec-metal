@@ -99,16 +99,18 @@ module EcMetal
     def self.run(command, timeout = nil)
       puts "#{command} from #{harness_dir} with env #{ENV.to_h}"
 
-      shellout_params = {:cwd => harness_dir, :env => ENV.to_h}
+      shellout_params = {:env => ENV.to_h}
       shellout_params[:timeout] = timeout unless timeout.nil?
 
-      Bundler.with_clean_env do
-        # TODO(jmink) determine why this env var needs to be set externally
-        run = Mixlib::ShellOut.new("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{command}", shellout_params)
-        run.run_command
-        puts run.stdout
-        puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
-        run.error!
+      Dir.chdir("harness_dir") do
+        Bundler.with_clean_env do
+          # TODO(jmink) determine why this env var needs to be set externally
+          run = Mixlib::ShellOut.new("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{command}", shellout_params)
+          run.run_command
+          puts run.stdout
+          puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
+          run.error!
+        end
       end
     end
   end
