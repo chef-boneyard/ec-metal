@@ -3,7 +3,7 @@ PATH
   specs:
     ec-metal (0.0.0)
       berkshelf (>= 3.0)
-      chef (>= 11.14.0)
+      chef (>= 10.34.2)
       chef-metal (>= 0.14.1)
       chef-metal-fog (>= 0.6.0)
       chef-metal-vagrant (>= 0.5.0)

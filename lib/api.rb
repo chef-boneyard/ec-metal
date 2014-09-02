@@ -11,7 +11,7 @@ module EcMetal
       create_users_directory
       ENV['HARNESS_DIR'] = harness_dir
       ENV['REPO_PATH'] = repo_dir
-      run("#{harness_dir}/bin/chef-client -z -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
+      run("#{harness_dir}/bin/chef-client -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
     end
 
     # TODO(jmink) Make private once all main apis are in this file
