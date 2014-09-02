@@ -16,4 +16,13 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ['lib', 'bin']
+
+   s.add_runtime_dependency "chef-metal", [">= 0.14.1"]
+   s.add_runtime_dependency "chef-metal-vagrant", [">= 0.5.0"]
+   s.add_runtime_dependency "chef-metal-fog", [">= 0.6.0"]
+   s.add_runtime_dependency "cheffish", [">= 0.6.0"]
+   s.add_runtime_dependency "chef", [">= 11.14.0"]
+   s.add_runtime_dependency "berkshelf", [">= 3.0"]
+   s.add_runtime_dependency "mixlib-shellout"
+   s.add_runtime_dependency "knife-opc", [">= 0.1.0"]
 end
