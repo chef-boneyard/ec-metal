@@ -1,5 +1,6 @@
 require "mixlib/shellout"
 require 'pathname'
+require 'bundler'
 
 module EcMetal
   class Api
