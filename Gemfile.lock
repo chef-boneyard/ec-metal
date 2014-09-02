@@ -1,3 +1,16 @@
+PATH
+  remote: .
+  specs:
+    ec-metal (0.0.0)
+      berkshelf (>= 3.0)
+      chef (>= 11.14.0)
+      chef-metal (>= 0.14.1)
+      chef-metal-fog (>= 0.6.0)
+      chef-metal-vagrant (>= 0.5.0)
+      cheffish (>= 0.6.0)
+      knife-opc (>= 0.1.0)
+      mixlib-shellout
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -28,7 +41,7 @@ GEM
     buff-extensions (1.0.0)
     buff-ignore (1.1.1)
     buff-ruby_engine (0.1.0)
-    buff-shell_out (0.1.1)
+    buff-shell_out (0.2.0)
       buff-ruby_engine (~> 0.1.0)
     builder (3.2.2)
     celluloid (0.16.0.pre3)
@@ -84,7 +97,7 @@ GEM
       ffi (~> 1.9)
     diff-lcs (1.2.5)
     erubis (2.7.0)
-    excon (0.39.3)
+    excon (0.39.4)
     faraday (0.9.0)
       multipart-post (>= 1.2, < 3)
     ffi (1.9.3)
@@ -98,7 +111,7 @@ GEM
       fog-softlayer
       ipaddress (~> 0.5)
       nokogiri (~> 1.5, >= 1.5.11)
-    fog-brightbox (0.2.0)
+    fog-brightbox (0.3.0)
       fog-core (~> 1.22)
       fog-json
       inflecto
@@ -111,7 +124,7 @@ GEM
       net-ssh (>= 2.1.3)
     fog-json (1.0.0)
       multi_json (~> 1.0)
-    fog-softlayer (0.3.13)
+    fog-softlayer (0.3.14)
       fog-core
       fog-json
     formatador (0.2.5)
@@ -241,12 +254,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  berkshelf (~> 3.0)
-  chef (~> 11.14.0)
-  chef-metal (~> 0.14.1)
-  chef-metal-fog (~> 0.6.0)
-  chef-metal-vagrant (~> 0.5.0)
-  cheffish (~> 0.6.0)
-  knife-opc (~> 0.1.0)
-  mixlib-shellout
+  ec-metal!
   rake
