@@ -102,7 +102,7 @@ module EcMetal
       shellout_params = {:env => ENV.to_h}
       shellout_params[:timeout] = timeout unless timeout.nil?
 
-      Dir.chdir("harness_dir") do
+      Dir.chdir(harness_dir) do
         Bundler.with_clean_env do
           # TODO(jmink) determine why this env var needs to be set externally
           run = Mixlib::ShellOut.new("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{command}", shellout_params)
