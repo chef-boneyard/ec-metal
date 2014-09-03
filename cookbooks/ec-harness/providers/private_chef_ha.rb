@@ -69,7 +69,6 @@ action :install do
         recipe 'private-chef::manage' if node['harness']['manage_package'] &&
           topo.is_frontend?(vmname)
         recipe 'private-chef::pushy' if node['harness']['pushy_package']
-        recipe 'private-chef::tools'
         # this doesn't work 
         # ohai_hints { 'ec2' } 
         # but this does
