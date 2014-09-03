@@ -80,7 +80,7 @@ package 'rsync'
 
 if (topology.analytics_bootstrap_node_name.include?(node.name) || analytics_topology == 'standalone')
   source = topology.bootstrap_host_name
-elsif topology.is_analytics_frontends?(node.name)
+elsif (topology.is_analytics_frontends?(node.name) || topology.is_analytics_workers?(node.name))
   source = topology.analytics_bootstrap_host_name
 end
 
