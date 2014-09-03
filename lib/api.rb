@@ -6,12 +6,13 @@ module EcMetal
   class Api
 
     MINUTE_IN_DEC_SECS = 600
+    KNIFE = File.join(File.dirname(File.dirname(__FILE__)), '.chef', 'knife.rb')
 
     def self.up
       create_users_directory
       ENV['HARNESS_DIR'] = harness_dir
       ENV['REPO_PATH'] = repo_dir
-      run("bundle exec chef-client -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
+      run("bundle exec chef-client --config #{KNIFE} -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
     end
 
     # TODO(jmink) Make private once all main apis are in this file
