@@ -13,6 +13,7 @@ end
 current_dir = ::File.dirname(__FILE__)
 harness_dir = ENV['HARNESS_DIR']
 repo = ENV['REPO_PATH']
+local_cookbooks = File.join(Pathname.new(File.dirname(__FILE__)).parent.to_s, 'cookbooks')
 FileUtils.mkdir_p(repo)
 chef_repo_path repo
 keys_dir = ::File.join(repo, 'keys')
@@ -23,8 +24,11 @@ log_location             STDOUT
 node_name                'metal-provisioner'
 cache_type               'BasicFile'
 cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
-cookbook_path            [::File.join(harness_dir, 'cookbooks'),
-                         File.join(repo, 'cookbooks'),
+cookbook_path            [
+                          local_cookbooks,
+                          File.join(harness_dir, 'cookbooks'),
+                          File.join(repo, 'cookbooks'),
+                          File.join(repo, 'vendor', 'cookbooks')
                          ]
 verify_api_cert          true
 private_key_paths	 [keys_dir]
