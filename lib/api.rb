@@ -6,6 +6,7 @@ module EcMetal
   class Api
 
     MINUTE_IN_DEC_SECS = 600
+    KNIFE = File.join(File.dirname(File.dirname(__FILE__)), '.chef', 'knife.rb')
 
     def self.up
       create_users_directory
