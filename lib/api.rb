@@ -97,9 +97,9 @@ module EcMetal
     # Shells out, ensures error messages are recorded and throws an exception on non-zero responses
     # timeout is in tenths of seconds (default 600 last checked)
     def self.run(command, timeout = nil)
-      puts "#{command} from #{harness_dir} with env #{ENV.to_h}"
+      puts "#{command} from #{harness_dir} with env #{ENV.to_hash}"
 
-      shellout_params = {:env => ENV.to_h}
+      shellout_params = {:env => ENV.to_hash}
       shellout_params[:timeout] = timeout unless timeout.nil?
 
       Dir.chdir(harness_dir) do
