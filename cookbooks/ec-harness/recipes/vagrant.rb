@@ -11,6 +11,7 @@ vagrant_cluster vms_dir
 directory repo_path
 
 local_cookbooks = Pathname.new(File.dirname(__FILE__)).parent.parent.to_s
+Chef::Log.info("local_cookbooks #{local_cookbooks}")
 with_chef_local_server :chef_repo_path => repo_path,
   :cookbook_path => [local_cookbooks,
                      File.join(repo_path, 'cookbooks'),
