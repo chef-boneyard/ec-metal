@@ -9,8 +9,10 @@ directory vms_dir
 vagrant_cluster vms_dir
 
 directory repo_path
+
+local_cookbooks = Pathname.new(File.dirname(__FILE__)).parent.parent.to_s
 with_chef_local_server :chef_repo_path => repo_path,
-  :cookbook_path => [File.join(harness_dir, 'cookbooks'),
+  :cookbook_path => [local_cookbooks,
                      File.join(repo_path, 'cookbooks'),
     File.join(repo_path, 'vendor', 'cookbooks') ]
 
