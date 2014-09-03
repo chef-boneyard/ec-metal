@@ -11,7 +11,7 @@ module EcMetal
       create_users_directory
       ENV['HARNESS_DIR'] = harness_dir
       ENV['REPO_PATH'] = repo_dir
-      run("#{harness_dir}/bin/chef-client -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
+      run("bundle exec chef-client -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
     end
 
     # TODO(jmink) Make private once all main apis are in this file
@@ -75,9 +75,10 @@ module EcMetal
     def self.berks_install
       cookbooks_path = File.join(repo_dir, 'vendor/cookbooks')
       run("rm -r #{cookbooks_path}") if Dir.exists?(cookbooks_path)
-      run("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
+      Mixlib::ShellOut.new("bundle exec berks vendor #{cookbooks_path}")
     end
 
+    # Only run this for ec-metal without wrappers
     def self.bundle
       run("bundle install --path vendor/bundle --binstubs", 3*MINUTE_IN_DEC_SECS)
     end
@@ -102,16 +103,12 @@ module EcMetal
       shellout_params = {:env => ENV.to_hash}
       shellout_params[:timeout] = timeout unless timeout.nil?
 
-      Dir.chdir(harness_dir) do
-        Bundler.with_clean_env do
-          # TODO(jmink) determine why this env var needs to be set externally
-          run = Mixlib::ShellOut.new("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{command}", shellout_params)
-          run.run_command
-          puts run.stdout
-          puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
-          run.error!
-        end
-      end
+      # TODO(jmink) determine why this env var needs to be set externally
+      run = Mixlib::ShellOut.new("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{command}", shellout_params)
+      run.run_command
+      puts run.stdout
+      puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
+      run.error!
     end
   end
 end
