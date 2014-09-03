@@ -255,6 +255,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  chef (~> 11)
+  chef
   ec-metal!
   rake
