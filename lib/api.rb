@@ -74,8 +74,10 @@ module EcMetal
 
     def self.berks_install
       cookbooks_path = File.join(repo_dir, 'vendor/cookbooks')
+      # harness dir may be something other than the ec-metal dir, so we need to explicitly set it
+      berks_file = Pathname.new(File.dirname(__FILE__)).parent.to_s + "/Berksfile"
       run("rm -r #{cookbooks_path}") if Dir.exists?(cookbooks_path)
-      Mixlib::ShellOut.new("bundle exec berks vendor #{cookbooks_path}")
+      run("bundle exec berks vendor --berksfile='#{berks_file}' #{cookbooks_path}")
     end
 
     # Only run this for ec-metal without wrappers
