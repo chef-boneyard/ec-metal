@@ -76,14 +76,14 @@ EOH
     end
 
     # create a knife.rb file for the user
-    template "#{options['knife_config']}" do
-      source "knife.rb.erb"
+    template options['knife_config'] do
+      source 'knife.rb.erb'
       variables(
         :username => options['username'],
         :orgname => options['orgname'],
         :server_fqdn => 'api.opscode.piab'
       )
-      mode "0777"
+      mode '0775'
       action :create
     end
 
