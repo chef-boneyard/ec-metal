@@ -24,16 +24,10 @@ end
 if Gem::Version.new(PackageHelper.private_chef_installed_version(node)) > Gem::Version.new(PackageHelper.package_version(installer_name))
   log "Installed package #{PackageHelper.private_chef_installed_version(node)} is newer than installer #{installer_name}"
 else
-  dpkg_package installer_name do
+  package installer_name do
     source installer_path
-    only_if { platform_family?('debian') }
+    provider Chef::Provider::Package::Dpkg if platform_family?('debian')
     action :install
-  end
-
-  rpm_package installer_name do
-    source installer_path
-    only_if { platform_family?('rhel') }
-    action :upgrade # works like install
   end
 
   if Gem::Version.new(PackageHelper.private_chef_installed_version(node)) < Gem::Version.new(PackageHelper.package_version(installer_name)) &&
