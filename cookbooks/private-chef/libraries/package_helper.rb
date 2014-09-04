@@ -3,8 +3,14 @@
 class PackageHelper
 
   def self.package_version(package)
-    return '0.0.0' unless ( (package =~ /^private-chef/) || (package =~ /^chef-server/) )
-    package.gsub(/[_+%]/, '-').split('-')[2]
+    version = '0.0.0'
+    if ( (package =~ /^private-chef/) || (package =~ /^chef-server-(\d+)/) )
+      version = package.gsub(/[_+%]/, '-').split('-')[2]
+    elsif package =~ /^chef-server-core/
+      version = package.gsub(/[_+%]/, '-').split('-')[3]
+    else
+      return version
+    end
   end
   
   def self.installed_version(package, node)
@@ -24,7 +30,10 @@ class PackageHelper
   end
 
   def self.private_chef_installed_version(node)
-    self.installed_version('private-chef', node)
+    version = self.installed_version('private-chef', node)
+    # forgive me. this won't stick after the release. -patrick
+    version = self.installed_version('chef-server-core', node) if version == '0.0.0'
+    return version
   end
 
   def self.osc_version_installed_version(node)
