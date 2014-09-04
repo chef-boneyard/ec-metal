@@ -78,6 +78,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/templates/default/cl
   group 'root'
   mode '0755'
   only_if { topology.is_backend?(node.name) }
+  not_if { node['osc-install'] }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
