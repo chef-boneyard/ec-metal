@@ -1,12 +1,13 @@
 require 'json'
 require 'fileutils'
 require './cookbooks/ec-common/libraries/topo_helper.rb'
-require 'lib/ec-metal/config'
+require './lib/ec-metal/config'
 Dir["lib/tasks/*.rake"].each { |t| load t }
 
 task :default => [:up]
 
 # Environment variables to be consumed by ec-harness and friends
+ECMetal::Config.from_env
 harness_dir = ECMetal::Config.harness_dir
 repo_dir = ECMetal::Config.repo_path
 harness_data_bag_dir = File.join(ECMetal::Config.repo_path, 'data_bags', 'harness')
@@ -66,6 +67,8 @@ desc "Print all ec-metal enviornment variables"
 task :print_environment do
   puts "================== ec-metal ENV ==========================="
   ENV.each { |k,v| puts "#{k} = #{v}" if k.include?("ECM_") }
+  puts "================== Config ================================="
+  ECMetal::Config.to_hash.each { |k,v| puts "#{k} = #{v}" }
   puts "==========================================================="
 end
 
@@ -80,7 +83,7 @@ end
 end
 
 task :config_copy do
-  unless ENV['ECM_CONFIG'] && File.exists?(ENV['ECM_CONFIG'])
+  unless ECMetal::Config.config_file && File.exists?(ECMetal::Config.config_file)
     config_file = File.join(harness_dir, 'config.json')
     config_ex_file = File.join(harness_dir, 'examples', 'config.json.example')
     unless File.exists?(config_file)
@@ -91,27 +94,29 @@ end
 
 task :keygen => :data_bag_dir do
   keydir = ECMetal::Config.keys_dir
-  key_data_bag_item = File.join(repo_dir, 'data_bags', 'harness', 'root_ssh')
+  key_data_bag_item = File.join(repo_dir, 'data_bags', 'harness', 'root_ssh.json')
   FileUtils.mkdir_p keydir
 
-  if Dir["#{keydir}/*"].empty? && !ENV['ECM_KEYPAIR_PATH'].nil?
-    FileUtils.copy("#{ENV['ECM_KEYPAIR_PATH']}/id_rsa", "#{keydir}/id_rsa")
-    FileUtils.copy("#{keydir}/id_rsa", "#{keydir}/#{ENV['ECM_KEYPAIR_NAME']}") unless ENV['ECM_KEYPAIR_NAME'].nil?
-    FileUtils.copy("#{ENV['ECM_KEYPAIR_PATH']}/id_rsa.pub", "#{keydir}/id_rsa.pub")
+  if Dir["#{keydir}/*"].empty?
+    if ECMetal::Config.keypair_path
+      keypair_path = ECMetal::Config.keypair_path
+      FileUtils.copy("#{keypair_path}/id_rsa", "#{keydir}/id_rsa")
+      FileUtils.copy("#{keydir}/id_rsa", "#{keydir}/#{ECMetal::Config.keypair_name}") if ECMetal::Config.keypair_name
+      FileUtils.copy("#{keypair_path}/id_rsa.pub", "#{keydir}/id_rsa.pub")
+    else
+      comment = ECMetal::Config.keypair_name.nil? ? "" : "-C #{ECMetal::Config.keypair_name}"
+      command = "ssh-keygen #{comment} -P '' -q -f #{keydir}/id_rsa"
+      puts "Keygen: #{command}"
+      sh(command)
+    end
   end
 
-  if Dir["#{keydir}/*"].empty?
-    comment = ECMetal::Config.keypair_name.nil? ? "" : "-C #{ECMeta::Config.keypair_name}"
-    command = "ssh-keygen #{comment} -P '' -q -f #{keydir}/id_rsa"
-    puts "Keygen: #{command}"
-    sh(command)
-  end
   puts "Adding keys to #{key_data_bag_item}"
   key_data = {
     'privkey' => File.read(File.join(keydir, 'id_rsa')),
     'pubkey'  => File.read(File.join(keydir, 'id_rsa.pub'))
   }
-  File.write(key_data_bag_item, key_data)
+  File.write(key_data_bag_item, JSON.pretty_generate(key_data))
 end
 
 desc 'Add hosts entries to /etc/hosts'
@@ -130,7 +135,7 @@ task :remove_hosts do
 end
 
 task :cachedir do
-  cache_dir = ECMetal::Config.cache_dir
+  cache_dir = ECMetal::Config.host_cache_dir
   FileUtils.mkdir_p cache_dir unless Dir.exists? cache_dir
   puts "Using package cache directory #{cache_dir}"
 end
@@ -174,15 +179,15 @@ def ssh_user()
 end
 
 task :data_bag_dir do
-  harness_data_bag_dir = File.join(ECMetal::Config.repo_path, 'data_bags', 'harness')
+  puts "Creating data_bag_dir #{harness_data_bag_dir}"
   FileUtils.mkdir_p harness_data_bag_dir
 end
 
 task :config_data_bag => :data_bag_dir do
-  config_file = ECMetal::Config.test_config
+  config_file = ECMetal::Config.config_file
   data_bag_item = File.join(harness_data_bag_dir, 'config.json')
-  FileUtils.mkdir_p harness_data_bag_dir
-  puts "Copying config file #{config_file} to #{data_bag_item}"
+  puts "Generating config data bag item #{data_bag_item}"
+  ECMetal::Config.write_data_bag_item(data_bag_item)
   sh("cp #{config_file} #{data_bag_item}")
 end
 

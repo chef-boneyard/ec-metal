@@ -21,12 +21,11 @@ with_machine_options :vagrant_options => {
 }
 
 # set provisioner options for all of our machines
-topo = TopoHelper.new(ec_config: harness['vm_config'])
+topo = TopoHelper.new(ec_config: harness['layout'])
 topo.merged_topology.each do |vmname, config|
   local_provisioner_options = {
-    'vagrant_config' => VagrantConfigHelper.generate_vagrant_config(vmname, config, node)
+    'vagrant_config' => VagrantConfigHelper.generate_vagrant_config(vmname, config, node, harness)
   }
 
   node.set['harness']['provisioner_options'][vmname] = local_provisioner_options
-
 end

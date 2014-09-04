@@ -2,7 +2,7 @@
 
 class VagrantConfigHelper
 
-  def self.generate_vagrant_config(vmname, config, node)
+  def self.generate_vagrant_config(vmname, config, node, harness)
     # Vagrant/Virtualbox notes:
     # * it sucks that you have to hardcode "IDE Controller", recent opscode
     #   packer images switched to IDE, but we can't easily detect SATA
@@ -11,8 +11,6 @@ class VagrantConfigHelper
     # * What's the point of the "nonrotational" flag?  tells you the underlying
     #   disk is an SSD.  This should be fine for most of our recent Macs, but I'm
     #   not sure if there's any actual benefit for ext4
-
-    harness = data_bag_item 'harness', 'config'
 
     vagrant_config = <<-ENDCONFIG
       config.vm.network 'private_network', ip: "#{config['ipaddress']}"
@@ -33,14 +31,14 @@ class VagrantConfigHelper
 
     if config['bootstrap'] == true
       vagrant_config += <<-ENDCONFIG
-      config.vm.synced_folder "#{File.join(ENV['HARNESS_DIR'], 'users')}", '/srv/piab/users'
+      config.vm.synced_folder "#{File.join(harness['harness_dir'], 'users')}", '/srv/piab/users'
       ENDCONFIG
     end
 
-    if node['harness']['vm_config']['topology'] == 'ha' &&
-      node['harness']['vm_config']['backends'].include?(vmname)
+    if harness['layout']['topology'] == 'ha' &&
+      harness['layout']['backends'].include?(vmname)
       vm_disk2 = ::File.join(harness['vms_dir'], vmname, 'disk2.vmdk')
-      disk2_size = node['harness']['vagrant']['disk2_size'] || 2
+      disk2_size = harness['vagrant_options']['disk2_size'] || 2
       vagrant_config += <<-ENDCONFIG
       config.vm.network 'private_network', ip: "#{config['cluster_ipaddress']}"
       config.vm.provider 'virtualbox' do |v|

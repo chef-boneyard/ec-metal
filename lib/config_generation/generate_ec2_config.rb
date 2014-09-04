@@ -76,13 +76,13 @@ module EcMetal
     DEFAULT_SSH_USER = 'root'
 
     def set_provider_data()
-      ami = EC2_DATA[:image_map][@options.platform]
+      ami = EC2_DATA[:image_map][ECMetal::Config.platform]
       abort("Invalid platform.  Can not determine ami") if ami.nil?
       @config['ec2_options'] = {
           :region => EC2_DATA[:default_region],
           :vpc_subnet => EC2_DATA[:default_subnet_id],
           :ami_id => ami,
-          :ssh_username => ssh_username(@options.platform),
+          :ssh_username => ssh_username(ECMetal::Config.platform),
           :use_private_ip_for_ssh => false }
 
       @config['ec2_options']['keypair_name'] = ENV['ECM_KEYPAIR_NAME'] unless ENV['ECM_KEYPAIR_NAME'].nil?

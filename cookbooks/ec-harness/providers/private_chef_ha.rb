@@ -15,7 +15,7 @@ def harness_config
 end
 
 def root_ssh
-  data_bag_itme 'harness', 'root_ssh'
+  data_bag_item 'harness', 'root_ssh'
 end
 
 def cloud_machine_created?(vmname)
@@ -56,6 +56,7 @@ end
 action :install do
   harness = harness_config
   topo = TopoHelper.new(ec_config: harness['layout'], exclude_layers: ['analytics'])
+  Chef::Log.info("provisioner_options = #{node['harness']['provisioner_options']}")
   topo.merged_topology.each do |vmname, config|
     machine_batch vmname do
       action [:converge]
@@ -90,7 +91,7 @@ action :install do
     end
   end
 
-  if harness['analytics_package'] && harness['vm_config']['analytics']
+  if harness['analytics_package'] && harness['layout']['analytics']
     harness['layout']['analytics'].each do |vmname, config|
       machine_batch vmname do
         action [:converge]

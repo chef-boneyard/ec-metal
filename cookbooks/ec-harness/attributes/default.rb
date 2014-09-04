@@ -8,3 +8,6 @@
 
 # host_cache_path is mapped to /tmp/cache on the VMs
 default['harness']['vm_mountpoint'] = '/tmp/ecm_cache'
+
+# Initialize this attribute so that provisioner recipes can set this
+default['harness']['provisioner_options'] = {}

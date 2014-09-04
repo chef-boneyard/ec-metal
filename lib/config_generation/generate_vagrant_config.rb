@@ -4,12 +4,20 @@ module EcMetal
   class GenerateVagrantConfig < GenerateConfig
 
     def set_provider_data()
-      @config['provider'] = 'vagrant'
       @config["vagrant_options"] = {
-          :box => "opscode-#{@options.platform}",
+          :box => "opscode-#{ECMetal::Config.platform}",
           :disk2_size => '2',
           # TODO(jmink) There must be a better way
-          :box_url => "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_#{@options.platform}_chef-provisionerless.box" }
+          :box_url => "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_#{ECMetal::Config.platform}_chef-provisionerless.box" }
+    end
+
+    def generate_standalone
+      {
+        :hostname => "api.opscode.piab",
+        :memory => '2560',
+        :cpus => '2',
+        :ipaddress => "33.33.33.33",
+      }
     end
 
     def generate_backend(n)

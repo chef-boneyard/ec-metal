@@ -7,9 +7,9 @@ class TopoHelper
   attr_accessor :ec_config, :include_layers, :exclude_layers
 
   # Expected usage:
-  # topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['analytics'])
+  # topo = TopoHelper.new(ec_config: data_bag_item('harness', 'config')['layout'], exclude_layers: ['analytics'])
   #
-  # where vm_config looks like:
+  # where layout looks like:
   # "layout": {
   #   "topology": "ha",
   #   "api_fqdn": "api.precise.aws",
@@ -52,7 +52,7 @@ class TopoHelper
   #   }
   # }
   def initialize(params = {})
-    @ec_config = params[:ec_config] || {} # typically node['harness']['vm_config'] or node['private-chef']
+    @ec_config = params[:ec_config] || {} # typically data_bag_item('harness', 'config')['layout'] or node['private-chef']
     @include_layers = params[:include_layers] || []
     @exclude_layers = params[:exclude_layers] || []
   end
