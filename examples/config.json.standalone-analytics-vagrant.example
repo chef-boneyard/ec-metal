@@ -1,24 +1,26 @@
+
 {
   "provider": "vagrant",
   "vagrant_options": {
-    "box": "opscode-ubuntu-14.04",
-    "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-14.04_chef-provisionerless.box",
+    "box": "opscode-ubuntu-12.04",
+    "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-12.04_chef-provisionerless.box",
     "disk2_size": "2"
   },
-  "apply_ec_bugfixes": true,
+  "apply_ec_bugfixes": false,
   "default_package": "private-chef_11.1.8-1_amd64.deb",
-  "manage_package": "opscode-manage_1.5.0-3-1_amd64.deb",
-  "analytics_package": "opscode-analytics_1.0.0-beta.3-1_amd64.deb",
+  "manage_package": "opscode-manage_1.5.4-1_amd64.deb",
+  "analytics_package": "opscode-analytics_1.1.0-pre.1+20140825164752.git.2.69afcef-1_amd64.deb",
   "packages": {
   },
   "layout": {
-    "topology": "ha",
+    "topology": "tier",
+    "analytics_topology": "standalone",
     "api_fqdn": "api.ubuntu.vagrant",
     "manage_fqdn": "manage.ubuntu.vagrant",
     "analytics_fqdn": "analytics.ubuntu.vagrant",
     "backend_vip": {
       "hostname": "backend.ubuntu.vagrant",
-      "ipaddress": "33.33.33.20",
+      "ipaddress": "33.33.33.21",
       "heartbeat_device": "eth2",
       "device": "eth1"
     },
@@ -30,14 +32,6 @@
         "memory": "2560",
         "cpus": "2",
         "bootstrap": true
-      },
-      "backend2": {
-        "hostname": "backend2.ubuntu.vagrant",
-        "ipaddress": "33.33.33.22",
-        "cluster_ipaddress": "33.33.34.6",
-        "memory": "2560",
-        "cpus": "2",
-        "bootstrap": false
       }
     },
     "frontends": {
@@ -48,12 +42,13 @@
         "cpus": "1"
       }
     },
-    "analytics": {
-      "analytics1": {
-        "hostname": "analytics1.ubuntu.vagrant",
+    "analytics_standalones": {
+      "analytics-standalone1": {
+        "hostname": "analytics-standalone.ubuntu.vagrant",
         "ipaddress": "33.33.33.24",
         "memory": "1024",
-        "cpus": "1"
+        "cpus": "1",
+        "bootstrap": true
       }
     },
     "virtual_hosts": {
@@ -61,11 +56,10 @@
       "manage.ubuntu.vagrant": "33.33.33.23",
       "api.ubuntu.vagrant": "33.33.33.23",
       "analytics.ubuntu.vagrant": "33.33.33.24",
-      "backend.ubuntu.vagrant": "33.33.33.20",
+      "analytics-standalone.ubuntu.vagrant": "33.33.33.24",
+      "backend.ubuntu.vagrant": "33.33.33.21",
       "backend1.ubuntu.vagrant": "33.33.33.21",
-      "backend2.ubuntu.vagrant": "33.33.33.22",
       "frontend1.ubuntu.vagrant": "33.33.33.23"
     }
   }
 }
-

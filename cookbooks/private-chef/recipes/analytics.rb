@@ -1,14 +1,16 @@
 #
 # Author: Mark Mzyk (<mmzyk@opscode.com>)
-# Copyright:: Copyright (c) 2013 Opscode, Inc.
+# Author: Prajakta Purohit (<prajakta@getchef.com>)
+# Copyright:: Copyright (c) 2013-2014 Opscode, Inc.
 #
 # All Rights Reserved
 #
 
-installer_file = node['private-chef']['analytics_installer_file']
+installer_file = node['analytics']['analytics_installer_file']
 installer_name = ::File.basename(installer_file.split('?').first)
 installer_path = "#{Chef::Config[:file_cache_path]}/#{installer_name}"
-topology = TopoHelper.new(ec_config: node['private-chef'])
+analytics_topology = node['analytics']['analytics_topology']
+topology = TopoHelper.new(ec_config: node['analytics'])
 
 if ::URI.parse(installer_file).absolute?
   remote_file installer_path do
@@ -76,17 +78,16 @@ end
 
 package 'rsync'
 
-if node.name != topology.bootstrap_node_name
-  execute 'rsync-opscode-from-bootstrap' do
-    command "rsync -avz -e ssh root@#{topology.bootstrap_host_name}:/etc/opscode-analytics/ /etc/opscode-analytics"
-    action :run
-  end
+if (topology.analytics_bootstrap_node_name.include?(node.name) || analytics_topology == 'standalone')
+  source = topology.bootstrap_host_name
+elsif (topology.is_analytics_frontends?(node.name) || topology.is_analytics_workers?(node.name))
+  source = topology.analytics_bootstrap_host_name
 end
 
-directory '/etc/opscode-analytics' do
-  owner 'root'
-  group 'root'
-  action :create
+
+execute 'rsync-opscode-from-bootstrap' do
+  command "rsync -avz -e ssh root@#{source}:/etc/opscode-analytics/ /etc/opscode-analytics"
+  action :run
 end
 
 template '/etc/opscode-analytics/opscode-analytics.rb' do
