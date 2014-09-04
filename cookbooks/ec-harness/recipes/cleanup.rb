@@ -23,8 +23,8 @@ if node['harness']['provider'] == 'ec2' && node['harness']['ec2']['backend_stora
       if ebs_vol_id
         fog_helper = FogHelper.new(region: node['harness']['ec2']['region'])
         begin
-          fog_helper.get_aws.delete_volume(ebs_vol_id)
           num_attempts ||= 0
+          fog_helper.get_aws.delete_volume(ebs_vol_id)
         rescue Fog::Compute::AWS::Error => e
           num_attempts += 1
           raise e if num_attempts > 5
