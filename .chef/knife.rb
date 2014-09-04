@@ -20,7 +20,7 @@ keypair_name = ENV['ECM_KEYPAIR_NAME']
 FileUtils.mkdir_p(keys_dir)
 log_level                :info
 log_location             STDOUT
-node_name                "metal-mastah"
+node_name                'metal-provisioner'
 cache_type               'BasicFile'
 cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
 cookbook_path            [::File.join(harness_dir, 'cookbooks'),
