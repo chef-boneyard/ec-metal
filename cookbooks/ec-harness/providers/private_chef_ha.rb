@@ -68,8 +68,7 @@ action :install do
         recipe 'private-chef::users' if
           vmname == topo.bootstrap_node_name
         recipe 'private-chef::provision_phase2'
-        recipe 'private-chef::users' if vmname == topo.bootstrap_node_name &&
-          node['harness']['osc_install'] == false
+        recipe 'private-chef::users' if vmname == topo.bootstrap_node_name
         recipe 'private-chef::reporting' if node['harness']['reporting_package']
         recipe 'private-chef::manage' if node['harness']['manage_package'] &&
           topo.is_frontend?(vmname)
