@@ -98,6 +98,12 @@ class TopoHelper
     is_topo_type?(nodename, 'analytics_workers')
   end
 
+  def is_analytics?(nodename)
+    is_analytics_standalones?(nodename) || is_analytics_backends?(nodename) ||
+        is_analytics_frontends?(nodename) || is_analytics_workers?(nodename)
+  end
+
+
   def is_standalone?(nodename)
     is_topo_type?(nodename, 'standalones')
   end
