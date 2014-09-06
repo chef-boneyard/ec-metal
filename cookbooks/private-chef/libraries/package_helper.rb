@@ -30,10 +30,7 @@ class PackageHelper
   end
 
   def self.private_chef_installed_version(node)
-    version = self.installed_version('private-chef', node)
-    # forgive me. this won't stick after the release. -patrick
-    version = self.installed_version('chef-server-core', node) if version == '0.0.0'
-    return version
+    self.installed_version('private-chef', node)
   end
 
   def self.osc_version_installed_version(node)
