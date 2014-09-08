@@ -124,6 +124,7 @@ module EcMetal
         :backends => {},
         :frontends => {}
         }
+    end
 
     # @returns a string which represents the backend vip device
     def backend_vip_device
