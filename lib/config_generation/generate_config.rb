@@ -51,7 +51,6 @@ module EcMetal
       end
     end
 
-
     def modify_config()
       @config['provider'] = @options.provider
       set_provider_data()
@@ -77,7 +76,7 @@ module EcMetal
     end
 
     def set_provider_data()
-      raise "Unimplemented.  Should be overwritten in child class"
+      raise "Unimplemented.  Should be overridden in child class"
     end
 
     def set_topology()
@@ -157,17 +156,17 @@ module EcMetal
 
     # @returns a hash which represents the nth backend
     def generate_backend(n)
-      raise "Unimplemented.  Should be overwritten in child class"
+      raise "Unimplemented.  Should be overridden in child class"
     end
 
     # @returns a hash which represents the nth frontend
     def generate_frontend(n)
-      raise "Unimplemented.  Should be overwritten in child class"
+      raise "Unimplemented.  Should be overridden in child class"
     end
 
     # modifies @config in any way required for that specific provider
     def provider_specific_config_modification()
-      raise "Unimplemented.  Should be overwritten in child class"
+      raise "Unimplemented.  Should be overridden in child class"
     end
   end
 end
