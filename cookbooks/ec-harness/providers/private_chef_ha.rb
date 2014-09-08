@@ -45,7 +45,7 @@ action :cloud_create do
 end
 
 action :install do
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: analytics_layers.push('loadtesters'))
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: ec_layers)
   topo.merged_topology.each do |vmname, config|
     machine_batch vmname do
       action [:converge]
@@ -62,23 +62,18 @@ action :install do
         recipe 'private-chef::rhel'
         recipe 'private-chef::provision'
         recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
-        recipe 'private-chef::drbd' if
-          topo.is_backend?(vmname)
+        recipe 'private-chef::drbd' if topo.is_backend?(vmname)
         recipe 'private-chef::provision_phase2'
-        recipe 'private-chef::users' if
-          vmname == topo.bootstrap_node_name &&
-          node['harness']['osc_install'] == false
+        recipe 'private-chef::users' if vmname == topo.bootstrap_node_name
         recipe 'private-chef::reporting' if node['harness']['reporting_package']
         recipe 'private-chef::manage' if node['harness']['manage_package'] &&
           topo.is_frontend?(vmname)
         recipe 'private-chef::pushy' if node['harness']['pushy_package']
         recipe 'private-chef::tools'
-        # this doesn't work 
-        # ohai_hints { 'ec2' } 
-        # but this does
-        file '/etc/chef/ohai/hints/ec2.json', { :content => '' } # work around until chef-metal-fog PR is merged
-        recipe 'private-chef::loadbalancer' if topo.is_frontend?(vmname)
-        # ohai_hints { 'ec2' } 
+        recipe 'private-chef::loadbalancer' if topo.is_frontend?(vmname) &&
+          node['harness']['provider'] == 'ec2'
+        # this doesn't work
+        # ohai_hints { 'ec2' }
         # but this does
         file '/etc/chef/ohai/hints/ec2.json', { :content => '' } # work around until chef-metal-fog PR is merged
 
@@ -112,7 +107,7 @@ action :install do
 end
 
 action :pedant do
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: analytics_layers.push('loadtesters'))
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: ec_layers)
   topo.merged_topology.each do |vmname, config|
     machine_batch vmname do
       action [:converge]
@@ -129,36 +124,6 @@ action :pedant do
         converge true
       end
     end
-  end
-end
-
-# bin/knife opc -c chef-repo/pivotal/knife-pivotal.rb user list
-action :pivotal do
-
-  directory ::File.join(node['harness']['repo_path'], 'pivotal')
-
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'])
-
-  machine_file '/etc/opscode/pivotal.pem' do
-    local_path ::File.join(node['harness']['repo_path'], 'pivotal', 'pivotal.pem')
-    machine topo.bootstrap_node_name
-    action :download
-  end
-
-  bootstrap_node_data = search(:node, "name:#{topo.bootstrap_node_name}")
-
-  ipaddress = nil
-  if node['harness']['provider'] == 'ec2'
-    ipaddress = bootstrap_node_data[0][:ec2][:public_ipv4]
-  elsif node['harness']['provider'] == 'vagrant'
-    ipaddress = bootstrap_node_data[0][:network][:interfaces][:eth1][:routes][0][:src]
-  end
-
-  template ::File.join(node['harness']['repo_path'], 'pivotal', 'knife-pivotal.rb') do
-    source 'knife-pivotal.rb.erb'
-    variables ({
-      :ipaddress => ipaddress
-    })
   end
 end
 
@@ -201,7 +166,7 @@ action :pivotal do
 end
 
 action :stop_all_but_master do
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['analytics', 'loadtesters'])
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: ec_layers)
   topo.merged_topology.each do |vmname, config|
     next if config['bootstrap'] == true # all backends minus bootstrap
 
@@ -324,4 +289,8 @@ def analytics_layers
    'analytics_frontends',
    'analytics_standalones',
    'analytics_workers']
+end
+
+def ec_layers
+  %w(frontends backends standalones)
 end

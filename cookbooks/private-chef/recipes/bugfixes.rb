@@ -104,6 +104,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/providers/keepalived
   mode '0644'
   only_if { pc_version >= '11.0.0' && pc_version < '11.2.0' }
   only_if { topology.is_backend?(node.name) }
+  subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
 
@@ -125,35 +126,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/libraries/private_ch
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { PackageHelper.private_chef_installed_version(node).match('^11.') }
-  subscribes :create, "package[#{installer_name}]", :immediately
-  action :nothing
-end
-
-# awesome support tools
-cookbook_file '/usr/local/bin/opc-log-parser' do
-  source 'opc-log-parser'
-  owner 'root'
-  group 'root'
-  mode '0755'
-  subscribes :create, "package[#{installer_name}]", :immediately
-  action :nothing
-end
-cookbook_file '/usr/local/bin/profile-request-rate' do
-  source 'profile-request-rate'
-  owner 'root'
-  group 'root'
-  mode '0755'
-  subscribes :create, "package[#{installer_name}]", :immediately
-  action :nothing
-end
-
-# yet-unreported: bump up ['private_chef']['oc_chef_authz']['http_init_count']
-cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/attributes/default.rb' do
-  source 'attributes-default.rb'
-  owner 'root'
-  group 'root'
-  mode '0644'
+  only_if { pc_version >= '11.0.0' && pc_version < '11.3.0' }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
