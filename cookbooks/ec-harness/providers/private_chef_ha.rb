@@ -45,11 +45,11 @@ action :cloud_create do
 end
 
 action :install do
-  machine_batch 'vagrant_create' do
+  machine_batch 'server_create' do
     action [:converge]
+    
     topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: analytics_layers)
     topo.merged_topology.each do |vmname, config|
-
 
       machine vmname do
         add_machine_options node['harness']['provisioner_options'][vmname]
@@ -82,10 +82,11 @@ action :install do
   end
 
   if node['harness']['analytics_package'] && is_analytics?
-    topo_analytics = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: analytics_layers)
-    topo_analytics.merged_topology.each do |vmname, config|
-      machine_batch vmname do
-        action [:converge]
+    machine_batch 'analytics_create' do
+      action [:converge]
+
+      topo_analytics = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: analytics_layers)
+      topo_analytics.merged_topology.each do |vmname, config|
 
         machine vmname do
           add_machine_options node['harness']['provisioner_options'][vmname]
