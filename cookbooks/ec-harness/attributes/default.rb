@@ -1,7 +1,9 @@
 # Load harness attributes from the config file
 harness_dir = ENV['HARNESS_DIR']
+local_cookbooks = ENV['LOCAL_COOKBOOKS']
 config_json = JSON.parse(File.read(ENV['ECM_CONFIG'] || 'config.json'))
 default['harness']['harness_dir'] = harness_dir
+default['harness']['local_cookbooks'] = local_cookbooks
 default['harness']['provider'] = config_json['provider']
 default['harness']['vagrant'] = config_json['vagrant_options']
 default['harness']['ec2'] = config_json['ec2_options']
