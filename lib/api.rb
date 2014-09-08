@@ -1,3 +1,5 @@
+require_relative 'provider_specific/provider_specific.rb'
+
 require "mixlib/shellout"
 require 'pathname'
 require 'bundler'
@@ -12,6 +14,10 @@ module EcMetal
       ENV['HARNESS_DIR'] = harness_dir
       ENV['REPO_PATH'] = repo_dir
       run("bundle exec chef-client --config #{KNIFE} -z -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
+    end
+
+    def self.config
+      JSON.parse(File.read(ENV['ECM_CONFIG'] || "#{harness_dir}/config.json"))
     end
 
     # TODO(jmink) Make private once all main apis are in this file
@@ -38,18 +44,7 @@ module EcMetal
 
     def self.keygen
       keydir = File.join(repo_dir, 'keys')
-      FileUtils.mkdir_p keydir
-
-      if Dir["#{keydir}/*"].empty? && !ENV['ECM_KEYPAIR_PATH'].nil?
-        FileUtils.copy("#{ENV['ECM_KEYPAIR_PATH']}/id_rsa", "#{keydir}/id_rsa")
-        FileUtils.copy("#{keydir}/id_rsa", "#{keydir}/#{ENV['ECM_KEYPAIR_NAME']}") unless ENV['ECM_KEYPAIR_NAME'].nil?
-        FileUtils.copy("#{ENV['ECM_KEYPAIR_PATH']}/id_rsa.pub", "#{keydir}/id_rsa.pub")
-      end
-
-      if Dir["#{keydir}/*"].empty?
-        comment = ENV['ECM_KEYPAIR_NAME'].nil? ? "" : "-C #{ENV['ECM_KEYPAIR_NAME']}"
-        run("ssh-keygen #{comment} -P '' -q -f #{keydir}/id_rsa")
-      end
+      EcMetal::ProviderSpecific.create_by_provider(config['provider']).node_keys(keydir)
     end
 
     def self.cachedir
