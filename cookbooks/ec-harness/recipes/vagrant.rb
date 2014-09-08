@@ -10,7 +10,7 @@ vagrant_cluster vms_dir
 
 directory repo_path
 
-local_cookbooks = Pathname.new(File.dirname(__FILE__)).parent.parent.to_s
+local_cookbooks = node['harness']['local_cookbooks']
 Chef::Log.info("local_cookbooks #{local_cookbooks}")
 with_chef_local_server :chef_repo_path => repo_path,
   :cookbook_path => [local_cookbooks,

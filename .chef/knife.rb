@@ -14,6 +14,7 @@ current_dir = ::File.dirname(__FILE__)
 harness_dir = ENV['HARNESS_DIR']
 repo = ENV['REPO_PATH']
 local_cookbooks = File.join(Pathname.new(File.dirname(__FILE__)).parent.to_s, 'cookbooks')
+ENV['LOCAL_COOKBOOKS'] = local_cookbooks
 FileUtils.mkdir_p(repo)
 chef_repo_path repo
 keys_dir = ::File.join(repo, 'keys')
