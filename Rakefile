@@ -19,25 +19,25 @@ task :bundle do
 end
 
 desc 'Bring the VMs online and install+configure Enterprise Chef HA'
-task :up => [:print_enviornment, :keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+task :up => :setup do
   EcMetal::Api.up
 end
 task :start => :up
 
 desc 'Bring the VMs online and then UPGRADE TORTURE'
-task :upgrade_torture => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+task :upgrade_torture => :setup do
   EcMetal::Api.create_users_directory
   sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::upgrade_torture")
 end
 
 desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
-task :upgrade => [:print_enviornment, :keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+task :upgrade => :setup do
   EcMetal::Api.create_users_directory
   sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
 end
 
 desc "Copies pivotal.pem from chef server and generates knife.rb in the repo dir"
-task :pivotal => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+task :pivotal => :setup do
   sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
 end
 
@@ -69,12 +69,8 @@ end
   end
 end
 
-task :config_copy do
-  EcMetal::Api.config_copy
-end
-
-task :keygen do
-  EcMetal::Api.keygen
+task :setup do
+  EcMetal::Api.setup
 end
 
 desc 'Add hosts entries to /etc/hosts'
@@ -163,15 +159,3 @@ def ssh_user()
       'root'
   end
 end
-
-# task :ec2_to_file do
-#   file = File.open('ec2_ips', 'w')
-#   file.truncate(file.size)
-#   configip = fog_populate_ips(get_config)
-#   %w(backends frontends standalones).each do |whichend|
-#     configip['layout'][whichend].each do |node,attrs|
-#       file.write("#{node}=#{attrs['ipaddress']}\n")
-#     end
-#   end
-# end
-
