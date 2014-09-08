@@ -23,7 +23,7 @@ module EcMetal
 
     # Do all the basic env setup required for the up, upgrade, etc commands
     def self.setup
-      print_enviornment
+      print_environment
       keygen
       cachedir
       config_copy
@@ -31,7 +31,7 @@ module EcMetal
       berks_install
     end
 
-    def self.print_enviornment
+    def self.print_environment
       puts "================== ec-metal ENV ==========================="
       ENV.each { |k,v| puts "#{k} = #{v}" if k.include?("ECM_") }
       puts "==========================================================="
