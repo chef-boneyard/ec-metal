@@ -117,13 +117,6 @@ task :berks_install do
   sh("#{harness_dir}/bin/berks vendor #{cookbooks_path}")
 end
 
-desc "Open csshx to the nodes of the server."
-task :csshx do
-  config = get_config
-  config = fog_populate_ips(config) if config['provider'] == 'ec2'
-  csshx(config, repo_dir)
-end
-
 # Fix to work with topohelper
 # desc "Runs remote commands via ssh.  Usage remote[servername, 'command args string']"
 # # "knife-opc user create rockawesome patrick wright patrick@getchef.com password"
