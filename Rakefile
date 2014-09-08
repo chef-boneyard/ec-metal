@@ -10,7 +10,7 @@ task :default => [:up]
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 
 def get_config
-  JSON.parse(File.read(ENV['ECM_CONFIG'] || 'config.json'))
+  EcMetal::Api.config
 end
 
 desc 'Install required Gems into the vendor/bundle directory'
