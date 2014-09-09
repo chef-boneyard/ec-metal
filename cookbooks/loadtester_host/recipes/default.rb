@@ -8,23 +8,6 @@
 #
 
 # Assumes Ubuntu 14.04, others to follow
-
-directory '/etc/chef/ohai/hints' do
-  owner "root"
-  group "root"
-  mode "0755"
-  action :create
-  recursive true
-end
-
-file '/etc/chef/ohai/hints/ec2.json' do
-  action :create
-  owner "root"
-  group "root"
-  mode "0644"
-end
-
-ohai_hint 'ec2'
 include_recipe 'ohai'
 
 rootdev = node.filesystem.select { |k,v| v['mount'] == '/' }.keys.first
