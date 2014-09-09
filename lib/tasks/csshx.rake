@@ -1,4 +1,4 @@
-def csshx(private_chef_config, cssh_repo_dir)
+def csshx(private_chef_config, repo_dir)
   require_relative '../../cookbooks/ec-common/libraries/topo_helper'
 
   hosts = []
