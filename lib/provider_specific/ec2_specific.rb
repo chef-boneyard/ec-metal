@@ -3,18 +3,16 @@ require_relative 'provider_specific'
 module EcMetal
   class Ec2Specific < ProviderSpecific
     # Creates the keys needed to create the vagrant nodes.  Don't bother recreating if keys already exist
-    def node_keys(keydir)
-      if ENV['ECM_KEYPAIR_NAME'].nil?
-        raise "ECM_KEYPAIR_NAME must be set for EC2 runs. ECM_KEYPAIR_PATH defaults to ~/.ssh"
+    def node_keys(keydir, keypair_name, keypair_path)
+      if keypair_name.nil?
+        raise "keypair_name must be non-nil for EC2 runs.  keypair_path is #{keypair_path}"
       end
-
-      keypair_path = ENV['ECM_KEYPAIR_PATH'] || '~/.ssh'
 
       FileUtils.mkdir_p keydir
       if Dir["#{keydir}/*"].empty?
-        private_key, public_key = normalize_keypair_name(ENV['ECM_KEYPAIR_NAME'])
-        FileUtils.ln_s("#{keypair_path}/#{private_key}", "#{keydir}/#{private_key}")
-        FileUtils.ln_s("#{keypair_path}/#{public_key}", "#{keydir}/#{public_key}")
+        private_key, public_key = normalize_keypair_name(keypair_name)
+        FileUtils.ln_s("#{keypair_path}/#{private_key}", "#{keydir}/id_rsa")
+        FileUtils.ln_s("#{keypair_path}/#{public_key}", "#{keydir}/id_rsa.pub")
       end
     end
 
