@@ -29,7 +29,7 @@ def get_config
   JSON.parse(File.read(ENV['ECM_CONFIG'] || 'config.json'))
 end
 
-harness_dir = ENV['HARNESS_DIR'] ||= File.dirname(__FILE__)
+harness_dir = ENV['HARNESS_DIR'] ||= File.expand_path(".")
 repo_dir = ENV['REPO_PATH'] ||= File.join(harness_dir, 'chef-repo')
 
 desc "Open csshx to the nodes of the server."
