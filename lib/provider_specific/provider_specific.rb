@@ -17,7 +17,7 @@ module EcMetal
     end
   end
 
-  def node_keys(keydir)
+  def node_keys(keydir, keypair_name, keypair_path)
     raise "Unimplemented.  Should be overridden in child class"
   end
 end
