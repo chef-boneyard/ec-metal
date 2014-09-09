@@ -1,4 +1,4 @@
-def csshx(private_chef_config, repo_dir)
+def csshx(private_chef_config, cssh_repo_dir)
   require_relative '../../cookbooks/ec-common/libraries/topo_helper'
 
   hosts = []
@@ -29,12 +29,12 @@ def get_config
   JSON.parse(File.read(ENV['ECM_CONFIG'] || 'config.json'))
 end
 
-harness_dir = ENV['HARNESS_DIR'] ||= File.expand_path(".")
-repo_dir = ENV['REPO_PATH'] ||= File.join(harness_dir, 'chef-repo')
+cssh_harness_dir = ENV['HARNESS_DIR'] ||= File.expand_path(".")
+cssh_repo_dir = ENV['REPO_PATH'] ||= File.join(cssh_harness_dir, 'chef-repo')
 
 desc "Open csshx to the nodes of the server."
 task :csshx do
   config = get_config
   config = fog_populate_ips(config) if config['provider'] == 'ec2'
-  csshx(config, repo_dir)
+  csshx(config, cssh_repo_dir)
 end
