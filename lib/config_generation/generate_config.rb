@@ -9,15 +9,18 @@ module EcMetal
     require_relative 'generate_ec2_config'
     require_relative 'generate_vagrant_config'
 
+    VAGRANT = 'vagrant'
+    EC2 = 'ec2'
+
     VALID_TOPOS = ['ha', 'standalone', 'tier']
     VALID_VARIANTS = ['private_chef', 'chef_server']
     VALID_PROVIDERS = ['vagrant', 'ec2']
 
     def self.create_by_provider(provider, args, filename)
       case provider
-      when 'vagrant'
+      when VAGRANT
         EcMetal::GenerateVagrantConfig.new(args, filename)
-      when 'ec2'
+      when EC2
         EcMetal::GenerateEc2Config.new(args, filename)
       end
     end
@@ -124,31 +127,58 @@ module EcMetal
         :backends => {},
         :frontends => {}
         }
+
+      options[:num_backends].times do |n|
+        backend = generate_backend(n)
+        backend[:bootstrap] = true if n == 0
+        @config[:layout][:backends]["backend#{n}"] = backend
+      end
+      options[:num_frontends].times do |n|
+        @config[:layout][:frontends]["frontend#{n}"] = generate_frontend(n)
+      end
+
+      if options[:num_backends] > 1
+        vip = { :hostname => "backend.opscode.piab",
+                :ipaddress => "33.33.33.20" }
+      else
+        backend_name = @config[:layout][:backends].keys.first
+        vip = @config[:layout][:backends][backend_name]
+      end
+
+      @config[:layout][:backend_vip] = {
+        :hostname => vip[:hostname],
+        :ipaddress => vip[:ipaddress],
+        # TODO(jmink) figure out a smarter way to determine devices
+        :device => backend_vip_device(),
+        :heartbeat_device => backend_vip_heartbeat_device
+       }
+
+      provider_specific_config_modification()
     end
 
     # @returns a string which represents the backend vip device
     def backend_vip_device
-      raise "Unimplemented.  Should be overwritten in child class"
+      raise "Backend_vip_device unimplemented.  Should be overwritten in child class"
     end
 
     # @returns a string which represents the backend vip heartbeat device
     def backend_vip_heartbeat_device
-      raise "Unimplemented.  Should be overwritten in child class"
+      raise "backend_vip_heartbeat_device unimplemented.  Should be overwritten in child class"
     end
 
     # @returns a hash which represents the nth backend
     def generate_backend(n)
-      raise "Unimplemented.  Should be overridden in child class"
+      raise "generate_backend unimplemented.  Should be overridden in child class"
     end
 
     # @returns a hash which represents the nth frontend
     def generate_frontend(n)
-      raise "Unimplemented.  Should be overridden in child class"
+      raise "generate_backend unimplemented.  Should be overridden in child class"
     end
 
     # modifies @config in any way required for that specific provider
     def provider_specific_config_modification()
-      raise "Unimplemented.  Should be overridden in child class"
+      raise "provider_specific_config_modification unimplemented.  Should be overridden in child class"
     end
   end
 end

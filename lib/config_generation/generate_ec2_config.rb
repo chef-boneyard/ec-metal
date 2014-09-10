@@ -113,13 +113,13 @@ module EcMetal
 
     def provider_specific_config_modification
     end
-  end
 
-  def backend_vip_device
-    "eth0"
-  end
+    def backend_vip_device
+      "eth0"
+    end
 
-  def backend_vip_heartbeat_device
-    "eth0"
+    def backend_vip_heartbeat_device
+      "eth0"
+    end
   end
 end
