@@ -16,6 +16,12 @@ module EcMetal
       run("bundle exec chef-client --config #{KNIFE} -z -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
     end
 
+    def self.destroy
+      ENV['HARNESS_DIR'] = harness_dir
+      ENV['REPO_PATH'] = repo_dir
+      run("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
+    end
+
     def self.config
       JSON.parse(File.read(ENV['ECM_CONFIG'] || "#{harness_dir}/config.json"))
     end
@@ -90,14 +96,13 @@ module EcMetal
     end
 
 
-    private
-
+    # TODO(jmink) Move this into a utils class
     # Shells out, ensures error messages are recorded and throws an exception on non-zero responses
     # timeout is in tenths of seconds (default 600 last checked)
     def self.run(command, timeout = nil)
       puts "#{command} from #{harness_dir} with env #{ENV.to_hash}"
 
-      shellout_params = {:env => ENV.to_hash}
+      shellout_params = {:env => ENV.to_hash, :cwd => harness_dir}
       shellout_params[:timeout] = timeout unless timeout.nil?
 
       # TODO(jmink) determine why this env var needs to be set externally
