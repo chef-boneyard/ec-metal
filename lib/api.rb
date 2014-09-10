@@ -19,7 +19,7 @@ module EcMetal
     def self.destroy
       ENV['HARNESS_DIR'] = harness_dir
       ENV['REPO_PATH'] = repo_dir
-      run("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
+      run("bundle exec chef-client --config #{KNIFE} -z -o ec-harness::cleanup")
     end
 
     def self.config
