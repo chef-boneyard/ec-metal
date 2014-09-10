@@ -126,7 +126,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/libraries/private_ch
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { pc_version >= '11.0.0' && pc_version < '11.3.0' }
+  only_if { pc_version >= '11.2.0' && pc_version < '11.3.0' }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end

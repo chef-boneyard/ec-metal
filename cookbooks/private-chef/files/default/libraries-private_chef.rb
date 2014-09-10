@@ -34,6 +34,7 @@ module PrivateChef
   postgresql Mash.new
   redis_lb Mash.new
   oc_bifrost Mash.new
+  oc_id Mash.new
   opscode_certificate Mash.new
   opscode_org_creator Mash.new
   opscode_account Mash.new
@@ -155,6 +156,8 @@ module PrivateChef
       PrivateChef['oc_bifrost']['superuser_id'] ||= generate_hex_if_bootstrap(16, ha_guard)
       PrivateChef['oc_bifrost']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['oc_bifrost']['sql_ro_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['oc_id']['secret_key_base'] ||= generate_hex_if_bootstrap(50, ha_guard)
+      PrivateChef['oc_id']['sql_password'] ||= generate_hex_if_bootstrap(50, ha_guard)
       PrivateChef['bookshelf']['access_key_id'] ||= generate_hex_if_bootstrap(20, ha_guard)
       PrivateChef['bookshelf']['secret_access_key'] ||= generate_hex_if_bootstrap(40, ha_guard)
 
@@ -173,6 +176,10 @@ module PrivateChef
               'postgresql' => {
                 'sql_password' => PrivateChef['postgresql']['sql_password'],
                 'sql_ro_password' => PrivateChef['postgresql']['sql_ro_password']
+              },
+              'oc_id' => {
+                'sql_password' => PrivateChef['oc_id']['sql_password'],
+                'secret_key_base' => PrivateChef['oc_id']['secret_key_base']
               },
               'opscode_account' => {
                 'session_secret_key' => PrivateChef['opscode_account']['session_secret_key']
@@ -215,6 +222,7 @@ module PrivateChef
         "lb_internal",
         "postgresql",
         "oc_bifrost",
+        "oc_id",
         "opscode_certificate",
         "opscode_org_creator",
         "opscode_chef_mover",
@@ -302,6 +310,7 @@ module PrivateChef
       PrivateChef["keepalived"]["vrrp_instance_ipaddress_dev"] = backend_vip["device"]
       PrivateChef["bookshelf"]["ha"] ||= true
       PrivateChef["couchdb"]["ha"] ||= true
+      PrivateChef["oc_id"]["ha"] ||= true
       PrivateChef["rabbitmq"]["ha"] ||= true
       PrivateChef["opscode_solr"]["ha"] ||= true
       PrivateChef["opscode_expander"]["ha"] ||= true
@@ -323,7 +332,6 @@ module PrivateChef
       PrivateChef["couchdb"]["bind_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["rabbitmq"]["node_ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["redis_lb"]["listen"] ||= PrivateChef["default_listen_address"]
-      PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
       PrivateChef["opscode_solr"]["ip_address"] ||= PrivateChef["default_listen_address"]
       PrivateChef["opscode_webui"]["worker_processes"] ||= 2
       PrivateChef["postgresql"]["listen_address"] ||= '*' #PrivateChef["default_listen_address"]
@@ -341,7 +349,6 @@ module PrivateChef
 
     def gen_frontend
       PrivateChef[:role] = "frontend"
-      PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
       PrivateChef["bookshelf"]["enable"] ||= false
       PrivateChef["bookshelf"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["couchdb"]["enable"] ||= false
@@ -362,7 +369,7 @@ module PrivateChef
       PrivateChef["postgresql"]["enable"] ||= false
       PrivateChef["postgresql"]["vip"] ||= PrivateChef["backend_vips"]["ipaddress"]
       PrivateChef["lb"]["cache_cookbook_files"] ||= true
-      PrivateChef["lb"]["upstream"] = Mash.new
+      PrivateChef["lb"]["upstream"] ||= Mash.new
       if PrivateChef["use_ipv6"] && PrivateChef["backend_vips"]["ipaddress"].include?(':')
         PrivateChef["lb"]["upstream"]["bookshelf"] ||= [ "[#{PrivateChef["backend_vips"]["ipaddress"]}]" ]
       else
@@ -420,6 +427,8 @@ module PrivateChef
         PrivateChef["use_ipv6"] = true
         PrivateChef["default_listen_address"] = "::"
       end
+
+      PrivateChef["nginx"]["enable_ipv6"] ||= PrivateChef["use_ipv6"]
 
       case PrivateChef['topology']
       when "standalone","manual"
