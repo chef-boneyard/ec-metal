@@ -47,13 +47,13 @@ module EcMetal
         @config[:layout][:virtual_hosts][v[:hostname]] = v[:ipaddress]
       end
     end
-  end
 
-  def backend_vip_device
-    "eth1"
-  end
+    def backend_vip_device
+      "eth1"
+    end
 
-  def backend_vip_heartbeat_device
-    "eth2"
+    def backend_vip_heartbeat_device
+      "eth2"
+    end
   end
 end
