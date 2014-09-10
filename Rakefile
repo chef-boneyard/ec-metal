@@ -43,7 +43,7 @@ end
 
 desc 'Destroy all VMs'
 task :destroy do
-  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::cleanup")
+  EcMetal::Api.destroy
 end
 task :cleanup => :destroy
 

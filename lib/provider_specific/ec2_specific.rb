@@ -13,8 +13,8 @@ module EcMetal
       FileUtils.mkdir_p keydir
       if Dir["#{keydir}/*"].empty?
         private_key, public_key = normalize_keypair_name(ENV['ECM_KEYPAIR_NAME'])
-        FileUtils.ln_s("#{keypair_path}/#{private_key}", "#{keydir}/#{private_key}")
-        FileUtils.ln_s("#{keypair_path}/#{public_key}", "#{keydir}/#{public_key}")
+        FileUtils.ln_s("#{keypair_path}/#{private_key}", "#{keydir}/id_rsa")
+        FileUtils.ln_s("#{keypair_path}/#{public_key}", "#{keydir}/id_rsa.pub")
       end
     end
 
