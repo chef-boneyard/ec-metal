@@ -65,15 +65,6 @@ when 'debian'
   end
 end
 
-package 'btrfs-tools'
-
-# Format the two ephemeral disks #ASSUMPTIONS
-execute 'btrfs-format' do
-  command 'mkfs.btrfs -f /dev/xvdb'
-  action :run
-  not_if "file -sL /dev/xvdb | grep BTRFS"
-end
-
 directory '/var/lib/docker' do
   owner "root"
   group "root"
@@ -82,9 +73,31 @@ directory '/var/lib/docker' do
   recursive true
 end
 
-execute 'btrfs-mount-docker' do
-  command 'mount /dev/xvdb /var/lib/docker'
-  not_if 'mount | grep /var/lib/docker'
+if node['loadtester_host']['use_btrfs'] == true
+  package 'btrfs-tools'
+
+  # Format the two ephemeral disks #ASSUMPTIONS
+  execute 'btrfs-format' do
+    command 'mkfs.btrfs -f /dev/xvdb'
+    action :run
+    not_if "file -sL /dev/xvdb | grep BTRFS"
+  end
+
+  execute 'btrfs-mount-docker' do
+    command 'mount /dev/xvdb /var/lib/docker'
+    not_if 'mount | grep /var/lib/docker'
+  end
+else
+  execute 'ext4-format' do
+    command 'mkfs.ext4 /dev/xvdb'
+    action :run
+    not_if "file -sL /dev/xvdb | grep ext4"
+  end
+
+  execute 'ext4-mount-docker' do
+    command 'mount /dev/xvdb /var/lib/docker'
+    not_if 'mount | grep /var/lib/docker'
+  end
 end
 
 execute 'mkswap' do
