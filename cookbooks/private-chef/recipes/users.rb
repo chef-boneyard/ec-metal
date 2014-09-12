@@ -54,9 +54,28 @@ if installer_name =~ /^private-chef/ # skip both osc and cs12
   unless File.exists?("/srv/piab/dev_users_created")
     topology = TopoHelper.new(ec_config: node['private-chef'])
 
-    ruby_block "Waiting for first-time OPC initializtion" do
+    ruby_block "Waiting for first-time OPC initialization" do
       block do
-        sleep 80
+        attempts = 600
+        STDOUT.sync = true
+
+        keepalived_dir = '/var/opt/opscode/keepalived'
+        requested_cluster_status_file = ::File.join(keepalived_dir, 'requested_cluster_status')
+        cluster_status_file = ::File.join(keepalived_dir, 'current_cluster_status')
+
+        (0..attempts).each do |attempt|
+          break if File.exists?(requested_cluster_status_file) &&
+            File.open(requested_cluster_status_file).read.chomp == 'master' &&
+            File.exists?(cluster_status_file) &&
+            File.open(cluster_status_file).read.chomp == 'master'
+
+          sleep 1
+          print '.'
+          if attempt == attempts
+            raise "I'm sick of waiting for server startup after #{attempt} attempts"
+          end
+        end
+        sleep 10
       end
     end
 
