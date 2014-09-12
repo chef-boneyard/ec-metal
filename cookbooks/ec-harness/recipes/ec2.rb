@@ -3,18 +3,6 @@
 require 'cheffish'
 require 'chef_metal_fog'
 
-def find_open_port
-  port = 9010
-  begin
-    s = TCPServer.new('127.0.0.1', port)
-    s.close
-  rescue
-    port += 1
-    retry
-  end
-  port
-end
-
 harness_dir = node['harness']['harness_dir']
 repo_path = node['harness']['repo_path']
 
@@ -22,7 +10,7 @@ with_chef_local_server :chef_repo_path => repo_path,
   :cookbook_path => [ File.join(harness_dir, 'cookbooks'),
                       File.join(repo_path, 'cookbooks'),
     File.join(repo_path, 'vendor', 'cookbooks') ],
-    :port => find_open_port
+    :port => 9010.upto(9999)
 
 with_driver "fog:AWS:default:#{node['harness']['ec2']['region']}"
 # alternative method:
