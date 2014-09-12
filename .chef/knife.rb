@@ -11,8 +11,8 @@ def find_open_port
 end
 
 current_dir = ::File.dirname(__FILE__)
-harness_dir = ENV['HARNESS_DIR']
-repo = ENV['REPO_PATH']
+harness_dir = ENV['HARNESS_DIR'] || current_dir
+repo = ENV['REPO_PATH'] || ::File.join(harness_dir, 'chef-repo')
 FileUtils.mkdir_p(repo)
 chef_repo_path repo
 keys_dir = ::File.join(repo, 'keys')
@@ -28,10 +28,15 @@ cookbook_path            [::File.join(harness_dir, 'cookbooks'),
                          ]
 verify_api_cert          true
 private_key_paths	 [keys_dir]
-
-keypair_name ||= "#{ENV['USER']}@#{::File.basename(harness_dir)}"
-private_keys   keypair_name => ::File.join(keys_dir, 'id_rsa')
-public_keys    keypair_name => ::File.join(keys_dir, 'id_rsa.pub')
-
+if keypair_name.nil?
+  private_keys   "#{ENV['USER']}@#{::File.basename(harness_dir)}" => ::File.join(keys_dir, 'id_rsa')
+  public_keys    "#{ENV['USER']}@#{::File.basename(harness_dir)}" => ::File.join(keys_dir, 'id_rsa.pub')
+else
+  private_keys   keypair_name => ::File.join(keys_dir, 'id_rsa')
+  public_keys    keypair_name => ::File.join(keys_dir, 'id_rsa.pub')
+  private_keys   "#{ENV['USER']}@#{::File.basename(harness_dir)}" => ::File.join(keys_dir, 'id_rsa')
+  public_keys    "#{ENV['USER']}@#{::File.basename(harness_dir)}" => ::File.join(keys_dir, 'id_rsa.pub')
+end
 chef_zero		 :port => find_open_port
 lockfile                 ::File.join(harness_dir, 'chef-client-running.pid')
+verify_api_cert		false

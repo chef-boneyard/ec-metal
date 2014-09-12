@@ -1,5 +1,5 @@
 # Load harness attributes from the config file
-harness_dir = ENV['HARNESS_DIR']
+harness_dir = ENV['HARNESS_DIR'] || File.dirname(__FILE__)
 config_json = JSON.parse(File.read( ENV['ECM_CONFIG'] || File.join(harness_dir, 'config.json')))
 default['harness']['harness_dir'] = harness_dir
 default['harness']['provider'] = config_json['provider']
@@ -28,7 +28,7 @@ default['harness']['analytics_package'] = ENV['ANALYTICS_PACKAGE'] || config_jso
 default['harness']['manage_options'] = config_json['manage_options'] || {}
 
 # HARNESS_DIR is set by the Rakefile to the project root directory
-repo_path = ENV['REPO_PATH']
+repo_path = ENV['REPO_PATH'] || ::File.join(harness_dir, 'chef-repo')
 default['harness']['repo_path'] = repo_path
 default['harness']['vms_dir'] = File.join(harness_dir, 'vagrant_vms')
 
@@ -39,3 +39,6 @@ default['harness']['vm_mountpoint'] = '/tmp/ecm_cache'
 # SSH key distribution for inter-machine trust
 default['harness']['root_ssh']['privkey'] = File.read(File.join(repo_path, 'keys', 'id_rsa'))
 default['harness']['root_ssh']['pubkey'] = File.read(File.join(repo_path, 'keys', 'id_rsa.pub'))
+
+# load testers
+default['harness']['loadtesters'] = config_json['loadtesters']

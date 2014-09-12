@@ -119,3 +119,32 @@ cookbook_file '/opt/opscode/embedded/upgrades/001/009_migrate_authz.rb' do
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
+
+# yet-unreported: enabling tweaking of oc_chef_authz attributes for erchef
+cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/libraries/private_chef.rb' do
+  source 'libraries-private_chef.rb'
+  owner 'root'
+  group 'root'
+  mode '0644'
+  only_if { pc_version >= '11.2.0' && pc_version < '11.3.0' }
+  subscribes :create, "package[#{installer_name}]", :immediately
+  action :nothing
+end
+
+# awesome support tools
+cookbook_file '/usr/local/bin/opc-log-parser' do
+  source 'opc-log-parser'
+  owner 'root'
+  group 'root'
+  mode '0755'
+  subscribes :create, "package[#{installer_name}]", :immediately
+  action :nothing
+end
+cookbook_file '/usr/local/bin/profile-request-rate' do
+  source 'profile-request-rate'
+  owner 'root'
+  group 'root'
+  mode '0755'
+  subscribes :create, "package[#{installer_name}]", :immediately
+  action :nothing
+end
