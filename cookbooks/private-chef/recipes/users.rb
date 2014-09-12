@@ -77,6 +77,7 @@ if installer_name =~ /^private-chef/ # skip both osc and cs12
         end
         sleep 10
       end
+      only_if { topology.is_ha? }
     end
 
     dev_users.each_pair do |name, options|
