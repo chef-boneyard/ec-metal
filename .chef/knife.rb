@@ -1,15 +1,3 @@
-def find_open_port
-  port = 8889
-  begin
-    s = TCPServer.new('127.0.0.1', port)
-    s.close
-  rescue
-    port += 1
-    retry
-  end
-  port
-end
-
 current_dir = ::File.dirname(__FILE__)
 harness_dir = ENV['HARNESS_DIR']
 repo = ENV['REPO_PATH']
@@ -33,5 +21,5 @@ keypair_name ||= "#{ENV['USER']}@#{::File.basename(harness_dir)}"
 private_keys   keypair_name => ::File.join(keys_dir, 'id_rsa')
 public_keys    keypair_name => ::File.join(keys_dir, 'id_rsa.pub')
 
-chef_zero		 :port => find_open_port
+chef_zero		 :port => 9010.upto(9999)
 lockfile                 ::File.join(harness_dir, 'chef-client-running.pid')
