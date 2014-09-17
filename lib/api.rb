@@ -12,13 +12,13 @@ module EcMetal
     def self.up
       create_users_directory
       ENV['HARNESS_DIR'] = harness_dir
-      ENV['REPO_PATH'] = repo_dir
+      ENV['ECM_CHEF_REPO'] = repo_dir
       run("bundle exec chef-client --config #{KNIFE} -z -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
     end
 
     def self.destroy
       ENV['HARNESS_DIR'] = harness_dir
-      ENV['REPO_PATH'] = repo_dir
+      ENV['ECM_CHEF_REPO'] = repo_dir
       run("bundle exec chef-client --config #{KNIFE} -z -o ec-harness::cleanup")
     end
 
@@ -92,7 +92,7 @@ module EcMetal
     end
 
     def self.repo_dir
-      repo_dir = ENV['REPO_PATH'] ||= File.join(harness_dir, 'chef-repo')
+      repo_dir = ENV['ECM_CHEF_REPO'] ||= File.join(harness_dir, 'chef-repo')
     end
 
 
