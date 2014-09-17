@@ -100,9 +100,12 @@ module EcMetal
     # Shells out, ensures error messages are recorded and throws an exception on non-zero responses
     # timeout is in tenths of seconds (default 600 last checked)
     def self.run(command, timeout = nil)
-      puts "#{command} from #{harness_dir} with env #{ENV.to_hash}"
+      STDOUT.sync = true
 
-      shellout_params = {:env => ENV.to_hash, :cwd => harness_dir}
+      printable_env = ENV.to_a.map{|val| val.join('=')}.join(' ')
+      puts "#{command} from #{harness_dir} with env #{printable_env}"
+
+      shellout_params = {:env => ENV.to_hash, :cwd => harness_dir, :live_stream => STDOUT}
       shellout_params[:timeout] = timeout unless timeout.nil?
 
       # TODO(jmink) determine why this env var needs to be set externally
