@@ -30,7 +30,7 @@ default['harness']['analytics_package'] = ENV['ECM_ANALYTICS_PACKAGE'] || config
 default['harness']['manage_options'] = config_json['manage_options'] || {}
 
 # HARNESS_DIR is set by the Rakefile to the project root directory
-repo_path = ENV['REPO_PATH']
+repo_path = ENV['ECM_CHEF_REPO']
 default['harness']['repo_path'] = repo_path
 default['harness']['vms_dir'] = File.join(harness_dir, 'vagrant_vms')
 
