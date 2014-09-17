@@ -30,7 +30,7 @@ def get_config
 end
 
 cssh_harness_dir = ENV['HARNESS_DIR'] ||= File.expand_path(".")
-cssh_repo_dir = ENV['REPO_PATH'] ||= File.join(cssh_harness_dir, 'chef-repo')
+cssh_repo_dir = ENV['ECM_CHEF_REPO'] ||= File.join(cssh_harness_dir, 'chef-repo')
 
 desc "Open csshx to the nodes of the server."
 task :csshx do
