@@ -24,11 +24,76 @@ This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA c
 
 <a name="start" />
 ## Getting Started
-1. Select an [environment](#env)
-1. Configure ec-metal according to the environment selected
-1. Determine which [task](#tasks) you want to run
-1. Set packages for installation or upgrade based on task
-1. Run the ec-metal task!
+### A config.json
+First you need a config.  You can choose one from examples/<name>.json or you can generate a config with the create_config rake task.
+
+create_config known issues:
+* The default package isn't filled in unless you set the <> env var.  Just edit the config manually
+* Standalone support is mostly non existant.
+* It leaves out the provider at the top so you need to add "provider": "vagrant" (or "ec2")  (This may not be true at this point in the branch)
+* ec2 requires a url as opposed to a local package for the default package
+
+Valid options are:
+* topology: standalone, tier, ha
+* variant: private_chef, (open source something...)
+* platform: This is the OS, so anything chef supported
+* provider: ec2 or vagrant
+
+In the end the config needs to be named config.json and live in the harness directory, or be pointed to with the ECM_CONFIG env var
+
+### Run rake up
+I've found I generally need the following env vars:
+* ECM_KEYPAIR_PATH - Where your AWS ssh keys are (example: =~/oc/keys/)
+* ECM_KEYPAIR_NAME - What your aws keys are named ignoring the .pem/.pub (example: jmink or id_rsa)
+* REPO_PATH - Where the chef repo lives (example: $PWD/chef-repo)
+* ECM_CHEF_REPO - Same as above
+* HARNESS_DIR - Where the chef repo should be and any extra ec-metal related files (example: $PWD)
+* ECM_CONFIG - Where the config from the last step is (example: $PWD/config.json)
+
+It's generally least surprising to put all these on the command line as NAME0=var0 .... NAMEn=varn bundle exec rake up
+
+Note rake up will often fail on the `bundle exec chef-client --config $PWD/.chef/knife.rb -z -o ec-harness::private_chef_ha` command with little explanation.  You can run that command with the above env vars to try and pry deeper into the maw of the beast.
+
+### Useful hacks
+Things I've found that help get around issues:
+* Quickly times out: It's trying to connect to artifactory and you aren't on the VPN.  Sign into the VPN
+* It complains that your chef server is older than 1.4.  Comment out that check.
+* It complains it can't find the /files or /templates files in your cookbook.  Try coppying them from ec-metal/cookbooks to ~/.chef/local-mode-cache/cache/cookbooks/
+
+### Example config
+    {
+      "provider": "ec2",
+      "ec2_options": {
+        "region": "us-west-2",
+        "vpc_subnet": "subnet-c1372eb5",
+        "ami_id": "ami-c3abd6f3",
+        "ssh_username": "ubuntu",
+        "use_private_ip_for_ssh": false
+      },
+      "default_package": "https://packagecloud.io/chef/stable/download?distro=precise&filename=private-chef_11.2.2-1_amd64.deb",
+      "run_pedant": false,
+      "packages": {
+      },
+      "layout": {
+        "topology": "standalone",
+        "api_fqdn": "api.opscode.piab",
+        "default_orgname": null,
+        "manage_fqdn": "manage.opscode.piab",
+        "analytics_fqdn": "analytics.opscode.piab",
+        "standalones": {
+          "standalone0": {
+            "hostname": "standalone0.opscode.piab",
+            "instance_type": "c3.xlarge",
+            "ebs_optimized": true,
+            "bootstrap": true
+          }
+        }
+      }
+    }
+
+### Example rake up command
+`ECM_KEYPAIR_PATH=~/oc/keys/ ECM_KEYPAIR_NAME=jmink REPO_PATH=$PWD/chef-repo ECM_CHEF_REPO=$PWD/chef-repo HARNESS_DIR=$PWD ECM_CONFIG=/Users/jmink/oc/ec-metal/config.json bundle exec rake up`
+
 
 <a name="usage" />
 ## Usage
