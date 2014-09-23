@@ -28,14 +28,14 @@ This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA c
 First you need a config.  You can choose one from examples/<name>.json or you can generate a config with the create_config rake task.
 
 create_config known issues:
-* The default package isn't filled in unless you set the <> env var.  Just edit the config manually
+* The default package isn't filled in unless you set the ECM_TARGET_PACKAGE_NAME env var.  Just edit the config manually
 * Standalone support is mostly non existant.
 * It leaves out the provider at the top so you need to add "provider": "vagrant" (or "ec2")  (This may not be true at this point in the branch)
 * ec2 requires a url as opposed to a local package for the default package
 
 Valid options are:
 * topology: standalone, tier, ha
-* variant: private_chef, (open source something...)
+* variant: private_chef, chef_server
 * platform: This is the OS, so anything chef supported
 * provider: ec2 or vagrant
 
