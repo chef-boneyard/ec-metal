@@ -28,7 +28,7 @@ This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA c
 First you need a config.  You can choose one from examples/<name>.json or you can generate a config with the create_config rake task.
 
 Config creation example:
-`CM_TARGET_PACKAGE_NAME='https://packagecloud.io/chef/stable/download?distro=precise&filename=private-chef_11.2.2-1_amd64.deb' bundle exec rake create_config[tier,private_chef,ubuntu-12.04,ec2]`
+`ECM_TARGET_PACKAGE_NAME='https://packagecloud.io/chef/stable/download?distro=precise&filename=private-chef_11.2.2-1_amd64.deb' bundle exec rake create_config[tier,private_chef,ubuntu-12.04,ec2]`
 
 create_config known issues:
 * The default package isn't filled in unless you set the ECM_TARGET_PACKAGE_NAME env var.  Just edit the config manually
