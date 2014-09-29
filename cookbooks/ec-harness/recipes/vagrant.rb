@@ -10,9 +10,9 @@ vagrant_cluster vms_dir
 
 directory repo_path
 with_chef_local_server :chef_repo_path => repo_path,
-  :cookbook_path => [File.join(harness_dir, 'cookbooks'),
+  :cookbook_path => [ENV['ECM_LOCAL_COOKBOOKS'],
                      File.join(repo_path, 'cookbooks'),
-    File.join(repo_path, 'vendor', 'cookbooks') ],
+    File.join(repo_path, 'vendor', 'cookbooks') ].uniq,
     :port => 9010.upto(9999)
 
 with_machine_options :vagrant_options => {
