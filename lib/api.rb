@@ -18,19 +18,19 @@ module EcMetal
       ENV['ECM_CHEF_REPO'] = repo_dir
 
       # Optionally pass "debug" argument from the "rake up" task to the chef-client run
-      be_chef_client_command = "bundle exec chef-client --config #{KNIFE} -z -o ec-harness::private_chef_ha"
+      chef_client_command = "bundle exec chef-client --config #{KNIFE} -z -o ec-harness::private_chef_ha"
 
       if log_level
-        be_chef_client_command += " -l #{log_level}"
+        chef_client_command += " -l #{log_level}"
         puts "Setting chef-client log_level to #{log_level}"
       end
 
       if force_formatter
-        be_chef_client_command += " --force-formatter"
+        chef_client_command += " --force-formatter"
         puts "Adding '--force-formatter' to chef-client command"
       end
       
-      run(be_chef_client_command, 60*MINUTE_IN_DEC_SECS)
+      run(chef_client_command, 60*MINUTE_IN_DEC_SECS)
     end
 
     def self.destroy
