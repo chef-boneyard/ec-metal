@@ -14,19 +14,7 @@ class PackageHelper
   end
   
   def self.installed_version(package, node)
-    # Chef magic to get the package version in a cross-platform fashion
-    pkg = Chef::Resource::Package.new(package, node)
-    pkg_provider = Chef::Platform.provider_for_resource(pkg)
-    pkg_provider.load_current_resource
-
-    if pkg_provider.current_resource.version
-      pkg_provider.current_resource.version
-        .gsub(/[_+]/, '-')
-        .split('-')
-        .first
-    else
-      '0.0.0'
-    end
+    '0.0.0'
   end
 
   def self.private_chef_installed_version(node)
