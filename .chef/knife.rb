@@ -13,7 +13,7 @@ log_location             STDOUT
 node_name                'metal-provisioner'
 cache_type               'BasicFile'
 cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
-cookbook_path            [local_cookbooks, ::File.join(harness_dir, 'cookbooks'), File.join(repo, 'cookbooks')].uniq
+cookbook_path            [local_cookbooks, File.join(repo, 'cookbooks')].uniq
 verify_api_cert          true
 private_key_paths	 [keys_dir]
 
