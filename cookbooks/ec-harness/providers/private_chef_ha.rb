@@ -112,12 +112,8 @@ action :pedant do
 
       machine vmname do
         add_machine_options node['harness']['provisioner_options'][vmname]
-        attribute 'private-chef', privatechef_attributes
-        attribute 'root_ssh', node['harness']['root_ssh'].to_hash
-        attribute 'osc-install', node['harness']['osc_install']
-        attribute 'run-pedant', node['harness']['run_pedant']
 
-        recipe 'private-chef::pedant'
+        run_list ['recipe[private-chef::pedant]']
 
         converge true
       end
