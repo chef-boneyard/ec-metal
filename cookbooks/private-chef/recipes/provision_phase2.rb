@@ -128,7 +128,7 @@ ruby_block 'p-c-c osc upgrade' do
   block do
     begin
       tries ||= 2
-      cmd = Mixlib::ShellOut.new('yes | /opt/opscode/bin/private-chef-ctl upgrade')
+      cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl upgrade --yes --org-name ecmetal --full-org-name ecmetalorg')
       cmd.run_command
       if cmd.error?
         cmd.error!
