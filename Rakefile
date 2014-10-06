@@ -1,6 +1,7 @@
 require 'json'
 require 'fileutils'
 require './cookbooks/ec-common/libraries/topo_helper.rb'
+
 require_relative 'lib/api.rb'
 Dir["lib/tasks/*.rake"].each { |t| load t }
 
@@ -18,9 +19,11 @@ task :bundle do
   EcMetal::Api.bundle
 end
 
-desc 'Bring the VMs online and install+configure Enterprise Chef HA'
+desc 'Bring the VMs online and install/configure Enterprise Chef. Optionally: "rake up debug" and/or "rake up force_formatter" for verbose output'
 task :up => :setup do
-  EcMetal::Api.up
+  log_level = ARGV.select {|i| i =~ /debug|info|warn|error|fatal/}.last
+  force_formatter = ARGV.select {|i| i =~ /force(-|_)formatter/}.last
+  EcMetal::Api.up(log_level, force_formatter)
 end
 task :start => :up
 

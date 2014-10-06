@@ -10,11 +10,27 @@ module EcMetal
     MINUTE_IN_DEC_SECS = 600
     KNIFE = File.join(File.dirname(File.dirname(__FILE__)), '.chef', 'knife.rb')
 
-    def self.up
+    # Executes chef-client with the recipe that creates a chef server. Optionally consumes subcommands
+    # from the "rake up" task --log_level and --force-formatter commands to offer more verbose output
+    def self.up(log_level=nil, force_formatter=nil)
       create_users_directory
       ENV['HARNESS_DIR'] = harness_dir
       ENV['ECM_CHEF_REPO'] = repo_dir
-      run("bundle exec chef-client --config #{KNIFE} -z -o ec-harness::private_chef_ha", 60*MINUTE_IN_DEC_SECS)
+
+      # Optionally pass "debug" argument from the "rake up" task to the chef-client run
+      chef_client_command = "bundle exec chef-client --config #{KNIFE} -z -o ec-harness::private_chef_ha"
+
+      if log_level
+        chef_client_command += " -l #{log_level}"
+        puts "Setting chef-client log_level to #{log_level}"
+      end
+
+      if force_formatter
+        chef_client_command += " --force-formatter"
+        puts "Adding '--force-formatter' to chef-client command"
+      end
+      
+      run(chef_client_command, 60*MINUTE_IN_DEC_SECS)
     end
 
     def self.destroy
