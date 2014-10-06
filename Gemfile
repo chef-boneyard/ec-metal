@@ -10,4 +10,3 @@ gem 'chef',               '~> 11.0'
 
 gem 'knife-opc',          '~> 0.1.0'
 gem 'rake'
-
