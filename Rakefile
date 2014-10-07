@@ -50,6 +50,13 @@ task :destroy do
 end
 task :cleanup => :destroy
 
+
+desc 'Launch ec2 instances'
+task :cloud_create => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+  create_users_directory
+  system("#{harness_dir}/bin/chef-client -z -o ec-harness::cloud_create")
+end
+
 desc 'SSH to a machine like so: rake ssh[backend1]'
 task :ssh, [:machine] do |t,arg|
   Dir.chdir(File.join(EcMetal::Api.harness_dir, 'vagrant_vms')) {
