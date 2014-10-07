@@ -1,85 +1,69 @@
-require 'mixlib/config'
+require 'ec_metal/config'
 
 module EcMetal
-  class Config
-    extend Mixlib::Config
+  module Config
+    class Core
+      extend Mixlib::Config
 
-    config_strict_mode true
-
-    # make all options as flat as possible focusing on ec2 requirements
-    # currently only covers config.json settings
-    # next, need to add harness and env vars
-
-    def self.build_hostname(hostname)
-      "#{hostname}.#{EcMetal::Config.server.base_hostname}"
-    end
-
-    config_context :provider do
-      default :type, 'ec2'
-      default :region, 'us-west-2'
-      default :vpc_subnet, 'subnet-5ac1133f'
-      default :ami, 'ami-09e27439' # ubuntu, version?
-      default :ssh_username, 'ubuntu' # we can actually derive this from the ami
-      configurable :keypair_name
-    end
-
-    config_context :server do
       config_strict_mode true
-      default :version, 'latest' # keyword
-      default :apply_ec_bugfixes, false
-      default :run_pedant, true
-      configurable :package # url or local path
-      default :base_hostname, 'opscode.piab'
-      
-      config_context :settings do
-        config_strict_mode true
-        default(:api_fqdn) { build_hostname 'api' }
+
+      # currently only covers config.json settings
+      # next, need to add harness and env vars
+
+      config_context :provider do
+        default :type, 'ec2'
+        default(:options) { EcMetal::Config::Helper.get_provider_options(type) }
       end
 
-      config_context :topology do
-        config_strict_mode true
-        # meat and potatoes
-        default :type, 'standalone'
-      end
-    end
+      config_context :server do
+        default :version, 'latest' # keyword
+        default :apply_ec_bugfixes, false
+        default :run_pedant, true
+        configurable :package # url or local path
+        default :base_hostname, 'opscode.piab'
+        
+        config_context :settings do
+          default(:api_fqdn) { EcMetal::Config::ServerSettings.api_fqdn }
+        end
 
-    config_context :addons do
-      config_strict_mode true
-      config_context :manage do
-        config_strict_mode true
-        default :version, 'release' # based on server version
-        default(:fqdn) { build_hostname 'manage' }
-        default :install?, true
+        config_context :topology do
+          # meat and potatoes
+          default :type, 'standalone'
+        end
+      end
+
+      config_context :addons do
+        config_context :manage do
+          default :version, 'release' # based on server version
+          default(:fqdn) { build_hostname 'manage' }
+          default :install?, true
+          configurable :settings
+        end
+
+        config_context :push_jobs do
+          default :version, 'release' # based on server version
+          default :install?, false
+          configurable :settings
+        end
+
+        config_context :reporting do
+          default :version, 'release' # based on server version
+          default :install?, false
+          configurable :settings
+        end
+      end
+
+      config_context :analytics do
+        default(:fqdn) { build_hostname 'analytics' }
         configurable :settings
+        config_context :topology do
+          default :type, 'standalone'
+        end
       end
 
-      config_context :push_jobs do
-        config_strict_mode true
-        default :version, 'release' # based on server version
-        default :install?, false
-        configurable :settings
-      end
-
-      config_context :reporting do
-        config_strict_mode true
-        default :version, 'release' # based on server version
-        default :install?, false
-        configurable :settings
-      end
     end
-
-    config_context :analytics do
-      config_strict_mode true
-      default(:fqdn) { build_hostname 'analytics' }
-      configurable :settings
-      config_context :topology do
-        default :type, 'standalone'
-      end
-    end
-
   end
 end
-
 
 # {
 #   "id": "ec-metal",
