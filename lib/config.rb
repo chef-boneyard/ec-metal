@@ -9,11 +9,16 @@ module EcMetal
     # make all options as flat as possible focusing on ec2 requirements
     # currently only covers config.json settings
     # next, need to add harness and env vars
-    
+
+    def self.build_hostname(hostname)
+      "#{hostname}.#{EcMetal::Config.server.base_hostname}"
+    end
+
     config_context :provider do
       default :type, 'ec2'
 
       config_context :options do
+        config_strict_mode true
         default :region, 'us-west-2'
         default :vpc_subnet, 'subnet-5ac1133f'
         default :ami, 'ami-09e27439' # ubuntu, version?
@@ -23,6 +28,7 @@ module EcMetal
     end
 
     config_context :server do
+      config_strict_mode true
       default :version, 'latest' # keyword
       default :apply_ec_bugfixes, false
       default :run_pedant, true
@@ -30,7 +36,8 @@ module EcMetal
       default :base_hostname, 'opscode.piab'
       
       config_context :settings do
-        default :api_fqdn, "api.#{base_hostname}"
+        config_strict_mode true
+        default(:api_fqdn) { build_hostname 'api' }
       end
     end
 
@@ -40,20 +47,24 @@ module EcMetal
     end
 
     config_context :addons do
+      config_strict_mode true
       config_context :manage do
+        config_strict_mode true
         default :version, 'release' # based on server version
-        default :fqdn, "manage.#{base_hostname}"
+        default(:fqdn) { build_hostname 'manage' }
         default :install?, true
         configurable :settings
       end
-      
+
       config_context :push_jobs do
+        config_strict_mode true
         default :version, 'release' # based on server version
         default :install?, false
         configurable :settings
       end
-      
+
       config_context :reporting do
+        config_strict_mode true
         default :version, 'release' # based on server version
         default :install?, false
         configurable :settings
@@ -61,7 +72,8 @@ module EcMetal
     end
 
     config_context :analytics do
-      default :fqdn, "analytics.#{base_hostname}"
+      config_strict_mode true
+      default(:fqdn) { build_hostname 'analytics' }
       configurable :settings
       config_context :topology do
         default :type, 'standalone'
