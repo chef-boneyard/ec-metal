@@ -16,15 +16,11 @@ module EcMetal
 
     config_context :provider do
       default :type, 'ec2'
-
-      config_context :options do
-        config_strict_mode true
-        default :region, 'us-west-2'
-        default :vpc_subnet, 'subnet-5ac1133f'
-        default :ami, 'ami-09e27439' # ubuntu, version?
-        default :ssh_username, 'ubuntu' # we can actually derive this from the ami
-        configurable :keypair_name
-      end
+      default :region, 'us-west-2'
+      default :vpc_subnet, 'subnet-5ac1133f'
+      default :ami, 'ami-09e27439' # ubuntu, version?
+      default :ssh_username, 'ubuntu' # we can actually derive this from the ami
+      configurable :keypair_name
     end
 
     config_context :server do
@@ -39,11 +35,12 @@ module EcMetal
         config_strict_mode true
         default(:api_fqdn) { build_hostname 'api' }
       end
-    end
 
-    config_context :topology do
-      # meat and potatoes
-      default :type, 'standalone'
+      config_context :topology do
+        config_strict_mode true
+        # meat and potatoes
+        default :type, 'standalone'
+      end
     end
 
     config_context :addons do
