@@ -12,3 +12,5 @@ users
 data_bags
 chef-client-running.pid
 chef-repo
+
+Gemfile.lock

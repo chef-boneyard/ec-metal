@@ -70,10 +70,6 @@ action :install do
           topo.is_frontend?(vmname)
         recipe 'private-chef::pushy' if node['harness']['pushy_package']
         recipe 'private-chef::tools'
-        # this doesn't work 
-        # ohai_hints { 'ec2' } 
-        # but this does
-        file '/etc/chef/ohai/hints/ec2.json', { :content => '' } # work around until chef-metal-fog PR is merged
 
         converge true
       end
