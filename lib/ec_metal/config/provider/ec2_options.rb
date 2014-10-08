@@ -1,7 +1,7 @@
 require 'mixlib/config'
 
 module EcMetal
-  class ProviderOptionsEc2Config
+  class Ec2ProviderOptions
     extend Mixlib::Config
 
     config_strict_mode true

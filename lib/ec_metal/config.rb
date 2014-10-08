@@ -1,5 +1,5 @@
 require 'mixlib/config'
-require 'ec_metal/config/server_settings'
+require 'ec_metal/config/server/settings'
 
 module EcMetal
   class Config
@@ -17,16 +17,26 @@ module EcMetal
     def self.get_provider_options(type)
       case type
       when 'ec2'
-        require 'ec_metal/config/provider_options_ec2'
-        EcMetal::ProviderOptionsEc2Config
+        require 'ec_metal/config/provider/ec2_options'
+        EcMetal::Ec2ProviderOptions
       else
         raise "Can not assign options to #{type} provider"
       end
     end
 
+    def self.get_topology_configuration(type)
+      case type
+      when 'standalone'
+        require 'ec_metal/config/server/topology/standalone'
+        EcMetal::StandaloneTopologyConfiguration
+      else
+        raise "Can not assign configuration to #{type} topology"
+      end
+    end
+
     config_context :provider do
       default :type, 'ec2'
-      default(:options) { EcMetal::Config.get_provider_options(type) }
+      default(:options) { EcMetal::Config.get_provider_options(type) } # send "get_provider_options_for_#{type}"
     end
 
     config_context :server do
@@ -37,12 +47,12 @@ module EcMetal
       default :base_hostname, 'opscode.piab'
 
       config_context :settings do
-        default(:api_fqdn) { EcMetal::ServerSettingsConfig.api_fqdn }
+        default(:api_fqdn) { EcMetal::ServerSettings.api_fqdn }
       end
 
       config_context :topology do
-        # meat and potatoes
         default :type, 'standalone'
+        default(:config) { EcMetal::Config.get_topology_configuration(type) } # send "get_topology_configuration_for_#{type}"
       end
     end
 

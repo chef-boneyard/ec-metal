@@ -6,8 +6,8 @@ describe EcMetal::Config do
     EcMetal::Config.reset
   end
 
-  context "provider type and options" do
-    it "default to ec2 with ec2 options" do
+  context "provider" do
+    it "defaults and default options" do
       expect(EcMetal::Config.provider.type).to eq('ec2')
       expect(EcMetal::Config.provider.options.region).to eq('us-west-2')
       expect(EcMetal::Config.provider.options.vpc_subnet).to eq('subnet-5ac1133f')
@@ -26,19 +26,8 @@ describe EcMetal::Config do
     end
   end
 
-  context "#build_hostname" do
-    it "returns generated hostname with default base hostname" do
-      expect(EcMetal::Config.build_hostname('built')).to eq('built.opscode.piab')
-    end
-
-    it "returns generated hostname with overridden base hostname" do
-      EcMetal::Config.server.base_hostname = 'getchef.com'
-      expect(EcMetal::Config.build_hostname('built')).to eq('built.getchef.com')
-    end
-  end
-
   context "server" do
-    it "defaults with options" do
+    it "defaults and default options" do
       expect(EcMetal::Config.server.version).to eq('latest')
       expect(EcMetal::Config.server.apply_ec_bugfixes).to be false
       expect(EcMetal::Config.server.run_pedant).to be true
@@ -54,6 +43,25 @@ describe EcMetal::Config do
     context "settings" do
       it "api_fqdn default" do
         expect(EcMetal::Config.server.settings.api_fqdn).to eq('api.opscode.piab')
+      end
+    end
+
+    context "#build_hostname" do
+      it "returns generated hostname with default base hostname" do
+        expect(EcMetal::Config.build_hostname('built')).to eq('built.opscode.piab')
+      end
+
+      it "returns generated hostname with overridden base hostname" do
+        EcMetal::Config.server.base_hostname = 'getchef.com'
+        expect(EcMetal::Config.build_hostname('built')).to eq('built.getchef.com')
+      end
+    end
+
+    context "topology" do
+      it "default type and config" do
+        expect(EcMetal::Config.server.topology.type).to eq('standalone')
+        expect(EcMetal::Config.server.topology.config.backend_servers).to be 0
+        expect(EcMetal::Config.server.topology.config.frontend_servers).to be 0
       end
     end
   end
