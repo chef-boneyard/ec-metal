@@ -4,9 +4,7 @@ module EcMetal
   class StandaloneTopologyConfiguration
     extend Mixlib::Config
 
-    config_strict_mode true
+    # may not ever need anything here
 
-    default :backend_servers, 0
-    default :frontend_servers, 0
   end
 end

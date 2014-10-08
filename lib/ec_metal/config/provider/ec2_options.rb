@@ -11,5 +11,12 @@ module EcMetal
     default :ami, 'ami-09e27439' # ubuntu, version?
     default :ssh_username, 'ubuntu' # we can actually derive this from the ami
     configurable :keypair_name
+
+    # Not sure yet if these belong here or in server/topology/...
+    # config_context :instance_types do
+    #   default :backends, ''
+    #   default :frontends, ''
+    # end
+
   end
 end

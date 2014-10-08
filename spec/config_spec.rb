@@ -60,8 +60,45 @@ describe EcMetal::Config do
     context "topology" do
       it "default type and config" do
         expect(EcMetal::Config.server.topology.type).to eq('standalone')
-        expect(EcMetal::Config.server.topology.config.backend_servers).to be 0
-        expect(EcMetal::Config.server.topology.config.frontend_servers).to be 0
+      end
+    end
+  end
+
+  context "manage" do
+    it "defaults" do
+      expect(EcMetal::Config.addon.manage.version).to eq('release')
+      expect(EcMetal::Config.addon.manage.fqdn).to eq('manage.opscode.piab')
+      expect(EcMetal::Config.addon.manage.settings).to be_nil
+      expect(EcMetal::Config.addon.manage.package).to be_nil
+    end
+  end
+
+  context "push_jobs" do
+    it "defaults" do
+      expect(EcMetal::Config.addon.push_jobs.version).to eq('release')
+      expect(EcMetal::Config.addon.push_jobs.settings).to be_nil
+      expect(EcMetal::Config.addon.push_jobs.package).to be_nil
+    end
+  end
+
+  context "reporting" do
+    it "defaults" do
+      expect(EcMetal::Config.addon.reporting.version).to eq('release')
+      expect(EcMetal::Config.addon.reporting.settings).to be_nil
+      expect(EcMetal::Config.addon.reporting.package).to be_nil
+    end
+  end
+
+  context "analytics" do
+    it "defaults" do
+      expect(EcMetal::Config.analytics.version).to eq('release')
+      expect(EcMetal::Config.analytics.package).to be_nil
+      expect(EcMetal::Config.analytics.fqdn).to eq('analytics.opscode.piab')
+      expect(EcMetal::Config.analytics.settings).to be_nil
+    end
+    context "topology" do
+      it "defaults" do
+        expect(EcMetal::Config.analytics.topology.type).to eq('standalone')
       end
     end
   end

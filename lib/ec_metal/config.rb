@@ -52,33 +52,37 @@ module EcMetal
 
       config_context :topology do
         default :type, 'standalone'
-        default(:config) { EcMetal::Config.get_topology_configuration(type) } # send "get_topology_configuration_for_#{type}"
+        # Topology specfic configurations will be managed by recipes.
+        # We'll see what additional config is required as we build those out.
+        # default(:config) { EcMetal::Config.get_topology_configuration(type) } # send "get_topology_configuration_for_#{type}"
       end
     end
 
-    config_context :addons do
+    config_context :addon do
       config_context :manage do
         default :version, 'release' # based on server version
-        default(:fqdn) { build_hostname 'manage' }
-        default :install?, true
+        default(:fqdn) { EcMetal::Config.build_hostname('manage') }
         configurable :settings
+        configurable :package # url or local path
       end
 
       config_context :push_jobs do
         default :version, 'release' # based on server version
-        default :install?, false
         configurable :settings
+        configurable :package # url or local path
       end
 
       config_context :reporting do
         default :version, 'release' # based on server version
-        default :install?, false
         configurable :settings
+        configurable :package # url or local path
       end
     end
 
     config_context :analytics do
-      default(:fqdn) { build_hostname 'analytics' }
+      default :version, 'release' # based on server version
+      configurable :package # url or local path
+      default(:fqdn) { EcMetal::Config.build_hostname('analytics') }
       configurable :settings
       config_context :topology do
         default :type, 'standalone'
