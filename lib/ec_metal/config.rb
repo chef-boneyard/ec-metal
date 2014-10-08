@@ -39,9 +39,7 @@ module EcMetal
 
     default(:package_cache_dir) { File.join(chef_repo_dir, 'cache') }
 
-    default :keypair_name, 'id_rsa'
-
-    default :keypair_path, File.join(chef_repo_dir, 'keys')
+    configurable :keypair_dir
 
     config_context :provider do
       default :type, 'ec2'
