@@ -1,0 +1,210 @@
+#!/usr/bin/env ruby
+
+module OPCLogParser
+  class LogLine
+
+    def initialize(original_line)
+      @original_line = original_line
+    end
+
+    def to_s
+      @original_line
+    end
+
+    def remote_addr
+      parsed_line[0]
+    end
+
+    def timestamp
+      parsed_line[1]
+    end
+
+    def method
+      parsed_line[2]
+    end
+
+    def url
+      parsed_line[3]
+    end
+
+    def http_response
+      parsed_line[4]
+    end
+
+    def request_time
+      parsed_line[5]
+    end
+
+    def endpoint
+      /^\/organizations\/[a-z1-9_\-]*\/(?<endpoint>[a-z]+)\/.*/ =~ url
+      endpoint
+    end
+
+    def organization
+      /\/organizations\/(?<org>[a-z_\-1-9]+)\/.*/ =~ url
+      org
+    end
+
+    def parsed_line
+      @parsed_line ||= begin
+                         /(?<remote_addr>[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+) - - \[(?<ts>.*)\]  \"(?<method>[A-Z]+) (?<url>.*) HTTP\/1.[01]" (?<http_response>[0-9]{3}) \"(?<request_time>[0-9.]+)\".*/ =~ @original_line
+                         [remote_addr, ts, method, url, http_response, request_time.to_f]
+                       end
+    end
+  end
+
+
+  class LogStats
+    attr_reader :remote_addrs, :count, :first_time, :last_time, :http_methods, :urls, :organizations, :endpoints, :http_responses,
+    :request_times, :mean_rt, :perc25_rt, :median_rt, :perc75_rt, :perc90_rt, :perc99_rt, :max_rt, :min_rt
+
+    def initialize()
+      @count = 0
+      @mean_rt = 0
+      @perc25_rt = 0
+      @median_rt = 0
+      @perc75_rt = 0
+      @perc90_rt = 0
+      @perc99_rt = 0
+      @max_rt = 0
+      @min_rt = 0
+      @urls = Hash.new(0)
+      @http_methods = Hash.new(0)
+      @http_responses = Hash.new(0)
+      @request_times = Array.new
+      @organizations = Hash.new(0)
+      @endpoints = Hash.new(0)
+      @user_ids = Hash.new(0)
+      @remote_addrs = Hash.new(0)
+    end
+
+    def update(log_line)
+      raise ArgumentErrror unless log_line.is_a? OPCLogParser::LogLine
+      update_counts(log_line)
+      update_timestamps(log_line)
+      update_request_times(log_line)
+    end
+
+    def update_counts(log_line)
+      @remote_addrs[log_line.remote_addr] += 1
+      @http_methods[log_line.method] += 1
+      @organizations[log_line.organization] +=1
+      @urls[log_line.url] += 1
+      @endpoints[log_line.endpoint] += 1
+      @http_responses[log_line.http_response] += 1
+      @count += 1
+    end
+
+    def update_request_times(log_line)
+      @request_times << log_line.request_time
+    end
+
+    def update_request_stats
+      sorted_data = @request_times.sort
+      @mean_rt = mean(sorted_data)
+      @median_rt = median(sorted_data)
+      @max_rt = sorted_data.last
+      @min_rt = sorted_data.first
+      @perc25_rt = percentile(sorted_data, 0.25)
+      @perc75_rt = percentile(sorted_data, 0.75)
+      @perc90_rt = percentile(sorted_data, 0.90)
+      @perc99_rt = percentile(sorted_data, 0.99)
+    end
+
+    def mean(data)
+      sum(data)/data.length
+    end
+
+    def sum(data)
+      data.inject{|sum,x| sum += x}
+    end
+
+    def median(sorted_data)
+      percentile(sorted_data, 0.5)
+    end
+
+    def percentile(sorted_data, perc)
+      entry = ((sorted_data.length*perc)+0.5).round
+      sorted_data[entry]
+    end
+
+    def update_timestamps(log_line)
+      @first_time ||= log_line.timestamp
+      @last_time = log_line.timestamp
+    end
+  end
+end
+
+def render_stats(stats)
+  puts "Start time:\t#{stats.first_time}"
+  puts "End time:\t#{stats.last_time}"
+  puts "Total Records:\t#{stats.count}\n"
+
+  puts "Request Times"
+  puts "-------------"
+  puts "25th Percentile: #{stats.perc25_rt}"
+  puts "50th Percentile: #{stats.median_rt}"
+  puts "75th Percentile: #{stats.perc75_rt}"
+  puts "90th Percentile: #{stats.perc90_rt}"
+  puts "99th Percentile: #{stats.perc99_rt}"
+  puts "\n"
+  puts "Minimum: #{stats.min_rt}"
+  puts "Maximum: #{stats.max_rt}"
+  puts "Mean Request Time:#{stats.mean_rt}"
+  puts "\n"
+
+  puts "Organizations (top 10)"
+  puts "-----------"
+  stats.organizations.sort_by{|k,v| v}.reverse.take(10).each {|k, v|
+    next if k.nil?
+    puts "\t#{k}\t#{v}\t(#{'%.2f' % ((v/stats.count.to_f)*100)}%)"
+  }
+  puts "\n"
+
+  puts "Endpoints"
+  puts "-----------"
+  stats.endpoints.sort_by{|k,v| v}.reverse.each {|k, v|
+    next if k.nil?
+    puts "\t#{k}\t#{v}\t(#{'%.2f' % ((v/stats.count.to_f)*100)}%)"
+  }
+  puts "\n"
+
+  puts "HTTP Methods"
+  puts "-----------"
+  stats.http_methods.sort_by{|k,v| v}.reverse.each {|k, v|
+    next if k.nil?
+    puts "\t#{k}\t#{v}\t(#{'%.2f' % ((v/stats.count.to_f)*100)}%)"
+  }
+  puts "\n"
+
+  puts "HTTP Responses"
+  puts "-----------"
+  stats.http_responses.sort_by{|k,v| v}.reverse.each {|k, v|
+    next if k.nil?
+    puts "\t#{k}\t#{v}\t(#{'%.2f' % ((v/stats.count.to_f)*100)}%)"
+  }
+  puts "\n"
+
+  puts "Remote Addrs (top 10)"
+  puts "------------"
+  stats.remote_addrs.sort_by{|k,v| v}.reverse.take(10).each {|k, v|
+    next if k.nil?
+    puts "\t#{k}\t#{v}\t(#{'%.2f' % ((v/stats.count.to_f)*100)}%)"
+  }
+
+  puts "URLS (top 10)"
+  puts "-------------"
+  stats.urls.sort_by{|k,v| v}.reverse.take(10).each {|k, v|
+    next if k.nil?
+    puts "\t#{k}\t\t#{v}\t(#{'%.2f' % ((v/stats.count.to_f)*100)}%)"
+  }
+end
+
+stats = OPCLogParser::LogStats.new
+ARGF.each do |line|
+  log_line = OPCLogParser::LogLine.new(line)
+  stats.update(log_line)
+end
+
+stats.update_request_stats
+render_stats(stats)

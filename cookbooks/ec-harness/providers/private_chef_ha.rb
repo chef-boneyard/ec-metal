@@ -27,7 +27,7 @@ action :cloud_create do
  # Dumb hack to populate all of our machines first, for dynamic name/IP provisioners
   machine_batch 'cloud_create' do
     action [:converge]
-    topo = TopoHelper.new(ec_config: node['harness']['vm_config'])
+    topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['loadtesters'])
     topo.merged_topology.each do |vmname, config|
 
       next if cloud_machine_created?(vmname)
@@ -45,7 +45,7 @@ action :cloud_create do
 end
 
 action :install do
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: analytics_layers)
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: ec_layers, exclude_layers: analytics_layers))
   topo.merged_topology.each do |vmname, config|
     machine_batch vmname do
       action [:converge]
@@ -70,6 +70,8 @@ action :install do
           topo.is_frontend?(vmname)
         recipe 'private-chef::pushy' if node['harness']['pushy_package']
         recipe 'private-chef::tools'
+        recipe 'private-chef::loadbalancer' if topo.is_frontend?(vmname) &&
+          node['harness']['provider'] == 'ec2'
 
         converge true
       end
@@ -101,7 +103,7 @@ action :install do
 end
 
 action :pedant do
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: analytics_layers)
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: ec_layers, exclude_layers: analytics_layers)
   topo.merged_topology.each do |vmname, config|
     machine_batch vmname do
       action [:converge]
@@ -160,7 +162,7 @@ action :pivotal do
 end
 
 action :stop_all_but_master do
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['analytics'])
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: ec_layers, exclude_layers: ['analytics'])
   topo.merged_topology.each do |vmname, config|
     next if config['bootstrap'] == true # all backends minus bootstrap
 
@@ -283,4 +285,8 @@ def analytics_layers
    'analytics_frontends',
    'analytics_standalones',
    'analytics_workers']
+end
+
+def ec_layers
+  %w(frontends backends standalones)
 end

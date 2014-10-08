@@ -1,4 +1,3 @@
-Berksfile.lock
 .bundle
 bin
 config.json
@@ -14,3 +13,4 @@ chef-client-running.pid
 chef-repo
 
 *.lock
+*.orig
