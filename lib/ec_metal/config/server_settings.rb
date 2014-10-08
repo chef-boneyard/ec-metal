@@ -1,11 +1,9 @@
-require 'ec_metal/config'
+require 'mixlib/config'
 
 module EcMetal
-  module Config
-    class ServerSettings
-      extend Mixlib::Config
+  class ServerSettingsConfig
+    extend Mixlib::Config
 
-      default(:api_fqdn) { EcMetal::Config::Helper.build_hostname 'api' }
-    end
+    default(:api_fqdn) { EcMetal::Config.build_hostname 'api' }
   end
 end
