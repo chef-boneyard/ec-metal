@@ -34,6 +34,14 @@ module EcMetal
       end
     end
 
+    default :harness_dir, Pathname.new(File.dirname(__FILE__)).parent.parent.to_s # seriously, there has got to be a better way to identify the harness dir
+
+    default :chef_repo_dir, File.join(harness_dir, 'chef-repo')
+
+    configurable :config_file # This file will now be overrides... also need to reconsider if this should be json
+
+    default(:package_cache_dir) { File.join(chef_repo_dir, 'cache') }
+
     config_context :provider do
       default :type, 'ec2'
       default(:options) { EcMetal::Config.get_provider_options(type) } # send "get_provider_options_for_#{type}"
@@ -91,79 +99,3 @@ module EcMetal
 
   end
 end
-
-# {
-#   "id": "ec-metal",
-#   "provider": {
-#     "type": "ec2",
-#     "options": {
-#       "region": "us-west-2",
-#       "vpc_subnet": "subnet-5ac1133f",
-#       "ami_id": "ami-09e27439",
-#       "ssh_username": "ubuntu",
-#       "keypair_name": "ec2_keyname"
-#     }
-#   },
-#   "server": {
-#     “version”: “12.0.0-rc.4-1”,
-#     "apply_ec_bugfixes": false,
-#     "run_pedant": true,
-#     "package": "http://s3.amazonaws.com/...x86_64/private-chef_11.1.4-1_amd64.deb",
-#     "settings": {
-#       "api_fqdn": "api.precise.aws"
-#     },
-#     "topology": {
-#       "type": "ha",
-#       "backend_vip": {
-#         "hostname": "backend.opscode.piab",
-#         "ipaddress": "172.33.23.10",
-#         "device": "eth0",
-#         "heartbeat_device": "eth0"
-#       },
-#       "backends": {
-#         "backend1.opscode.piab": {
-#           "instance_type": "c3.xlarge",
-#           "ebs_optimized": true,
-#           "bootstrap": true
-#         },
-#         "backend2.opscode.piab": {
-#           "instance_type": "c3.xlarge",
-#           "ebs_optimized": true
-#         }
-#       },
-#       "frontends": {
-#         "frontend0.opscode.piab": {
-#           "ebs_optimized": false,
-#           "instance_type": "m3.medium"
-#         }
-#       }
-#     }
-#   },
-#   "addons": {
-#     "manage" : {
-#       "package": "http://s3.amazonaws.com/...x86_64/opscode-manage_1.3.1-1_amd64.deb",
-#       "fqdn": "manage65.centos.vagrant",
-#       "settings": {
-#       }
-#     },
-#     "push_jobs": {
-#       "package": "http://s3.amazonaws.com/...x86_64/opscode-push-jobs-server_1.1.2-1_amd64.deb",
-#       "settings": {
-#         "command_port": 10002
-#       }
-#     },
-#     "reporting": {
-#       "package": "http://s3.amazonaws.com/...x86_64/opscode-reporting_1.1.5-1_amd64.deb"
-#     }
-#   },
-#   "analytics": {
-#     "package": "http://s3.amazonaws.com/...x86_64/opscode-analytics_1.0.0-1_amd64.deb",
-#     “fqdn: “”,
-#     “settings”: {
-#       “”
-#     }
-#     “topology”: {
-#       “type”: “standalone”
-#     }
-#   }
-# }

@@ -102,4 +102,13 @@ describe EcMetal::Config do
       end
     end
   end
+
+  context "file locations" do
+    it "defaults" do
+     expect(EcMetal::Config.harness_dir).to be_truthy
+     expect(EcMetal::Config.chef_repo_dir).to end_with 'chef-repo'
+     expect(EcMetal::Config.config_file).to be_nil
+     expect(EcMetal::Config.package_cache_dir).to end_with 'cache'
+    end
+  end
 end
