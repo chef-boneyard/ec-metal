@@ -7,9 +7,6 @@ module EcMetal
 
     config_strict_mode true
 
-    # currently only covers config.json settings
-    # next, need to add harness and env vars
-
     def self.build_hostname(hostname)
       "#{hostname}.#{EcMetal::Config.server.base_hostname}"
     end
@@ -41,6 +38,10 @@ module EcMetal
     configurable :config_file # This file will now be overrides... also need to reconsider if this should be json
 
     default(:package_cache_dir) { File.join(chef_repo_dir, 'cache') }
+
+    default :keypair_name, 'id_rsa'
+
+    default :keypair_path, File.join(chef_repo_dir, 'keys')
 
     config_context :provider do
       default :type, 'ec2'
