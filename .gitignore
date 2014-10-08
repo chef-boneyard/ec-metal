@@ -1,6 +1,6 @@
 Berksfile.lock
 .bundle
-bin
+bin/*
 config.json
 clients
 nodes
@@ -14,3 +14,5 @@ chef-client-running.pid
 chef-repo
 
 *.lock
+
+!bin/ecm
