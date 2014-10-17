@@ -63,10 +63,16 @@ end
 installer_file = node['private-chef']['installer_file']
 installer_name = ::File.basename(installer_file.split('?').first)
 
+def open_source?(installer_name)
+  installer_name.start_with?('chef-server_')
+end
+
 if PackageHelper.package_version(installer_name) > '11.0.0'
   cluster_source = 'cluster.sh.erb'
 elsif PackageHelper.package_version(installer_name) > '1.4.0'
   cluster_source = 'cluster.sh.pc14.erb'
+elsif open_source?(installer_name)
+   # open source
 else
   raise 'EC2 operation not supported on Private chef < 1.4.0'
 end
@@ -78,6 +84,7 @@ cookbook_file '/opt/opscode/embedded/cookbooks/private-chef/templates/default/cl
   group 'root'
   mode '0755'
   only_if { topology.is_backend?(node.name) }
+  not_if { open_source?(installer_name) }
   subscribes :create, "package[#{installer_name}]", :immediately
   action :nothing
 end
