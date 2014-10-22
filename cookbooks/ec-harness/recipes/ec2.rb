@@ -7,9 +7,9 @@ harness_dir = node['harness']['harness_dir']
 repo_path = node['harness']['repo_path']
 
 with_chef_local_server :chef_repo_path => repo_path,
-  :cookbook_path => [ File.join(harness_dir, 'cookbooks'),
+  :cookbook_path => [ ENV['ECM_LOCAL_COOKBOOKS'],
                       File.join(repo_path, 'cookbooks'),
-    File.join(repo_path, 'vendor', 'cookbooks') ],
+    File.join(repo_path, 'vendor', 'cookbooks') ].uniq,
     :port => 9010.upto(9999)
 
 with_driver "fog:AWS:default:#{node['harness']['ec2']['region']}"
