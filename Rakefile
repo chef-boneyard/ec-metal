@@ -14,34 +14,38 @@ def get_config
   EcMetal::Api.config
 end
 
+# run chef-client commands not part of the api
+def shellout_chef_client(run_list)
+  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o #{run_list} --force_formatter")
+end
+
 desc 'Install required Gems into the vendor/bundle directory'
 task :bundle do
   EcMetal::Api.bundle
 end
 
-desc 'Bring the VMs online and install/configure Enterprise Chef. Optionally: "rake up debug" and/or "rake up force_formatter" for verbose output'
+desc 'Bring the VMs online and install/configure Enterprise Chef. Optionally: "rake up debug" for verbose output'
 task :up => :setup do
   log_level = ARGV.select {|i| i =~ /debug|info|warn|error|fatal/}.last
-  force_formatter = ARGV.select {|i| i =~ /force(-|_)formatter/}.last
-  EcMetal::Api.up(log_level, force_formatter)
+  EcMetal::Api.up(log_level)
 end
 task :start => :up
 
 desc 'Bring the VMs online and then UPGRADE TORTURE'
 task :upgrade_torture => :setup do
   EcMetal::Api.create_users_directory
-  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::upgrade_torture")
+  shellout_chef_client('ec-harness::upgrade_torture')
 end
 
 desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
 task :upgrade => :setup do
   EcMetal::Api.create_users_directory
-  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::upgrade")
+  shellout_chef_client('ec-harness::upgrade')
 end
 
 desc "Copies pivotal.pem from chef server and generates knife.rb in the repo dir"
 task :pivotal => :setup do
-  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
+  shellout_chef_client('ec-harness::pivotal')
 end
 
 desc 'Destroy all VMs'
