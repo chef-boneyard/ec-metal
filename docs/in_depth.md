@@ -1,6 +1,89 @@
 # (More) In Depth Guide
 
 ## Using ec-metal to install Chef Server
+
+Using `ec-metal` will require 3 things at minimum, having:
+
+- provider specific prerequisites met
+- appropriate environmental variables set and
+- a valid configuration file
+- a local or remote source for packages
+
+#### Provider Specific Prereqs
+- Vagrant
+	- ensure that recent versions of `Vagrant` & `Virtualbox` are installed
+	- desired `CPU` and `memory` settings
+	- (optional) have the desired `.box file` added using `vagrant box add`
+- EC2
+	- You will need to know:
+		- a `subnet` within the desired availability zone
+		- an `AMI` of the desired platform/version in the same AZ
+		- desired `instance types` (probably `m3.medium` for frontends and `c3.xlarge` for backends)
+		- (optional) use a VPC/subnet with access to the `Chef VPN` -- and therefore access to Artifactory
+
+#### Environmental Variables
+- `ECM_CONFIG`: the path to a file .json containing your dc-metal configuration options
+	- "export ECM_CONFIG=/tmp/tier-private_chef-ubuntu-12.04-vagrant.json"
+- `ECM_CACHE_PATH`: a path to a directory where ec-metal will look for packages specific in your config file
+	- "export ECM_CACHE_PATH=~/Downloads"
+- `ECM_CHEF_REPO`: a path to a directory where ec-metal will build the `chef-repo` to use with `chef-metal`
+	- "export ECM_CHEF_REPO=/tmp/ecm-chef-repo"
+- (ec2 only) `ECM_KEYPAIR_PATH`: a path to a directory where generated .pem keys will be saved/retrieved
+	- "export ECM_KEYPAIR_PATH=~/.ec-metal"
+- (ec2 only) `ECM_KEYPAIR_NAME`: the name to use when uploading said .pem keys to EC2
+	- "export ECM_KEYPAIR_NAME=aaa-isa-us-west-2-yay"
+	
+#### Configuration 
+The config for `ec-metal` is in the .json format and must resemble the examples at the bottom of this document. Of note are the provider specific options:
+
+**EC2** -- This is where you will need the `subnet`, `AMI`, and `instance type` information:
+
+```
+"provider": "ec2",
+ "ec2_options": {
+   "region": "us-west-2",
+   "vpc_subnet": "subnet-XXXXXXXX",
+   "ami_id": "ami-XXXXXXXX",
+   "ssh_username": "ubuntu",
+   "use_private_ip_for_ssh": false
+```
+
+**Vagrant** -- You will need to know your desired `CPU`, `memory`, and a URL for a `.box file` (probably from [Bento](http://github.com/opscode/bento))
+
+```
+  "vagrant_options": {
+    "box": "opscode-ubuntu-12.04",
+    "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-12.04_chef-provisionerless.box",
+    "disk2_size": "2"
+```
+
+There are also a few top-level options, such as `"run_pedant": true` that you can use. See [examples](https://github.com/opscode/ec-metal/tree/master/examples).
+
+ **Required** `""default_package": "/path/to/chef_server_package_file.deb"`
+
+#### Packages
+**Chef Server 12** (from [packagecloud](http://packagecloud.io/chef/stable/)):
+
+```
+https://packagecloud.io/chef/stable/download?distro=lucid&filename=chef-server-core_12.0.0-rc.5-1_amd64.deb
+```
+
+**Private Chef** (from S3):
+
+```
+https://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/private-chef-11.2.4-1.el6.x86_64.rpm
+https://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/opscode-manage-1.6.2-1.el6.x86_64.rpm
+https://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/opscode-push-jobs-server-1.1.3-1.el6.x86_64.rpm
+https://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/opscode-reporting-1.1.6-1.x86_64.rpm
+
+```
+
+**Open Source Chef Server** (from Omnitruck):
+
+```
+https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef-server_11.1.6-1_amd64.deb
+```
+
 ### ec-metal setup
 1. git clone https://github.com/opscode/ec-metal.git
 1. Decide whether you are going to use the ec2 or vagrant provider
@@ -275,6 +358,60 @@ us-west-2
      }
    }
  }
+}
+```
+
+#### vagrant-tiered-ec
+```json
+{
+  "provider":"vagrant",
+  "vagrant_options": {
+    "box": "opscode-centos-6.5",
+    "disk2_size": "2",
+    "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.5_chef-provisionerless.box"
+  },
+  "default_package": "ec/private-chef/el/6/x86_64/private-chef-11.2.2-1.el6.x86_64.rpm",
+  "manage_package": "ec/opscode-manage/el/6/x86_64/opscode-manage-1.5.4-1.el6.x86_64.rpm",
+  "packages": {
+  },
+  "layout": {
+    "topology": "tier",
+    "api_fqdn": "api65.centos.vagrant",
+    "default_orgname": null,
+    "manage_fqdn": "manage65.centos.vagrant",
+    "backends": {
+      "backend0": {
+        "hostname": "backend065.centos.vagrant",
+        "memory": "2560",
+        "cpus": "2",
+        "ipaddress": "33.30.33.21",
+        "cluster_ipaddress": "33.30.34.5",
+        "bootstrap": true
+      }
+    },
+    "frontends": {
+      "frontend0": {
+        "hostname": "frontend065.centos.vagrant",
+        "memory": "1024",
+        "cpus": "1",
+        "ipaddress": "33.30.33.22"
+      }
+    },
+    "backend_vip": {
+      "hostname": "backend065.centos.vagrant",
+      "ipaddress": "33.30.33.21",
+      "device": "eth0",
+      "heartbeat_device": "eth1"
+    },
+    "virtual_hosts": {
+      "private-chef65.centos.vagrant": "33.30.33.22",
+      "manage65.centos.vagrant": "33.30.33.22",
+      "api65.centos.vagrant": "33.30.33.22",
+      "backend65.centos.vagrant": "33.30.33.21",
+      "backend065.centos.vagrant": "33.30.33.21",
+      "frontend065.centos.vagrant": "33.30.33.22"
+    }
+  }
 }
 ```
 
