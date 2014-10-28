@@ -62,6 +62,8 @@ There are also a few top-level options, such as `"run_pedant": true` that you ca
  **Required** `""default_package": "/path/to/chef_server_package_file.deb"`
 
 #### Packages
+There's several places you can get package for the various interations of the chef server. Below are some example permalinks **which can all be tweaked to get your desired platofrm/version**.
+
 **Chef Server 12** (from [packagecloud](http://packagecloud.io/chef/stable/)):
 
 ```
