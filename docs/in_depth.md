@@ -2,7 +2,7 @@
 
 ## Using ec-metal to install Chef Server
 
-Using `ec-metal` will require 3 things at minimum, having:
+Using `ec-metal` will require 4 things at minimum, having:
 
 - provider specific prerequisites met
 - appropriate environmental variables set and
