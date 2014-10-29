@@ -101,23 +101,15 @@ action :install do
 end
 
 action :pedant do
+
   topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: analytics_layers)
   topo.merged_topology.each do |vmname, config|
-    machine_batch vmname do
-      action [:converge]
 
-      machine vmname do
-        add_machine_options node['harness']['provisioner_options'][vmname]
-        attribute 'private-chef', privatechef_attributes
-        attribute 'root_ssh', node['harness']['root_ssh'].to_hash
-        attribute 'osc-install', node['harness']['osc_install']
-        attribute 'run-pedant', node['harness']['run_pedant']
-
-        recipe 'private-chef::pedant'
-
-        converge true
-      end
+    machine_execute "run_pedant_on#{vmname}" do
+      command '/opt/opscode/bin/private-chef-ctl test'
+      machine vmname
     end
+
   end
 end
 
