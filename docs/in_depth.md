@@ -5,12 +5,15 @@
 1. Decide whether you are going to use the ec2 or vagrant provider
 	- ec2 is recommended
 1. Create a config.json
-	- Starter configuration examples
 	- Review sections below to customize your config to support the Chef Server variant being installed
 1. Check out the ec-metal docs for more info
 	- [https://github.com/opscode/ec-metal#toc](https://github.com/opscode/ec-metal#toc)
 
 ## Using ec-metal to install Chef Server
+
+`ec-metal` is operated through the use of `rake` tasks and acts upon a `json` configuration file.
+
+Setting up and running can take upwards of **50 MINUTES**, likely more. **This process is not quick.** Expect for it to take you more than your first attempt to get `ec-metal` running.
 
 Using `ec-metal` will require 4 things at minimum, having:
 
@@ -32,6 +35,8 @@ Using `ec-metal` will require 4 things at minimum, having:
 		- (optional) use a VPC/subnet with access to the `Chef VPN` -- and therefore access to Artifactory
 
 #### Environmental Variables
+**NOTE**: When specifying file paths, you'll have less headache by providing absolute paths.
+
 - `ECM_CONFIG`: the path to a file .json containing your dc-metal configuration options
 	- "export ECM_CONFIG=/tmp/tier-private_chef-ubuntu-12.04-vagrant.json"
 - `ECM_CACHE_PATH`: a path to a directory where ec-metal will look for packages specific in your config file
@@ -98,6 +103,13 @@ https://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/opscode-reporting-1.1.
 
 ```
 https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef-server_11.1.6-1_amd64.deb
+```
+
+##Make it go!
+After you have all the pieces in place:
+
+```
+rake up
 ```
 
 ##Troubleshooting
