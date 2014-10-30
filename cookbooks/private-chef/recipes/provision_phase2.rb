@@ -31,19 +31,19 @@ ruby_block 'p-c-c reconfigure' do
   block do
     begin
       tries ||= 2
-      if node['osc-install'] 
-        cmd = Mixlib::ShellOut.new('/opt/chef-server/bin/chef-server-ctl reconfigure')
+      if node['osc-install']
+        cmd = Mixlib::ShellOut.new('/opt/chef-server/bin/chef-server-ctl reconfigure', live_stream: STDOUT)
       else
-        cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl reconfigure')
+        cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl reconfigure', live_stream: STDOUT)
       end
       cmd.run_command
       if cmd.error?
         cmd.error!
       else
         ::File.open("/var/log/p-c-c-reconfigure-#{Time.now.strftime("%Y%m%d_%H%M%S")}.log", 'w') { |lf| lf.write(cmd.stdout) }
-        puts '--- BEGIN private-chef-ctl reconfigure output ---'
-        puts cmd.stdout
-        puts '--- END private-chef-ctl reconfigure output ---'
+        # puts '--- BEGIN private-chef-ctl reconfigure output ---'
+        # puts cmd.stdout
+        # puts '--- END private-chef-ctl reconfigure output ---'
       end
     rescue Exception => e
       ::File.open("/var/log/p-c-c-reconfigure-#{Time.now.strftime("%Y%m%d_%H%M%S")}.log", 'w') { |lf| lf.write(cmd.stdout) }
@@ -99,7 +99,7 @@ ruby_block 'p-c-c upgrade' do
   block do
     begin
       tries ||= 2
-      cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl upgrade')
+      cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl upgrade', live_stream: STDOUT)
       cmd.run_command
       if cmd.error?
         cmd.error!
@@ -128,7 +128,7 @@ ruby_block 'p-c-c osc upgrade' do
   block do
     begin
       tries ||= 2
-      cmd = Mixlib::ShellOut.new('yes | /opt/opscode/bin/private-chef-ctl upgrade')
+      cmd = Mixlib::ShellOut.new('yes | /opt/opscode/bin/private-chef-ctl upgrade', live_stream: STDOUT)
       cmd.run_command
       if cmd.error?
         cmd.error!
