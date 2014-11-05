@@ -1,6 +1,19 @@
 # (More) In Depth Guide
+## Setting up ec-metal
+
+1. `git clone https://github.com/opscode/ec-metal.git`
+1. Decide whether you are going to use the ec2 or vagrant provider
+	- ec2 is recommended
+1. Create a config.json
+	- Review sections below to customize your config to support the Chef Server variant being installed
+1. Check out the ec-metal docs for more info
+	- [https://github.com/opscode/ec-metal#toc](https://github.com/opscode/ec-metal#toc)
 
 ## Using ec-metal to install Chef Server
+
+`ec-metal` is operated through the use of `rake` tasks and acts upon a `json` configuration file.
+
+Setting up and running can take upwards of **50 MINUTES**, likely more. **This process is not quick.** Expect for it to take you more than your first attempt to get `ec-metal` running.
 
 Using `ec-metal` will require 4 things at minimum, having:
 
@@ -22,6 +35,8 @@ Using `ec-metal` will require 4 things at minimum, having:
 		- (optional) use a VPC/subnet with access to the `Chef VPN` -- and therefore access to Artifactory
 
 #### Environmental Variables
+**NOTE**: When specifying file paths, you'll have less headache by providing absolute paths.
+
 - `ECM_CONFIG`: the path to a file .json containing your dc-metal configuration options
 	- "export ECM_CONFIG=/tmp/tier-private_chef-ubuntu-12.04-vagrant.json"
 - `ECM_CACHE_PATH`: a path to a directory where ec-metal will look for packages specific in your config file
@@ -34,7 +49,15 @@ Using `ec-metal` will require 4 things at minimum, having:
 	- "export ECM_KEYPAIR_NAME=aaa-isa-us-west-2-yay"
 	
 #### Configuration 
-The config for `ec-metal` is in the .json format and must resemble the examples at the bottom of this document. Of note are the provider specific options:
+The config for `ec-metal` is in the .json format and must resemble the examples at the bottom of this document.
+There are also a few top-level options, such as `"run_pedant": true` that you can use. See [examples](https://github.com/opscode/ec-metal/tree/master/examples).
+
+**Required** `"default_package": "/path/to/chef_server_package_file.deb"`
+
+**addons** 
+Other packages (for addons and else)can be specified within the configuration file. See [https://github.com/opscode/ec-metal#setting-packages-for-installation-and-upgrades](https://github.com/opscode/ec-metal#setting-packages-for-installation-and-upgrades)
+
+Of note are the provider specific options:
 
 **EC2** -- This is where you will need the `subnet`, `AMI`, and `instance type` information:
 
@@ -56,10 +79,6 @@ The config for `ec-metal` is in the .json format and must resemble the examples 
     "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-12.04_chef-provisionerless.box",
     "disk2_size": "2"
 ```
-
-There are also a few top-level options, such as `"run_pedant": true` that you can use. See [examples](https://github.com/opscode/ec-metal/tree/master/examples).
-
- **Required** `""default_package": "/path/to/chef_server_package_file.deb"`
 
 #### Packages
 There's several places you can get package for the various interations of the chef server. Below are some example permalinks **which can all be tweaked to get your desired platofrm/version**.
@@ -86,42 +105,17 @@ https://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/opscode-reporting-1.1.
 https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef-server_11.1.6-1_amd64.deb
 ```
 
-### ec-metal setup
-1. git clone https://github.com/opscode/ec-metal.git
-1. Decide whether you are going to use the ec2 or vagrant provider
- 1. ec2 is recommended
-1. Create a config.json
- 1. Starter configuration examples
- 1. Review sections below to customize your config to support the Chef Server variant being installed
-1. Check out the ec-metal docs for more info
- 1. https://github.com/opscode/ec-metal#toc
+##Make it go!
+After you have all the pieces in place:
 
-### EC
-*private-chef* packages
-#### addons
-* When selecting addons to install refer to https://github.com/opscode/ec-metal#setting-packages-for-installation-and-upgrades
-.  The value will be the URL or file path based on provider.
+```
+rake up
+```
 
-Packages examples
-EC example
-analytics example
-
-### OSC
-*chef-server* packages for open source
-* *set osc_install to true*
-
-OSC example
-
-### CS12
-*chef-server-core* packages
-* ec-metal does not officially support CS12.  However, ec-metal will get you most of the way there to the point where the CS12 installation documentation can be followed.
-* *set default_package to chef-server-core*
-
-CS12 examples
-analytics example
+##Troubleshooting
 
 #### Converge will fail and you should get error
-```bash
+```
  * package[chef-server-core] action install[2014-10-20T15:02:56+00:00] INFO: Processing package[chef-server-core] action install (private-chef::provision line 27)
 
                         * Package chef-server-core not found: /tmp/ecm_cache/chef-server-core
@@ -135,7 +129,6 @@ analytics example
 ```
 
 #### Installing Chef 12
-* Install - https://packagecloud.io/chef/stable/
 * Once installed complete the instructions here to complete the process for Cher Server and the addons.
 http://docs.getchef.com/server/install_server.html
 
@@ -143,6 +136,7 @@ http://docs.getchef.com/server/install_server.html
 The way ec-metal previously generated ec2 key pairs commonly caused naming conflicts. To get around that ec-metal would attempt to generate key for each user and git clone. This became difficult to manage and started to create key clutter in ec2.  
 
 Follow these steps to create a reusable, throwaway key for testing with ec-metal:
+
 ```
 # create a sub-dir somewhere that will only contain new ssh keys. 
 # Recommended not to use your personal ssh keys!
@@ -152,6 +146,7 @@ cd ~/.ec-metal
 
 ssh-keygen -f id_rsa
 ```
+
 the generated keys may need to be copied to ec-metal/chef-repo/keys if the files don’t properly symlink during execution
 
 ### Running ec-metal
