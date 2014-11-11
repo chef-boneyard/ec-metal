@@ -1,0 +1,66 @@
+{
+  "provider": "ec2",
+  "ec2_options": {
+    "region": "us-west-2",
+    "vpc_subnet": "subnet-f28f7797",
+    "ami_id": "ami-bdf48f8d",
+    "ssh_username": "ubuntu",
+    "backend_storage_type": "ebs",
+    "ebs_disk_size": "100",
+    "use_private_ip_for_ssh": false
+  },
+  "default_package": "https://s3-us-west-2.amazonaws.com/opscode-pkgcache-us-west-2/EC/private-chef_11.2.5-1_amd64.deb",
+  "manage_package": "https://s3-us-west-2.amazonaws.com/opscode-pkgcache-us-west-2/EC/opscode-manage_1.6.2-3-1_amd64.deb",
+  "reporting_package": "https://s3.amazonaws.com/opscode-private-chef/ubuntu/12.04/x86_64/opscode-reporting_1.1.7-1_amd64.deb",
+  "apply_ec_bugfixes": true,
+  "lemme_doit": false,
+  "loadtesters": {
+    "num_loadtesters": 50,
+    "num_groups": 5,
+    "num_containers": 800
+  },
+  "packages": {
+  },
+  "layout": {
+    "topology": "standalone",
+    "api_fqdn": "api.precise.aws",
+    "manage_fqdn": "manage.precise.aws",
+    "analytics_fqdn": "analytics.precise.aws",
+    "configuration": {
+      "postgresql": {
+	      "max_connections": 1024
+      },
+      "opscode_erchef": {
+	      "depsolver_worker_count": 16,
+	      "depsolver_timeout": 120000,
+	      "db_pool_size": 100
+      },
+      "oc_bifrost": {
+	      "db_pool_size": 100
+      },
+      "oc_chef_authz": {
+        "http_init_count": 100,
+        "http_max_count": 100
+      },
+      "opscode_certificate": {
+	      "num_workers": 8,
+	      "num_certificates_per_worker": 1000
+      }
+    },
+   "standalones": {
+      "ip-standalone1": {
+        "hostname": "ip-standalone1.precise.aws",
+        "ebs_optimized": true,
+        "instance_type": "m3.2xlarge"
+      }
+    },
+   "loadtesters": {
+      "loadtester_spec": {
+        "hostname": "loadtester1.precise.aws",
+        "ebs_optimized": true,
+        "instance_type": "m3.2xlarge"
+      }
+    }
+  }
+}
+
