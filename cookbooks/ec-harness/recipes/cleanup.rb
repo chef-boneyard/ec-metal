@@ -27,7 +27,7 @@ if node['harness']['provider'] == 'ec2' && node['harness']['ec2']['backend_stora
           fog_helper.get_aws.delete_volume(ebs_vol_id)
         rescue Fog::Compute::AWS::Error => e
           num_attempts += 1
-          raise e if num_attempts > 5
+          raise e if num_attempts > 10
 
           # typically due to volume still attached, machine shutting down
           Chef::Log.info("AWS error, sleeping and then retrying: #{e}")
