@@ -52,11 +52,32 @@ if installer_name =~ /^private-chef/ # skip both osc and cs12
   end
 
   unless File.exists?("/srv/piab/dev_users_created")
+    topology = TopoHelper.new(ec_config: node['private-chef'])
 
-    ruby_block "Waiting for first-time OPC initializtion" do
+    ruby_block "Waiting for first-time OPC initialization" do
       block do
-        sleep 80
+        attempts = 600
+        STDOUT.sync = true
+
+        keepalived_dir = '/var/opt/opscode/keepalived'
+        requested_cluster_status_file = ::File.join(keepalived_dir, 'requested_cluster_status')
+        cluster_status_file = ::File.join(keepalived_dir, 'current_cluster_status')
+
+        (0..attempts).each do |attempt|
+          break if File.exists?(requested_cluster_status_file) &&
+            File.open(requested_cluster_status_file).read.chomp == 'master' &&
+            File.exists?(cluster_status_file) &&
+            File.open(cluster_status_file).read.chomp == 'master'
+
+          sleep 1
+          print '.'
+          if attempt == attempts
+            raise "I'm sick of waiting for server startup after #{attempt} attempts"
+          end
+        end
+        sleep 10
       end
+      only_if { topology.is_ha? }
     end
 
     dev_users.each_pair do |name, options|
@@ -64,6 +85,18 @@ if installer_name =~ /^private-chef/ # skip both osc and cs12
       # create the students .chef/ dir
       directory ::File.dirname(options['private_key']) do
         recursive true
+        action :create
+      end
+
+      # create a knife.rb file for the user
+      template "#{options['knife_config']}" do
+        source "knife.rb.erb"
+        variables(
+          :username => options['username'],
+          :orgname => options['orgname'],
+          :server_fqdn => "api.#{topology.mydomainname}"
+        )
+        mode "0777"
         action :create
       end
 
@@ -78,19 +111,6 @@ if installer_name =~ /^private-chef/ # skip both osc and cs12
   EOH
         cwd opscode_account_path
       end
-
-      # create a knife.rb file for the user
-      template "#{options['knife_config']}" do
-        source "knife.rb.erb"
-        variables(
-          :username => options['username'],
-          :orgname => options['orgname'],
-          :server_fqdn => 'api.opscode.piab'
-        )
-        mode "0777"
-        action :create
-      end
-
     end
 
     # create the orgs and associate the users
