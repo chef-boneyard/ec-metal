@@ -13,7 +13,7 @@
   "default_package": "http://opscode-private-chef.s3.amazonaws.com/ubuntu/12.04/x86_64/private-chef_11.2.5-1_amd64.deb",
   "manage_package": "https://s3.amazonaws.com/opscode-private-chef/ubuntu/12.04/x86_64/opscode-manage_1.6.2-1_amd64.deb",
   "reporting_package": "https://s3.amazonaws.com/opscode-private-chef/ubuntu/12.04/x86_64/opscode-reporting_1.1.7-1_amd64.deb",
-  "apply_ec_bugfixes": true,
+  "apply_ec_bugfixes": false,
   "lemme_doit": false,
   "loadtesters": {
     "num_loadtesters": 50,
