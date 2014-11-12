@@ -25,3 +25,4 @@ public_keys    keypair_name => ::File.join(keys_dir, 'id_rsa.pub')
 
 chef_zero		 :port => 9010.upto(9999)
 lockfile                 ::File.join(harness_dir, 'chef-client-running.pid')
+verify_api_cert         false

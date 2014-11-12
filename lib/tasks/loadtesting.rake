@@ -1,0 +1,47 @@
+# encoding: utf-8
+
+desc 'Spin up load-testing machines'
+task :loadtesters do
+  # run twice because AWS
+  system("#{harness_dir}/bin/chef-client -z -o ec-harness::loadtesters")
+end
+task :setup_loadtest => :loadtesters
+
+desc 'Run the load test'
+task :run_loadtest do
+  config = get_config
+  num_loadtesters = config['loadtesters']['num_loadtesters']
+  num_groups = config['loadtesters']['num_groups']
+  num_containers = config['loadtesters']['num_containers']
+  subwave_size = 8
+  Dir.chdir(File.join(harness_dir, 'users', 'pinkiepie')) {
+    1.upto(num_containers/subwave_size).each do
+    # Each subwave (100 nodes)
+      (1..num_loadtesters).group_by { |i| i%num_groups }.each do |k,v|
+      # each group
+        search_req = ""
+        v.map { |i| search_req += "name:*loadtester-#{i} OR " }
+        search_req.chomp!(' OR ')
+        puts "Starting group at #{Time.now}: #{search_req}"
+        system("#{harness_dir}/bin/knife ssh '#{search_req}' -a cloud.public_ipv4 'for i in {1..#{subwave_size}}; do sudo docker run -d ponyville/ubuntu; done' -x ubuntu -i #{repo_dir}/keys/id_rsa")
+        puts "Finishing group at #{Time.now}: #{search_req}"
+        puts "----------------------------------------------------------------\n\n\n\n"
+      end
+    end
+  }
+end
+
+desc 'Destroy the load-testing machines'
+task :cleanup_loadtest do
+  system("#{harness_dir}/bin/chef-client -z -o ec-harness::loadtesters_destroy")
+end
+task :destroy_loadtest => :cleanup_loadtest
+
+task :pivotal => [:keygen, :cachedir, :config_copy, :bundle, :berks_install] do
+  sh("#{harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
+end
+
+desc 'Spin up load-testing machines'
+task :loadtest => [:berks_install] do
+  system("#{harness_dir}/bin/chef-client -z -o ec-harness::loadtesters")
+end

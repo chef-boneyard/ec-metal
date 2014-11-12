@@ -39,3 +39,6 @@ default['harness']['vm_mountpoint'] = '/tmp/ecm_cache'
 # SSH key distribution for inter-machine trust
 default['harness']['root_ssh']['privkey'] = File.read(File.join(repo_path, 'keys', 'id_rsa'))
 default['harness']['root_ssh']['pubkey'] = File.read(File.join(repo_path, 'keys', 'id_rsa.pub'))
+
+# loadtesters config
+default['harness']['loadtesters'] = config_json['loadtesters']
