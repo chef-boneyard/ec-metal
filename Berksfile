@@ -9,7 +9,7 @@ cookbook 'yum-elrepo'
 cookbook 'yum-epel'
 
 # For loadtester hosts/guests
-cookbook 'docker'
+cookbook 'docker', '~> 0.0'
 cookbook 'chef-client'
 
 cookbook 'ec-tools', :git => 'https://github.com/patrick-wright/ec-tools'
