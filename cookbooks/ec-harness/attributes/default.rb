@@ -7,13 +7,13 @@ default['harness']['vagrant'] = config_json['vagrant_options']
 default['harness']['ec2'] = config_json['ec2_options']
 default['harness']['vm_config'] = config_json['layout']
 default['harness']['default_package'] = ENV['ECM_DEFAULT_PACKAGE'] || config_json['default_package']
-default['harness']['run_pedant'] = config_json['run_pedant'] || false
+default['harness']['run_pedant'] = config_json['run_pedant'] || true
 default['harness']['osc_install'] = config_json['osc_install'] || false
 default['harness']['osc_upgrade'] = config_json['osc_upgrade'] || false
 default['harness']['packages'] = config_json['packages']
 
 # Provide an option to not monkeypatch the bugfixes
-default['harness']['apply_ec_bugfixes'] = config_json['apply_ec_bugfixes']
+default['harness']['apply_ec_bugfixes'] = config_json['apply_ec_bugfixes'] || false
 
 # Provide an option to intentionally bomb out before running the upgrade reconfigure, so it can be done manually
 default['harness']['vm_config']['lemme_doit'] = config_json['lemme_doit'] || false

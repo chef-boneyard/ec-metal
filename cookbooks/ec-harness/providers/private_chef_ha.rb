@@ -107,6 +107,11 @@ action :pedant do
   topo = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: ec_layers)
   topo.merged_topology.each do |vmname, config|
 
+    # Skip on non-bootstrap backend
+    # FIXME: this assumes no failover has occured, better to make it conditional
+    next if topo.is_backend?(vmname) && topo.is_ha? &&
+      config['bootstrap'] != true
+
     machine_execute "run_pedant_on#{vmname}" do
       command '/opt/opscode/bin/private-chef-ctl test'
       machine vmname
