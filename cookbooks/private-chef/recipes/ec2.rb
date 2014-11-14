@@ -36,6 +36,13 @@ when 'debian'
   end
 end
 
+# temporary workaround until Nokogiri is fixed again - IP 11/11/2014
+gem_package 'nokogiri' do
+  gem_binary('/opt/chef/embedded/bin/gem')
+  version '1.6.3.1'
+  options('--no-rdoc --no-ri')
+end
+
 gem_package 'fog' do
   gem_binary('/opt/chef/embedded/bin/gem')
   options('--no-rdoc --no-ri')

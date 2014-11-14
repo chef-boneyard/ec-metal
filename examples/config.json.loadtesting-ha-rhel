@@ -1,0 +1,102 @@
+{
+  "provider": "ec2",
+  "ec2_options": {
+    "region": "us-west-2",
+    "vpc_subnet": "subnet-b2bb82f4",
+    "ami_id": "ami-7df0bd4d",
+    "ssh_username": "ec2-user",
+    "backend_storage_type": "drbd",
+    "ebs_disk_size": "100",
+    "use_private_ip_for_ssh": false,
+    "elb": true
+  },
+  "default_package": "https://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/private-chef-11.2.5-1.el6.x86_64.rpm",
+  "manage_package": "https://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/opscode-manage-1.6.2-1.el6.x86_64.rpm",
+  "reporting_package": "https://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/opscode-reporting-1.1.7-1.x86_64.rpm",
+  "analytics_package": "https://s3.amazonaws.com/opscode-private-chef/el/6/x86_64/opscode-analytics-1.0.4-1.el6.x86_64.rpm",
+  "apply_ec_bugfixes": false,
+  "lemme_doit": false,
+  "loadtesters": {
+    "num_loadtesters": 10,
+    "num_groups": 8,
+    "num_containers": 300
+  },
+  "packages": {
+  },
+  "layout": {
+    "topology": "ha",
+    "api_fqdn": "api.rhel.aws",
+    "manage_fqdn": "manage.rhel.aws",
+    "analytics_fqdn": "analytics.rhel.aws",
+    "configuration": {
+      "postgresql": {
+	      "max_connections": 1500
+      },
+      "oc_id": {
+	      "administrators": ["pinkiepie", "soarin"]
+      },
+      "opscode_erchef": {
+	      "depsolver_worker_count": 4,
+	      "depsolver_timeout": 120000,
+	      "db_pool_size": 40
+      },
+      "oc_bifrost": {
+	      "db_pool_size": 40
+      },
+      "opscode_certificate": {
+	      "num_workers": 4,
+	      "num_certificates_per_worker": 1000
+      },
+      "nginx": {
+        "enable_non_ssl": true
+      }
+    },
+    "backend_vip": {
+      "hostname": "backend.rhel.aws",
+      "ipaddress": "33.33.33.9",
+      "device": "eth0",
+      "heartbeat_device": "eth0"
+    },
+    "analytics_standalones": {
+      "analytics-standalone1": {
+        "hostname": "ip-rh-analytics-standalone1.rhel.aws",
+        "ebs_optimized": true,
+        "instance_type": "m3.xlarge",
+        "bootstrap": true
+      }
+    },
+   "frontends": {
+      "ip-rh-frontend1": {
+        "hostname": "ip-rh-frontend1.rhel.aws",
+        "ebs_optimized": true,
+        "instance_type": "m3.xlarge"
+      },
+      "ip-rh-frontend2": {
+        "hostname": "ip-rh-frontend2.rhel.aws",
+        "ebs_optimized": true,
+        "instance_type": "m3.xlarge"
+      }
+   },
+   "backends": {
+      "ip-rh-backend1": {
+        "hostname": "ip-rh-backend1.rhel.aws",
+        "ebs_optimized": true,
+        "instance_type": "m3.xlarge",
+	      "bootstrap": true
+      },
+      "ip-rh-backend2": {
+        "hostname": "ip-rh-backend2.rhel.aws",
+        "ebs_optimized": true,
+        "instance_type": "m3.xlarge",
+	      "bootstrap": false
+      }
+    },
+   "loadtesters": {
+      "loadtester_spec": {
+        "hostname": "loadtester1.rhel.aws",
+        "ebs_optimized": true,
+        "instance_type": "m3.xlarge"
+      }
+    }
+  }
+}

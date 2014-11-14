@@ -29,6 +29,8 @@ action :ebs_standalone do
   attach_ebs_volume
   create_lvm(disk_devmap[3], '/var/opt/opscode') # assume drbd/ebs volume is the fourth disk (/dev/sdd)
   save_ebs_volumes_db
+  create_drbd_dirs
+  touch_drbd_ready
   new_resource.updated_by_last_action(true)
 end
 
@@ -147,6 +149,13 @@ def install_drbd_packages
         node['cloud']['provider'] == 'ec2' &&
         node['cloud']['backend_storage_type'] == 'ebs' }
       not_if { platform?('amazon', 'oracle') }
+
+      # Ugh, very annoying elrepo packaging issue with drbd
+      if node['platform_version'].to_f >= 6.6
+        version '8.4.5-2.el6.elrepo'
+      else
+        version '8.4.5-1.el6.elrepo'
+      end
     end
   end
 end
