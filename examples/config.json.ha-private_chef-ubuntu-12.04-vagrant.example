@@ -6,10 +6,8 @@
     "disk2_size": "2"
   },
   "apply_ec_bugfixes": true,
-  "default_package": "private-chef_11.1.8-1_amd64.deb",
+  "default_package": "private-chef_11.2.5-1_amd64.deb",
   "packages": {
-    "OPC1.4.13": "private-chef-1.4.13-1.el6.x86_64.rpm",
-    "EC11.1.8": "private-chef_11.1.8-1_amd64.deb"
   },
   "layout": {
     "topology": "ha",
