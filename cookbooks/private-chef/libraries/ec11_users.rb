@@ -8,6 +8,7 @@ class Chef
       self.resource_name = :ec11_users
       actions :create
       default_action :create
+      attribute :knife_opc_cmd, :kind_of => String, :default => nil
     end
   end
 end
@@ -19,39 +20,22 @@ class Chef
     class Ec11Users < Chef::Provider::LWRPBase
       use_inline_resources
 
-      # from patrick-wright/ec-tools::knife-opc
-      knife_opc_cmd = '/opt/opscode/embedded/bin/knife-opc'
-
-      user_root = '/srv/piab/users'
-      sentinel_file = '/srv/piab/dev_users_created'
-      organizations = {
-        'ponyville' => [
-            'rainbowdash',
-            'fluttershy',
-            'applejack',
-            'pinkiepie',
-            'twilightsparkle',
-            'rarity'
-        ],
-        'wonderbolts' => [
-            'spitfire',
-            'soarin',
-            'rapidfire',
-            'fleetfoot'
-        ]
-      }
-
       action :create do
         domainname = TopoHelper.new(ec_config: node['private-chef']).mydomainname
 
-        directory user_root do
+        directory node['private-chef']['user_root'] do
           action :create
           recursive true
         end
 
-        create_orgs_and_users(organizations, user_root, knife_opc_cmd, domainname)
+        create_orgs_and_users(
+          node['private-chef']['organizations'],
+          node['private-chef']['user_root'],
+          new_resource.knife_opc_cmd,
+          domainname
+        )
 
-        file sentinel_file do
+        file node['private-chef']['users_sentinel_file'] do
           content "Canned dev users and organization created successfully at #{::Time.now}"
           action :create
         end
@@ -61,7 +45,6 @@ class Chef
         organizations.each do |orgname, users|
           execute "create_org_#{orgname}" do
             command "#{knife_opc_cmd} org create #{orgname} #{orgname} -f #{user_root}/#{orgname}-validator.pem"
-            creates "/tmp/something"
             action :run
           end
 
@@ -76,13 +59,13 @@ class Chef
 
             # create a knife.rb file for the user
             template "#{dot_chef}/knife.rb" do
-              source "knife.rb.erb"
+              source 'knife.rb.erb'
               variables(
                 :username => username,
                 :orgname => orgname,
                 :server_fqdn => "api.#{domainname}"
               )
-              mode "0777"
+              mode '0777'
               action :create
             end
 
