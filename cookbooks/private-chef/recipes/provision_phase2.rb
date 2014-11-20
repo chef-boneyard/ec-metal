@@ -31,7 +31,7 @@ ruby_block 'p-c-c reconfigure' do
   block do
     begin
       tries ||= 2
-      if node['osc-install'] 
+      if node['osc-install']
         cmd = Mixlib::ShellOut.new('/opt/chef-server/bin/chef-server-ctl reconfigure', live_stream: STDOUT)
       else
         cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl reconfigure', live_stream: STDOUT)
@@ -57,6 +57,17 @@ ruby_block 'p-c-c reconfigure' do
     end
   end
   not_if { node['osc-upgrade'] }
+  notifies :create, 'wait_for_ha_master[p-c-c reconfigure]', :immediately if topology.is_ha?
+  notifies :create, 'wait_for_server_ready[p-c-c reconfigure]', :immediately
+end
+
+wait_for_ha_master 'p-c-c reconfigure' do
+  action :nothing
+end
+
+wait_for_server_ready 'p-c-c reconfigure' do
+  action :nothing
+  not_if 'ls /tmp/private-chef-perform-upgrade'
 end
 
 # OC-11297
@@ -122,7 +133,19 @@ ruby_block 'p-c-c upgrade' do
   end
   only_if 'ls /tmp/private-chef-perform-upgrade'
   not_if { node['osc-install'] || node['osc-upgrade'] }
+  notifies :create, "wait_for_ha_master[p-c-c upgrade]", :immediately if topology.is_ha?
+  notifies :create, "wait_for_server_ready[p-c-c upgrade]", :immediately
 end
+
+
+wait_for_ha_master 'p-c-c upgrade' do
+  action :nothing
+end
+
+wait_for_server_ready 'p-c-c upgrade' do
+  action :nothing
+end
+
 
 ruby_block 'p-c-c osc upgrade' do
   block do
