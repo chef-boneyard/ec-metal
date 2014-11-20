@@ -17,7 +17,7 @@ require 'chef/provider/lwrp_base'
 class Chef
   class Provider
     class Ec11Users < Chef::Provider::LWRPBase
-      use_inline_resources if defined?(use_inline_resources)
+      use_inline_resources
 
       # from patrick-wright/ec-tools::knife-opc
       knife_opc_cmd = '/opt/opscode/embedded/bin/knife-opc'
@@ -42,25 +42,22 @@ class Chef
       }
 
       action :create do
-        topology = TopoHelper.new(ec_config: node['private-chef'])
-
-        wait_for_ha_master if topology.is_ha?
-        wait_for_server_startup
+        domainname = TopoHelper.new(ec_config: node['private-chef']).mydomainname
 
         directory user_root do
           action :create
           recursive true
         end
 
-        create_orgs_and_users
+        create_orgs_and_users(organizations, user_root, knife_opc_cmd, domainname)
 
         file sentinel_file do
-          content "Canned dev users and organization created successfully at #{Time.now}"
+          content "Canned dev users and organization created successfully at #{::Time.now}"
           action :create
         end
       end
 
-      def create_orgs_and_users
+      def create_orgs_and_users(organizations, user_root, knife_opc_cmd, domainname)
         organizations.each do |orgname, users|
           execute "create_org_#{orgname}" do
             command "#{knife_opc_cmd} org create #{orgname} #{orgname} -f #{user_root}/#{orgname}-validator.pem"
@@ -83,7 +80,7 @@ class Chef
               variables(
                 :username => username,
                 :orgname => orgname,
-                :server_fqdn => "api.#{topology.mydomainname}"
+                :server_fqdn => "api.#{domainname}"
               )
               mode "0777"
               action :create
@@ -104,58 +101,6 @@ class Chef
             end
           end
         end
-      end
-
-      def wait_for_ha_master
-        Chef::Log.info('Waiting for node to become HA master')
-        attempts = 600
-        STDOUT.sync = true
-
-        keepalived_dir = '/var/opt/opscode/keepalived'
-        requested_cluster_status_file = ::File.join(keepalived_dir, 'requested_cluster_status')
-        cluster_status_file = ::File.join(keepalived_dir, 'current_cluster_status')
-
-        (0..attempts).each do |attempt|
-          break if File.exists?(requested_cluster_status_file) &&
-            File.open(requested_cluster_status_file).read.chomp == 'master' &&
-            File.exists?(cluster_status_file) &&
-            File.open(cluster_status_file).read.chomp == 'master'
-
-          sleep 1
-          print '.'
-          if attempt == attempts
-            raise "I'm sick of waiting for server startup after #{attempt} attempts"
-          end
-        end
-      end
-
-      def wait_for_server_startup
-        Chef::Log.info('Waiting for the Chef server to be ready')
-        attempts = 90
-        STDOUT.sync = true
-        (0..attempts).each do |attempt|
-          break if erchef_ready?
-
-          sleep 1
-          print '.'
-          if attempt == attempts
-            raise "I'm sick of waiting for server startup after #{attempt} attempts"
-          end
-        end
-      end
-
-      def erchef_ready?
-        require 'open-uri'
-        require 'openssl'
-
-        begin
-          server_status = JSON.parse(open('https://localhost/_status', ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE).read)
-        rescue Exception
-          return false
-        end
-
-        return true if server_status['status'] == 'pong'
-        false
       end
 
     end
