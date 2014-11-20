@@ -1,0 +1,33 @@
+{
+  "provider": "vagrant",
+  "vagrant_options": {
+    "box": "opscode-ubuntu-12.04",
+    "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-12.04_chef-provisionerless.box",
+    "disk2_size": "2"
+  },
+  "default_package": "private-chef_11.2.5-1_amd64.deb",
+  "run_pedant": true,
+  "packages": {
+  },
+  "layout": {
+    "topology": "standalone",
+    "api_fqdn": "api.opscode.piab",
+    "manage_fqdn": "manage.opscode.piab",
+    "analytics_fqdn": "analytics.opscode.piab",
+    "standalones": {
+      "standalone1": {
+        "hostname": "standalone1.opscode.piab",
+        "ipaddress": "33.33.33.23",
+        "memory": "1024",
+        "cpus": "2"
+      }
+    },
+    "virtual_hosts": {
+      "private-chef.opscode.piab": "33.33.33.23",
+      "manage.opscode.piab": "33.33.33.23",
+      "api.opscode.piab": "33.33.33.23",
+      "analytics.opscode.piab": "33.33.33.23",
+      "standalone1.opscode.piab": "33.33.33.23"
+    }
+  }
+}
