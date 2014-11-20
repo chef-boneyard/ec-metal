@@ -4,8 +4,8 @@ require 'chef/resource/lwrp_base'
 
 class Chef
   class Resource
-    class Ec11Users < Chef::Resource::LWRPBase
-      self.resource_name = :ec11_users
+    class OpcUsers < Chef::Resource::LWRPBase
+      self.resource_name = :opc_users
       actions :create
       default_action :create
       attribute :knife_opc_cmd, :kind_of => String, :default => nil
@@ -17,7 +17,7 @@ require 'chef/provider/lwrp_base'
 
 class Chef
   class Provider
-    class Ec11Users < Chef::Provider::LWRPBase
+    class OpcUsers < Chef::Provider::LWRPBase
       use_inline_resources
 
       action :create do
