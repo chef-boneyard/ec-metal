@@ -63,10 +63,12 @@ end
 
 wait_for_ha_master 'p-c-c reconfigure' do
   action :nothing
+  only_if { node.name == topology.bootstrap_node_name }
 end
 
 wait_for_server_ready 'p-c-c reconfigure' do
   action :nothing
+  only_if { node.name == topology.bootstrap_node_name }
   not_if 'ls /tmp/private-chef-perform-upgrade'
 end
 
@@ -140,10 +142,12 @@ end
 
 wait_for_ha_master 'p-c-c upgrade' do
   action :nothing
+  only_if { node.name == topology.bootstrap_node_name }
 end
 
 wait_for_server_ready 'p-c-c upgrade' do
   action :nothing
+  only_if { node.name == topology.bootstrap_node_name }
 end
 
 
