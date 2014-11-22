@@ -25,3 +25,23 @@ default['private-chef']['configuration'] = {}
 
 # wrapping the aws cookbook
 default['aws']['right_aws_version'] = '3.1.0'
+
+# Organizations list
+default['private-chef']['organizations'] = {
+  'ponyville' => [
+      'rainbowdash',
+      'fluttershy',
+      'applejack',
+      'pinkiepie',
+      'twilightsparkle',
+      'rarity'
+  ],
+  'wonderbolts' => [
+      'spitfire',
+      'soarin',
+      'rapidfire',
+      'fleetfoot'
+  ]
+}
+default['private-chef']['user_root'] = '/srv/piab/users'
+default['private-chef']['users_sentinel_file'] = '/srv/piab/dev_users_created'

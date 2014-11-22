@@ -64,12 +64,12 @@ action :install do
         recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
         recipe 'private-chef::drbd' if topo.is_backend?(vmname)
         recipe 'private-chef::provision_phase2'
-        recipe 'private-chef::users' if vmname == topo.bootstrap_node_name
         recipe 'private-chef::reporting' if node['harness']['reporting_package']
         recipe 'private-chef::manage' if node['harness']['manage_package'] &&
           topo.is_frontend?(vmname)
         recipe 'private-chef::pushy' if node['harness']['pushy_package']
         recipe 'private-chef::tools'
+        recipe 'private-chef::users' if vmname == topo.bootstrap_node_name
         recipe 'private-chef::loadbalancer' if topo.is_frontend?(vmname) &&
           node['harness']['provider'] == 'ec2'
 
