@@ -1,6 +1,6 @@
 analytics_fqdn "<%= node['analytics']['analytics_fqdn'] %>"
 
-topology "<%= node['analytics']['analytics_topology'] %>"
+topology "<%= node['analytics']['analytics_topology'] || 'standalone' %>"
 
 <% (node['analytics']['analytics_backends'] || {}).each_pair do |name, options| -%>
 server "<%= options['hostname'] || "#{name}.opscode.piab" %>",
