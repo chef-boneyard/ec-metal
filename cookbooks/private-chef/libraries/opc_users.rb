@@ -69,19 +69,32 @@ class Chef
               action :create
             end
 
-            execute "create_user_#{username}_in_org_#{orgname}" do
+            execute "create_user_#{username}" do
               # it goes USERNAME FIRST_NAME [MIDDLE_NAME] LAST_NAME EMAIL PASSWORD options
               cmd_args = [
                           knife_opc_cmd, 'user', 'create',
-                          username, username, username,
-                          "#{username}@#{orgname}.org",
-                          username,
-                          '-o', orgname,
+                          username, #username
+                          username, #first_name
+                          username, #last_name
+                          "#{username}@#{orgname}.org", #email
+                          username, #password
                           '-f' "#{dot_chef}/#{username}.pem"
                          ]
               command cmd_args.join(' ')
               action :run
             end
+
+            execute "associate_user_#{username}_to_org_#{orgname}" do
+              cmd_args = [
+                          knife_opc_cmd, 'org', 'user', 'add',
+                          orgname,
+                          username,
+                          '--admin'
+                         ]
+              command cmd_args.join(' ')
+              action :run
+            end
+
           end
         end
       end
