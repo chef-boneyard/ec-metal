@@ -114,7 +114,10 @@ end
 
 include_recipe 'docker'
 
-chef_gem 'knife-container'
+gem_package 'knife-container' do
+  gem_binary('/opt/chef/embedded/bin/gem')
+  options('--no-rdoc --no-ri')
+end
 
 directory '/etc/chef/secure/certs' do
   owner "root"
