@@ -58,7 +58,7 @@ directory '/var/opt/opscode/keepalived/bin' do
   only_if { topology.is_backend?(node.name) }
 end
 
-template '/var/opt/opscode/keepalived/bin/custom_backend_ip' do
+template '/var/opt/opscode/keepalived/bin/ha_backend_ip' do
   source 'custom_backend_ip.vpc.erb'
   owner 'root'
   group 'root'
