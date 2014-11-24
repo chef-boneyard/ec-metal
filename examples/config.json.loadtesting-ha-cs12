@@ -3,17 +3,17 @@
   "ec2_options": {
     "region": "us-west-2",
     "vpc_subnet": "subnet-b2bb82f4",
-    "ami_id": "ami-7df0bd4d",
-    "ssh_username": "ec2-user",
+    "ami_id": "ami-3d50120d",
+    "ssh_username": "ubuntu",
     "backend_storage_type": "drbd",
     "ebs_disk_size": "100",
     "use_private_ip_for_ssh": false,
     "elb": true
   },
-  "default_package": "https://web-dl.packagecloud.io/chef/stable/packages/el/6/private-chef-11.2.5-1.el6.x86_64.rpm",
-  "manage_package": "https://web-dl.packagecloud.io/chef/stable/packages/el/6/opscode-manage-1.6.2-1.el6.x86_64.rpm",
-  "reporting_package": "https://web-dl.packagecloud.io/chef/stable/packages/el/6/opscode-reporting-1.1.5-1.el6.x86_64.rpm",
-  "analytics_package": "https://web-dl.packagecloud.io/chef/stable/packages/el/6/opscode-analytics-1.0.4-1.el6.x86_64.rpm",
+  "default_package":   "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/trusty/chef-server-core_12.0.0-rc.6-1_amd64.deb",
+  "manage_package":    "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/precise/opscode-manage_1.6.2-1_amd64.deb",
+  "reporting_package": "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/precise/opscode-reporting_1.1.7-1_amd64.deb",
+  "analytics_package": "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/precise/opscode-analytics_1.0.4-1_amd64.deb",
   "apply_ec_bugfixes": false,
   "lemme_doit": false,
   "loadtesters": {
@@ -25,16 +25,16 @@
   },
   "layout": {
     "topology": "ha",
-    "api_fqdn": "api.rhel.aws",
-    "manage_fqdn": "manage.rhel.aws",
-    "analytics_fqdn": "analytics.rhel.aws",
+    "api_fqdn": "api.trusty.aws",
+    "manage_fqdn": "manage.trusty.aws",
+    "analytics_fqdn": "analytics.trusty.aws",
     "configuration": {
       "postgresql": {
 	      "max_connections": 1500,
         "log_min_duration_statement": 500
       },
       "oc_id": {
-	      "administrators": ["pinkiepie", "soarin"]
+        "administrators": ["pinkiepie", "soarin"]
       },
       "opscode_erchef": {
 	      "depsolver_worker_count": 4,
@@ -54,53 +54,56 @@
       },
       "nginx": {
         "enable_non_ssl": true
+      },
+      "license": {
+        "nodes": 100000
       }
     },
     "backend_vip": {
-      "hostname": "backend.rhel.aws",
+      "hostname": "backend.trusty.aws",
       "ipaddress": "33.33.33.9",
       "device": "eth0",
       "heartbeat_device": "eth0"
     },
     "analytics_standalones": {
       "analytics-standalone1": {
-        "hostname": "ip-rh-analytics-standalone1.rhel.aws",
+        "hostname": "ip-ub-analytics-standalone1.trusty.aws",
         "ebs_optimized": true,
         "instance_type": "m3.xlarge",
         "bootstrap": true
       }
     },
    "frontends": {
-      "ip-rh-frontend1": {
-        "hostname": "ip-rh-frontend1.rhel.aws",
+      "ip-ub-frontend1": {
+        "hostname": "ip-ub-frontend1.trusty.aws",
         "ebs_optimized": true,
         "instance_type": "m3.xlarge"
       },
-      "ip-rh-frontend2": {
-        "hostname": "ip-rh-frontend2.rhel.aws",
+      "ip-ub-frontend2": {
+        "hostname": "ip-ub-frontend2.trusty.aws",
         "ebs_optimized": true,
         "instance_type": "m3.xlarge"
       },
-      "ip-rh-frontend3": {
-        "hostname": "ip-rh-frontend3.rhel.aws",
+      "ip-ub-frontend3": {
+        "hostname": "ip-ub-frontend3.trusty.aws",
         "ebs_optimized": true,
         "instance_type": "m3.xlarge"
       },
-      "ip-rh-frontend4": {
-        "hostname": "ip-rh-frontend4.rhel.aws",
+      "ip-ub-frontend4": {
+        "hostname": "ip-ub-frontend4.trusty.aws",
         "ebs_optimized": true,
         "instance_type": "m3.xlarge"
       }
    },
    "backends": {
-      "ip-rh-backend1": {
-        "hostname": "ip-rh-backend1.rhel.aws",
+      "ip-ub-backend1": {
+        "hostname": "ip-ub-backend1.trusty.aws",
         "ebs_optimized": true,
         "instance_type": "m3.xlarge",
 	      "bootstrap": true
       },
-      "ip-rh-backend2": {
-        "hostname": "ip-rh-backend2.rhel.aws",
+      "ip-ub-backend2": {
+        "hostname": "ip-ub-backend2.trusty.aws",
         "ebs_optimized": true,
         "instance_type": "m3.xlarge",
 	      "bootstrap": false
@@ -108,11 +111,9 @@
     },
    "loadtesters": {
       "loadtester_spec": {
-        "hostname": "loadtester1.rhel.aws",
+        "hostname": "loadtester1.trusty.aws",
         "ebs_optimized": true,
-        "instance_type": "m3.2xlarge",
-	"ssh_username": "ubuntu",
-        "ami_id": "ami-3d50120d"
+        "instance_type": "m3.2xlarge"
       }
     }
   }
