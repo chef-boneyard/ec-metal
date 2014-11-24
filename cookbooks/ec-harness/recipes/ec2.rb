@@ -38,13 +38,14 @@ topo.merged_topology.each do |vmname, config|
   fog_helper = FogHelper.new(ami: node['harness']['ec2']['ami_id'], region: node['harness']['ec2']['region'])
 
   local_provisioner_options = {
+    :ssh_username => config['ssh_username'] || node['harness']['ec2']['ssh_username'],
     :bootstrap_options => {
       :key_name => keypair_name,
-      :flavor_id => config['instance_type'] || 'c3.large',
+      :flavor_id => config['instance_type'] || 'm3.xlarge',
       :region => node['harness']['ec2']['region'],
       :ebs_optimized => config['ebs_optimized'] || false,
-      :image_id => node['harness']['ec2']['ami_id'],
-      :subnet_id => node['harness']['ec2']['vpc_subnet'],
+      :image_id => config['ami_id'] || node['harness']['ec2']['ami_id'],
+      :subnet_id => config['vpc_subnet'] || node['harness']['ec2']['vpc_subnet'],
       :associate_public_ip => true,
       :block_device_mapping => [
         {'DeviceName' => fog_helper.get_root_blockdevice,
