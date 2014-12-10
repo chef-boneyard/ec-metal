@@ -76,6 +76,7 @@ end
 execute 'fix-migration-state' do
   command '/opt/opscode/embedded/bin/bundle exec bin/partybus init'
   cwd '/opt/opscode/embedded/service/partybus'
+  environment 'PATH' => '/opt/opscode/embedded/bin:/bin:/sbin:/usr/bin:/usr/sbin'
   action :run
   not_if 'ls /var/opt/opscode/upgrades/migration-level'
   not_if 'ls /tmp/private-chef-perform-upgrade'
