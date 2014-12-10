@@ -1,3 +1,13 @@
+# encoding: utf-8
+
+def topo
+  TopoHelper.new(ec_config: node['private-chef'])
+end
+
+def api_hostname
+  "api.#{topo.mydomainname}"
+end
+
 def ipaddresses_prepopulated(private_chef_attributes)
   case private_chef_attributes['topology']
   when 'ha'
@@ -16,7 +26,7 @@ def hosts_invert(virtual_hosts)
   hosts_inverted = {}
   virtual_hosts.each do |name,ip|
     hosts_inverted[ip] = [] unless hosts_inverted[ip].is_a?(Array)
-    hosts_inverted[ip] << name
+    hosts_inverted[ip] << name unless name == api_hostname
   end
   hosts_inverted
 end
@@ -36,7 +46,6 @@ action :create do
 
     log "[private-chef::hostsfile] Performing dynamic discovery..."
 
-    topo = TopoHelper.new(ec_config: node['private-chef'])
     topo.found_topo_types.each do |whichend|
       node['private-chef'][whichend].each do |vmname, config|
         if vmname == node.name
@@ -90,6 +99,13 @@ action :create do
     hosts_invert(node['private-chef']['virtual_hosts']).each do |ip,names|
       shortnames = names.map {|name| name.split('.').first }
       firstname = names.pop
+
+      # point the API fqdn at myself on each host, so p-c-c test runs against me
+      # Not sure if it's more reliable to match node.name from shortnames or
+      #  node.fqdn from names -- we shall see
+      if shortnames.include?(node.name)
+        names << api_hostname
+      end
 
       hostsfile_entry ip do
         hostname firstname
