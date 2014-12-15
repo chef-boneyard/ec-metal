@@ -12,4 +12,4 @@ cookbook 'yum-epel'
 cookbook 'docker', '~> 0.0'
 cookbook 'chef-client'
 
-cookbook 'ec-tools', :git => 'https://github.com/patrick-wright/ec-tools'
+cookbook 'ec-tools', :git => 'https://github.com/irvingpop/ec-tools'
