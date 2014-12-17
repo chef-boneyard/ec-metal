@@ -3,12 +3,34 @@
 topology = TopoHelper.new(ec_config: node['private-chef'])
 
 rootdev = node.filesystem.select { |k,v| v['mount'] == '/' }.keys.first
+rootdisk, rootpartition = rootdev.partition(/[0-9]/)
+
+def is_gpt?(rootdisk)
+  parted = `parted #{rootdisk} print -ms | grep ^#{rootdisk}`.split(':')[5]
+  parted == 'gpt'
+end
 
 # Resize EBS root volume
-execute 'Resize root EBS volume' do
-  command "resize2fs #{rootdev} && touch /.root_resized"
-  action :run
-  not_if { ::File.exists?('/.root_resized') }
+# special case for RHEL/HVM AMIs that require a reboot to notice the resized disk
+if is_gpt?(rootdisk) && node['platform_family'] == 'rhel'
+  reboot 'diskresize' do
+    action :cancel
+  end
+
+  package 'gdisk'
+
+  execute 'Resize root EBS volume' do
+    command "growpart --update off #{rootdisk} #{rootpartition} && touch /.root_resized"
+    action :run
+    not_if { ::File.exists?('/.root_resized') }
+    notifies :request_reboot, 'reboot[diskresize]'
+  end
+else
+  execute 'Resize root EBS volume' do
+    command "resize2fs #{rootdev} && touch /.root_resized"
+    action :run
+    not_if { ::File.exists?('/.root_resized') }
+  end
 end
 
 # Unmount the cloud-init created /mnt on epheremal volumes automatically
