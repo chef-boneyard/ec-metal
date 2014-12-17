@@ -1,4 +1,4 @@
-if platform_family?('rhel') 
+if platform_family?('rhel')
   remote_file "/tmp/packages@opscode.com.gpg.key" do
     source "https://downloads.getchef.com/packages-chef-io-public.key"
   end
@@ -17,5 +17,18 @@ if platform_family?('rhel')
     command 'sed -i "s/^.*requiretty/#Defaults requiretty/" /etc/sudoers'
     action :run
     only_if 'grep "^Defaults.*requiretty" /etc/sudoers'
+  end
+
+  # RHEL and it's silly limits
+  file '/etc/security/limits.d/90-nproc.conf' do
+    action :delete
+  end
+
+  file '/etc/security/limits.d/10-nofile.conf' do
+    action :create
+    owner 'root'
+    group 'root'
+    mode '0644'
+    content "*          soft    nofile     1048576\n*          hard    nofile     1048576"
   end
 end

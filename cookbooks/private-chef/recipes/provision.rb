@@ -11,6 +11,8 @@ installer_file = node['private-chef']['installer_file']
 installer_name = ::File.basename(installer_file.split('?').first)
 installer_path = "#{Chef::Config[:file_cache_path]}/#{installer_name}"
 
+topology = TopoHelper.new(ec_config: node['private-chef'])
+
 if ::URI.parse(installer_file).absolute?
   remote_file installer_path do
     source installer_file
@@ -38,6 +40,21 @@ else
       group 'root'
       mode '0644'
       content "Running upgrade of #{installer_name} at #{Time.now}"
+    end
+
+    # Drop a special file for EC11->CS12 upgrades, now we must stop services on the backend master
+    if PackageHelper.private_chef_installed_version(node).to_i == 11 &&
+      PackageHelper.package_version(installer_name).to_i == 12 &&
+      node.name == topology.bootstrap_node_name
+
+      file '/tmp/upgrading_ec11_to_cs12' do
+        action :create
+        owner 'root'
+        group 'root'
+        mode '0644'
+        content "Upgrading from #{PackageHelper.private_chef_installed_version(node)} to #{PackageHelper.package_version(installer_name)} at #{Time.now}"
+      end
+
     end
   end
 end

@@ -56,6 +56,8 @@ ruby_block 'p-c-c reconfigure' do
       end
     end
   end
+  # Contentious change, but we should no longer baby the upgrade process:
+  not_if 'ls /tmp/private-chef-perform-upgrade'
   not_if { node['osc-upgrade'] }
   notifies :create, 'wait_for_ha_master[p-c-c reconfigure]', :immediately if topology.is_ha?
   notifies :create, 'wait_for_server_ready[p-c-c reconfigure]', :immediately
@@ -109,6 +111,15 @@ execute 'p-c-c-start' do
   retries 1
 end
 
+# per https://github.com/opscode/chef-docs/pull/428
+execute 'stop_service_on_bootstrap_ec11_to_cs12_upgrade' do
+  command '/opt/opscode/bin/chef-server-ctl stop'
+  action :run
+  only_if { node.name == topology.bootstrap_node_name }
+  only_if 'ls /tmp/private-chef-perform-upgrade'
+  only_if 'ls /tmp/upgrading_ec11_to_cs12'
+end
+
 ruby_block 'p-c-c upgrade' do
   block do
     begin
@@ -137,13 +148,22 @@ ruby_block 'p-c-c upgrade' do
   only_if 'ls /tmp/private-chef-perform-upgrade'
   not_if { node['osc-install'] || node['osc-upgrade'] }
   notifies :create, "wait_for_ha_master[p-c-c upgrade]", :immediately if topology.is_ha?
-  notifies :create, "wait_for_server_ready[p-c-c upgrade]", :immediately
 end
-
 
 wait_for_ha_master 'p-c-c upgrade' do
   action :nothing
   only_if { node.name == topology.bootstrap_node_name }
+  notifies :run, "execute[start_services_on_bootstrap_ec11_to_cs12_upgrade]", :immediately
+end
+
+# restart services which are still stopped
+execute 'start_services_on_bootstrap_ec11_to_cs12_upgrade' do
+  command '/opt/opscode/bin/chef-server-ctl start'
+  action :run
+  only_if { node.name == topology.bootstrap_node_name }
+  only_if 'ls /tmp/private-chef-perform-upgrade'
+  only_if 'ls /tmp/upgrading_ec11_to_cs12'
+  notifies :create, "wait_for_server_ready[p-c-c upgrade]", :immediately
 end
 
 wait_for_server_ready 'p-c-c upgrade' do
@@ -194,5 +214,9 @@ execute 'p-c-c-cleanup' do
 end
 
 file '/tmp/private-chef-perform-upgrade' do
+  action :delete
+end
+
+file '/tmp/upgrading_ec11_to_cs12' do
   action :delete
 end
