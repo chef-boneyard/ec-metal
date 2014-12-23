@@ -63,7 +63,11 @@ end
 gem_package 'nokogiri' do
   gem_binary('/opt/chef/embedded/bin/gem')
   version '1.6.3.1'
-  options('--no-rdoc --no-ri -- --use-system-libraries')
+  if node['platform_family'] == 'rhel'
+    options('--no-rdoc --no-ri -- --use-system-libraries')
+  else
+    options('--no-rdoc --no-ri')
+  end
 end
 
 gem_package 'fog' do
