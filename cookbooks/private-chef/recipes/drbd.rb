@@ -9,6 +9,16 @@ when 'rhel'
 end
 
 include_recipe 'lvm::default'
+
+# because of https://github.com/opscode-cookbooks/lvm/issues/43
+service 'lvm2-lvmetad' do
+  supports :status => true, :restart => true, :reload => true
+  action [ :enable, :start ]
+  provider Chef::Provider::Service::Systemd
+  only_if { node['platform_family'] == 'rhel'}
+  only_if { node['platform_version'].to_i == 7 }
+end
+
 topology = TopoHelper.new(ec_config: node['private-chef'])
 
 if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend_storage_type'] == 'ebs'

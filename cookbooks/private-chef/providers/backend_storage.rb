@@ -2,7 +2,7 @@
 action :drbd do
   install_drbd_packages
   create_drbd_dirs
-  create_lvm(disk_devmap[1]) # assume drbd volume is the second disk (ephemeral)
+  create_lvm([disk_devmap[1]]) # assume drbd volume is the second disk (ephemeral)
   create_drbd_config_files
   setup_drbd
   touch_drbd_ready
@@ -14,7 +14,7 @@ action :ebs_shared do
   create_drbd_dirs
   if topology.bootstrap_node_name == node.name
     attach_ebs_volume
-    create_lvm(disk_devmap[3]) # assume drbd/ebs volume is the fourth disk (/dev/sdd)
+    create_lvm([disk_devmap[3]]) # assume drbd/ebs volume is the fourth disk (/dev/sdd)
     mount_ebs
     save_ebs_volumes_db
   else
@@ -151,9 +151,7 @@ def install_drbd_packages
       not_if { platform?('amazon', 'oracle') }
 
       # Ugh, very annoying elrepo packaging issue with drbd
-      if node['platform_version'].to_f >= 6.6
-        version '8.4.5-2.el6.elrepo'
-      else
+      if node['platform_version'].to_f >= 6.0 && node['platform_version'].to_f < 6.6
         version '8.4.5-1.el6.elrepo'
       end
     end
@@ -190,6 +188,16 @@ def create_lvm(disks, mountpoint = nil)
     # Note, lvm cookbook is dumb and resets this, so do it later on
     stupid_chown_trick = true
   end
+
+  # stupid wipe trick because of https://github.com/opscode-cookbooks/lvm/issues/45
+  # yes, this scares me also, so comment out until CS12 actually supports RHEL7
+  # disks.each do |disk|
+  #   execute "wipe #{disk} signature" do
+  #     command "dd if=/dev/zero of=#{disk} bs=1M count=10"
+  #     action :run
+  #     only_if "file -sL #{disk} | grep ext3"
+  #   end
+  # end
 
   fs_type = fstype
   lvm_volume_group 'opscode' do
