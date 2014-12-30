@@ -2,7 +2,7 @@
 action :drbd do
   install_drbd_packages
   create_drbd_dirs
-  create_lvm([disk_devmap[1]]) # assume drbd volume is the second disk (ephemeral)
+  create_lvm(local_drbd_disks)
   create_drbd_config_files
   setup_drbd
   touch_drbd_ready
@@ -350,4 +350,19 @@ end
 
 def running_lucid?
   node['platform'] == 'ubuntu' && node['platform_version'].to_i == 10
+end
+
+def local_drbd_disks
+  if node['cloud'] && node['cloud']['provider'] == 'ec2'
+    ec2_ephemeral_disks
+  else
+    [disk_devmap[1]]
+  end
+end
+
+def ec2_ephemeral_disks
+  node['ec2']
+    .select { |k,v| k =~ /block_device_mapping_ephemeral/ }
+    .values
+    .map { |dev| dev.sub(/^sd/, '/dev/xvd') }
 end
