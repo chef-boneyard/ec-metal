@@ -82,7 +82,8 @@ action :install do
         #   topo.is_frontend?(vmname)
         recipe 'private-chef::pushy' if node['harness']['pushy_package']
         recipe 'private-chef::tools'
-        recipe 'private-chef::users' if vmname == topo.bootstrap_node_name
+        recipe 'private-chef::users'
+        recipe 'private-chef::org_torture'
         # recipe 'private-chef::loadbalancer' if topo.is_frontend?(vmname) &&
         #   node['harness']['provider'] == 'ec2'
 
