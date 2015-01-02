@@ -92,11 +92,15 @@ end
 
 task :multiorg_uploader => [:multiorg_prep] do
   (1..num_orgs).in_parallel_n(parallel_uploaders) do |orgnum|
+    start_time = Time.now
     orgname = "org#{orgnum}"
-    puts "Uploading STARTING to org #{orgname}"
+    puts "Uploading STARTING to org #{orgname} at #{start_time.to_s}"
     berks_config_file = ::File.join(BERKS_CONFIG_DIR, "#{orgname}.json")
     sh "#{HARNESS_KNIFE_BIN} upload /cookbooks -s #{chef_server_url(orgname)} -k #{CHEF_USER_PEM} -u #{CHEF_USER} -c #{HARNESS_KNIFE_CONFIG}"
     sh "#{BERKS_BIN} upload -c #{berks_config_file}"
-    puts "Uploading COMPLETE to org #{orgname}"
+    end_time = Time.now
+    duration_secs = end_time.to_i - start_time.to_i
+    puts "Uploading COMPLETE to org #{orgname} at #{end_time}"
+    puts "STATS #{orgname} #{duration_secs}"
   end
 end
