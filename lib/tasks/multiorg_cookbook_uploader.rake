@@ -28,11 +28,17 @@ module Enumerable
   end
 end
 
+def resolve_bootstrap_host_name
+  topo = TopoHelper.new(ec_config: CONFIG['layout'])
+  ::Resolv.getaddress(topo.bootstrap_host_name)
+rescue Resolv::ResolvError
+  'notcreatedyet'
+end
+
 harness_dir = ENV['HARNESS_DIR'] = EcMetal::Api.harness_dir
 repo_dir = ENV['ECM_CHEF_REPO'] = EcMetal::Api.repo_dir
 
-config = get_config
-topo = TopoHelper.new(ec_config: config['layout'])
+CONFIG = get_config
 
 PRIVATE_KEY_PATH = ::File.join(repo_dir, 'keys', 'id_rsa')
 USERS_PATH = ::File.join(harness_dir, 'users')
@@ -40,10 +46,10 @@ USERS_PATH = ::File.join(harness_dir, 'users')
 # chef_org_validation_pem = ::File.join(users_path, "#{chef_org}-validator.pem")
 CHEF_USER = 'pinkiepie'
 CHEF_USER_PEM = ::File.join(USERS_PATH, CHEF_USER, '.chef', "#{CHEF_USER}.pem")
-if config['ec2_options'] && config['ec2_options']['elb'] && config['ec2_options']['elb'] == true
+if CONFIG['ec2_options'] && CONFIG['ec2_options']['elb'] && CONFIG['ec2_options']['elb'] == true
   CHEF_SERVER =  fog.get_elb_dns_name(elb_name)
 else
-  CHEF_SERVER = ::Resolv.getaddress(topo.bootstrap_host_name)
+  CHEF_SERVER = resolve_bootstrap_host_name
 end
 # chef_server_url = "https://#{chef_server}/organizations/#{chef_org}"
 HARNESS_KNIFE_BIN = ::File.join(harness_dir, 'bin', 'knife')
@@ -80,7 +86,7 @@ task :berks_prep do
 end
 
 task :multiorg_prep => [:berks_prep] do
-  sh "rsync -az --delete -e 'ssh -i #{PRIVATE_KEY_PATH}' root@#{topo.bootstrap_host_name}:/srv/piab/users/ #{USERS_PATH}"
+  sh "rsync -az --delete -e 'ssh -i #{PRIVATE_KEY_PATH}' root@#{resolve_bootstrap_host_name}:/srv/piab/users/ #{USERS_PATH}"
   (1..num_orgs).each do |orgnum|
     orgname = "org#{orgnum}"
     puts "Prepping org #{orgname}"
