@@ -1,8 +1,7 @@
 require_relative '../../cookbooks/ec-common/libraries/topo_helper'
-
+require 'resolv'
 
 # cargo culted from: http://t-a-w.blogspot.com/2010/05/very-simple-parallelization-with-ruby.html
-
 def Exception.ignoring_exceptions
   begin
     yield
