@@ -84,19 +84,19 @@ class TopoHelper
   end
 
   def is_analytics_standalones?(nodename)
-    is_topo_type?(nodename, 'analytics_standalones')
+    is_analytics_topo_type?(nodename, 'analytics_standalones')
   end
 
   def is_analytics_backends?(nodename)
-    is_topo_type?(nodename, 'analytics_backends')
+    is_analytics_topo_type?(nodename, 'analytics_backends')
   end
 
   def is_analytics_frontends?(nodename)
-    is_topo_type?(nodename, 'analytics_frontends')
+    is_analytics_topo_type?(nodename, 'analytics_frontends')
   end
 
   def is_analytics_workers?(nodename)
-    is_topo_type?(nodename, 'analytics_workers')
+    is_analytics_topo_type?(nodename, 'analytics_workers')
   end
 
   def is_analytics?(nodename)
@@ -114,6 +114,13 @@ class TopoHelper
       return @ec_config[topotype].has_key?(nodename)
     elsif found_topo_types.include?('standalones')
       return @ec_config['standalones'].has_key?(nodename)
+    end
+    false
+  end
+
+  def is_analytics_topo_type?(nodename, topotype)
+    if found_topo_types.include?(topotype)
+      return @ec_config[topotype].has_key?(nodename)
     end
     false
   end

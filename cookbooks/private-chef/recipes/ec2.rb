@@ -15,6 +15,7 @@ end
 if is_gpt?(rootdisk) && node['platform_family'] == 'rhel'
   reboot 'diskresize' do
     action :cancel
+    delay_mins 1
   end
 
   package 'gdisk'
@@ -62,7 +63,11 @@ end
 gem_package 'nokogiri' do
   gem_binary('/opt/chef/embedded/bin/gem')
   version '1.6.3.1'
-  options('--no-rdoc --no-ri')
+  if node['platform_family'] == 'rhel'
+    options('--no-rdoc --no-ri -- --use-system-libraries')
+  else
+    options('--no-rdoc --no-ri')
+  end
 end
 
 gem_package 'fog' do

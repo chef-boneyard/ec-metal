@@ -87,6 +87,23 @@ if node['loadtester_host']['use_btrfs'] == true
     command 'mount /dev/xvdb /var/lib/docker'
     not_if 'mount | grep /var/lib/docker'
   end
+
+elsif node['loadtester_host']['use_direct_lvm'] == true
+  package 'xfsprogs'
+  include_recipe 'lvm::default'
+
+  lvm_volume_group 'docker' do
+    physical_volumes ['/dev/xvdb']
+
+    logical_volume 'data' do
+      size        '95%VG'
+    end
+
+    logical_volume 'metadata' do
+      size        '5%VG'
+    end
+  end
+
 else
   execute 'ext4-format' do
     command 'mkfs.ext4 /dev/xvdb'
@@ -154,7 +171,7 @@ file "/var/chef/dockerfiles/#{docker_repo}/ubuntu/chef/.node_name" do
   owner "root"
   group "root"
   mode "0644"
-  content "build-#{node.name}\n"
+  content "build-#{node.name.split('-')[2]}-#{Time.now.strftime('%Y%m%d-%H%M%S')}\n"
  end
 
 execute 'container build' do
