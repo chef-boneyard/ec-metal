@@ -68,7 +68,8 @@ Of note are the provider specific options:
    "vpc_subnet": "subnet-XXXXXXXX",
    "ami_id": "ami-XXXXXXXX",
    "ssh_username": "ubuntu",
-   "use_private_ip_for_ssh": false
+   "use_private_ip_for_ssh": false,
+   "ec_metal_tag" : "EcMetal key will default to no value if attribute is omitted"
 ```
 
 **Vagrant** -- You will need to know your desired `CPU`, `memory`, and a URL for a `.box file` (probably from [Bento](http://github.com/opscode/bento))

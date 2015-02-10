@@ -71,7 +71,8 @@ Things I've found that help get around issues:
         "vpc_subnet": "subnet-c1372eb5",
         "ami_id": "ami-c3abd6f3",
         "ssh_username": "ubuntu",
-        "use_private_ip_for_ssh": false
+        "use_private_ip_for_ssh": false,
+        "ec_metal_tag" : "EcMetal key will default to no value if attribute is omitted"
       },
       "default_package": "https://packagecloud.io/chef/stable/download?distro=precise&filename=private-chef_11.2.2-1_amd64.deb",
       "run_pedant": false,
