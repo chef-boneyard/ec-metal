@@ -1,4 +1,3 @@
-Berksfile.lock
 .bundle
 bin/*
 config.json
