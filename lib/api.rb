@@ -93,6 +93,11 @@ module EcMetal
       run("bundle exec berks vendor --berksfile='#{berks_file}' #{cookbooks_path}")
     end
 
+    def self.berks_update
+      berks_file = Pathname.new(File.dirname(__FILE__)).parent.to_s + "/Berksfile"
+      run("bundle exec berks update --berksfile='#{berks_file}'")
+    end
+
     # Only run this for ec-metal without wrappers
     def self.bundle
       run("bundle install --path vendor/bundle --binstubs", 3*MINUTE_IN_DEC_SECS)
