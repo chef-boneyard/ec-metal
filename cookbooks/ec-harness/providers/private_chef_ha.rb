@@ -44,12 +44,21 @@ action :cloud_create do
     end
   end
 
-  unless bootstrap_created
-    sleep_time = 60
-    log "Waiting #{sleep_time} seconds for bootstrap node to reboot in case of disk resizing"
-    execute 'wait_for_reboots' do
-      command "sleep #{sleep_time}"
-      action :run
+  # If you're dealing with https://bugzilla.redhat.com/show_bug.cgi?id=1155742
+  #  and you need a reboot to resize the rootfs, set
+  #  ec2_options: reboot_wait: true
+  # in your config.json
+  if node['harness']['provider'] == 'ec2' &&
+    node['harness']['ec2']['reboot_wait'] &&
+    node['harness']['ec2']['reboot_wait'] == true
+
+    unless bootstrap_created
+      sleep_time = 60
+      log "Waiting #{sleep_time} seconds for bootstrap node to reboot in case of disk resizing"
+      execute 'wait_for_reboots' do
+        command "sleep #{sleep_time}"
+        action :run
+      end
     end
   end
 end
@@ -254,8 +263,14 @@ def installer_path(ec_package)
   ::File.join(node['harness']['vm_mountpoint'], ec_package)
 end
 
+def search_bootstrap_node_ip
+  search(:node, "name:#{topo.bootstrap_node_name}").map { |n| n.ipaddress }.first
+end
+
 def privatechef_attributes
   packages = package_attributes
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'])
+
   attributes = node['harness']['vm_config'].to_hash
   attributes['configuration'] = {} unless attributes['configuration']
   attributes['installer_file'] = packages['ec']
@@ -269,10 +284,13 @@ def privatechef_attributes
   unless packages['analytics'] == nil
     attributes['analytics_installer_file'] = packages['analytics']
     attributes['configuration']['dark_launch'] = { 'actions' => true }
-    attributes['configuration']['rabbitmq'] = {
-      'vip' => attributes['backend_vip']['ipaddress'],
-      'node_ip_address' => '0.0.0.0'
-    }
+    attributes['configuration']['rabbitmq'] = {}
+    attributes['configuration']['rabbitmq']['node_ip_address'] = '0.0.0.0'
+    if topo.is_ha?
+      attributes['configuration']['rabbitmq']['vip'] = attributes['backend_vip']['ipaddress']
+    else
+      attributes['configuration']['rabbitmq']['vip'] = topo.bootstrap_host_name
+    end
   end
   attributes
 end
