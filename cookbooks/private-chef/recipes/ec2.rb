@@ -12,25 +12,27 @@ end
 
 # Resize EBS root volume
 # special case for RHEL/HVM AMIs that require a reboot to notice the resized disk
-if is_gpt?(rootdisk) && node['platform_family'] == 'rhel'
-  reboot 'diskresize' do
-    action :cancel
-    delay_mins 1
-  end
+if node['platform_family'] == 'rhel' && node['platform_version'].to_f < 7.1
+  if is_gpt?(rootdisk)
+    reboot 'diskresize' do
+      action :cancel
+      delay_mins 1
+    end
 
-  package 'gdisk'
+    package 'gdisk'
 
-  execute 'Resize root EBS volume' do
-    command "growpart --update off #{rootdisk} #{rootpartition} && touch /.root_resized"
-    action :run
-    not_if { ::File.exists?('/.root_resized') }
-    notifies :request_reboot, 'reboot[diskresize]'
-  end
-else
-  execute 'Resize root EBS volume' do
-    command "resize2fs #{rootdev} && touch /.root_resized"
-    action :run
-    not_if { ::File.exists?('/.root_resized') }
+    execute 'Resize root EBS volume' do
+      command "growpart --update off #{rootdisk} #{rootpartition} && touch /.root_resized"
+      action :run
+      not_if { ::File.exists?('/.root_resized') }
+      notifies :request_reboot, 'reboot[diskresize]'
+    end
+  else
+    execute 'Resize root EBS volume' do
+      command "resize2fs #{rootdev} && touch /.root_resized"
+      action :run
+      not_if { ::File.exists?('/.root_resized') }
+    end
   end
 end
 
