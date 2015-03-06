@@ -44,7 +44,7 @@ if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend
     }
   end
 
-  template '/var/opt/opscode/keepalived/bin/custom_backend_storage' do
+  template '/var/opt/opscode/keepalived/bin/ha_backend_storage' do
     source 'custom_backend_storage.ebs.erb'
     owner 'root'
     group 'root'
