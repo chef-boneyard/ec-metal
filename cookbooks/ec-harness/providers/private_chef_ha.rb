@@ -25,7 +25,7 @@ end
 
 action :cloud_create do
  # Dumb hack to populate all of our machines first, for dynamic name/IP provisioners
-  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], include_layers: ec_layers)
+  topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['loadtesters'])
   bootstrap_created = cloud_machine_created?(topo.bootstrap_node_name)
 
   machine_batch 'cloud_create' do
