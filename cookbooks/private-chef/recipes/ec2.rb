@@ -5,6 +5,8 @@ topology = TopoHelper.new(ec_config: node['private-chef'])
 rootdev = node.filesystem.select { |k,v| v['mount'] == '/' }.keys.first
 rootdisk, rootpartition = rootdev.partition(/[0-9]/)
 
+ephemeraldev = node.filesystem.select { |k,v| v['mount'] == '/mnt' }.keys.first || '/dev/null'
+
 def is_gpt?(rootdisk)
   parted = `parted #{rootdisk} print -ms | grep ^#{rootdisk}`.split(':')[5]
   parted == 'gpt'
@@ -41,6 +43,15 @@ execute 'Unmount /mnt' do
   command 'umount -f /mnt'
   action :run
   only_if 'grep /mnt /proc/mounts'
+  notifies :run, 'execute[wipe-ephemeral-disk]'
+end
+
+# stupid wipe trick because of https://github.com/opscode-cookbooks/lvm/issues/45
+execute 'wipe-ephemeral-disk' do
+  command "dd if=/dev/zero of=#{ephemeraldev} bs=1M count=10"
+  action :nothing
+  only_if "file -sL #{ephemeraldev} | grep ext3"
+  only_if { node['platform_family'] == 'rhel' && node['platform_version'].to_i == 7 }
 end
 
 execute 'Remove /mnt from fstab' do
