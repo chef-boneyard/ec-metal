@@ -9,14 +9,13 @@ when 'rhel'
 end
 
 include_recipe 'lvm::default'
-
-# because of https://github.com/opscode-cookbooks/lvm/issues/43
-service 'lvm2-lvmetad' do
-  supports :status => true, :restart => true, :reload => true
-  action [ :enable, :start ]
-  provider Chef::Provider::Service::Systemd
-  only_if { node['platform_family'] == 'rhel'}
-  only_if { node['platform_version'].to_i == 7 }
+# Start+Enable the lvmetad service on RHEL7, it is enabled by default
+if node['platform_family'] == 'rhel' && node['platform_version'].to_i >= 7
+  service 'lvm2-lvmetad' do
+    action [:enable, :start]
+    provider Chef::Provider::Service::Systemd
+    only_if '/sbin/lvm dumpconfig global/use_lvmetad | grep use_lvmetad=1'
+  end
 end
 
 topology = TopoHelper.new(ec_config: node['private-chef'])
