@@ -28,6 +28,8 @@ desc 'Bring the VMs online and install/configure Enterprise Chef. Optionally: "r
 task :up => :setup do
   log_level = ARGV.select {|i| i =~ /debug|info|warn|error|fatal/}.last
   EcMetal::Api.up(log_level)
+  Rake::Task['add_hosts'].reenable
+  Rake::Task['add_hosts'].invoke
 end
 task :start => :up
 
@@ -57,6 +59,8 @@ end
 desc 'Destroy all VMs'
 task :destroy do
   EcMetal::Api.destroy
+  Rake::Task['remove_hosts'].reenable
+  Rake::Task['remove_hosts'].invoke
 end
 task :cleanup => :destroy
 
