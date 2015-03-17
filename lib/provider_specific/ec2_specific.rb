@@ -4,17 +4,31 @@ module EcMetal
   class Ec2Specific < ProviderSpecific
     # Creates the keys needed to create the vagrant nodes.  Don't bother recreating if keys already exist
     def node_keys(keydir)
-      if ENV['ECM_KEYPAIR_NAME'].nil?
-        raise "ECM_KEYPAIR_NAME must be set for EC2 runs. ECM_KEYPAIR_PATH defaults to ~/.ssh"
-      end
-
-      keypair_path = ENV['ECM_KEYPAIR_PATH'] || '~/.ssh'
-
       FileUtils.mkdir_p keydir
-      if Dir["#{keydir}/*"].empty?
-        private_key, public_key = normalize_keypair_name(ENV['ECM_KEYPAIR_NAME'])
-        FileUtils.ln_s("#{keypair_path}/#{private_key}", "#{keydir}/id_rsa")
-        FileUtils.ln_s("#{keypair_path}/#{public_key}", "#{keydir}/id_rsa.pub")
+
+      if ENV['ECM_KEYPAIR_PATH']
+        keypair_path = ENV['ECM_KEYPAIR_PATH']
+
+        if Dir["#{keydir}/*"].empty?
+          private_key, public_key = normalize_keypair_name(ENV['ECM_KEYPAIR_NAME'])
+          # If you followed the instructions and made your ssh key like "irving@ec-metal.pem"
+          if File.exist?(File.join(keypair_path, private_key))
+            FileUtils.ln_s("#{keypair_path}/#{private_key}", "#{keydir}/id_rsa")
+            FileUtils.ln_s("#{keypair_path}/#{public_key}", "#{keydir}/id_rsa.pub")
+          # if you set up an ECM_KEYPAIR_PATH, but your ssh key is named "id_rsa"
+          elsif File.exist?(File.join(keypair_path, 'id_rsa'))
+            FileUtils.ln_s("#{keypair_path}/id_rsa", "#{keydir}/id_rsa")
+            FileUtils.ln_s("#{keypair_path}/id_rsa.pub", "#{keydir}/id_rsa.pub")
+          else
+            raise "ERROR: You set an $ECM_KEYPAIR_PATH of #{keypair_path} but didn't put any ssh keys in there!"
+          end
+        end
+      else
+        # Legacy mode, like the old, simple days
+        if Dir["#{keydir}/*"].empty?
+          comment = ENV['ECM_KEYPAIR_NAME'].nil? ? "" : "-C #{ENV['ECM_KEYPAIR_NAME']}"
+          Api.run("ssh-keygen #{comment} -P '' -q -f #{keydir}/id_rsa")
+        end
       end
     end
 

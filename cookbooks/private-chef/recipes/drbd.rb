@@ -5,18 +5,19 @@ when 'debian'
 when 'rhel'
   include_recipe 'yum-epel'
   include_recipe 'yum-elrepo'
+  # while we wait for the RHEL7.1 drbd module to get promoted to elrepo stable:
+  include_recipe 'yum-elrepo::testing' if node['platform_version'].to_f == 7.1
   package 'psmisc'
 end
 
 include_recipe 'lvm::default'
-
-# because of https://github.com/opscode-cookbooks/lvm/issues/43
-service 'lvm2-lvmetad' do
-  supports :status => true, :restart => true, :reload => true
-  action [ :enable, :start ]
-  provider Chef::Provider::Service::Systemd
-  only_if { node['platform_family'] == 'rhel'}
-  only_if { node['platform_version'].to_i == 7 }
+# Start+Enable the lvmetad service on RHEL7, it is enabled by default
+if node['platform_family'] == 'rhel' && node['platform_version'].to_i >= 7
+  service 'lvm2-lvmetad' do
+    action [:enable, :start]
+    provider Chef::Provider::Service::Systemd
+    only_if '/sbin/lvm dumpconfig global/use_lvmetad | grep use_lvmetad=1'
+  end
 end
 
 topology = TopoHelper.new(ec_config: node['private-chef'])
@@ -44,7 +45,7 @@ if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend
     }
   end
 
-  template '/var/opt/opscode/keepalived/bin/custom_backend_storage' do
+  template '/var/opt/opscode/keepalived/bin/ha_backend_storage' do
     source 'custom_backend_storage.ebs.erb'
     owner 'root'
     group 'root'

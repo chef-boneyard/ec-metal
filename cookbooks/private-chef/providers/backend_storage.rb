@@ -189,16 +189,6 @@ def create_lvm(disks, mountpoint = nil)
     stupid_chown_trick = true
   end
 
-  # stupid wipe trick because of https://github.com/opscode-cookbooks/lvm/issues/45
-  # yes, this scares me also, so comment out until CS12 actually supports RHEL7
-  # disks.each do |disk|
-  #   execute "wipe #{disk} signature" do
-  #     command "dd if=/dev/zero of=#{disk} bs=1M count=10"
-  #     action :run
-  #     only_if "file -sL #{disk} | grep ext3"
-  #   end
-  # end
-
   fs_type = fstype
   lvm_volume_group 'opscode' do
     physical_volumes disks

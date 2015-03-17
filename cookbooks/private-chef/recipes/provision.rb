@@ -28,6 +28,7 @@ if Gem::Version.new(PackageHelper.private_chef_installed_version(node)) > Gem::V
 else
   package installer_name do
     source installer_path
+    provider Chef::Provider::Package::Rpm if platform_family?('rhel')
     provider Chef::Provider::Package::Dpkg if platform_family?('debian')
     action :install
   end

@@ -17,7 +17,7 @@ def fog_populate_ips(config)
 
   get_running_server_ips(config['ec2_options']['region']).each do |entry|
 
-    topo = TopoHelper.new(ec_config: config['layout'])
+    topo = TopoHelper.new(ec_config: config['layout'], exclude_layers: ['loadtesters'])
     topo.found_topo_types.each do |whichend|
       next unless config['layout'][whichend][entry['name']]
       config['layout'][whichend][entry['name']]['ipaddress'] = entry['ipaddress']
@@ -32,7 +32,11 @@ def fog_populate_ips(config)
         config['layout']['virtual_hosts'][config['layout']['api_fqdn']] = entry['ipaddress']
       end
 
-      if whichend == 'analytics'
+      if whichend == 'analytics_frontends'
+        config['layout']['virtual_hosts'][config['layout']['analytics_fqdn']] = entry['ipaddress']
+      end
+
+      if whichend == 'analytics_standalones'
         config['layout']['virtual_hosts'][config['layout']['analytics_fqdn']] = entry['ipaddress']
       end
 

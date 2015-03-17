@@ -28,6 +28,8 @@ desc 'Bring the VMs online and install/configure Enterprise Chef. Optionally: "r
 task :up => :setup do
   log_level = ARGV.select {|i| i =~ /debug|info|warn|error|fatal/}.last
   EcMetal::Api.up(log_level)
+  Rake::Task['add_hosts'].reenable
+  Rake::Task['add_hosts'].invoke
 end
 task :start => :up
 
@@ -57,6 +59,8 @@ end
 desc 'Destroy all VMs'
 task :destroy do
   EcMetal::Api.destroy
+  Rake::Task['remove_hosts'].reenable
+  Rake::Task['remove_hosts'].invoke
 end
 task :cleanup => :destroy
 
@@ -109,30 +113,9 @@ task :berks_install do
   EcMetal::Api.berks_install
 end
 
-# Fix to work with topohelper
-# desc "Runs remote commands via ssh.  Usage remote[servername, 'command args string']"
-# # "knife-opc user create rockawesome patrick wright patrick@getchef.com password"
-# # "knife-opc org create myorg2 supercoolorg -a rockawesome"
-# task :remote, [:machine, :command] do |t, arg|
-#   configip = fog_populate_ips(get_config)
-#   %w(backends frontends standalones).each do |whichend|
-#     configip['layout'][whichend].each do |node,attrs|
-#       if node == arg[:machine]
-#         case configip['provider']
-#           when 'ec2'
-#             ssh_username = configip['ec2_options']['ssh_username'] || 'ec2-user'
-#           when 'vagrant'
-#             ssh_username = 'vagrant'
-#           else
-#             ssh_username = 'root'
-#         end
-#         cmd = "ssh #{ssh_username}@#{attrs['ipaddress']} -o StrictHostKeyChecking=no -i #{File.join(harness_dir, 'keys')}/id_rsa \"#{arg[:command]}\""
-#         puts "Executing '#{arg[:command]}' on #{arg[:machine]}"
-#         sh(cmd)
-#       end
-#     end
-#   end
-# end
+task :berks_update do
+  EcMetal::Api.berks_update
+end
 
 desc "Open csshx to the nodes of the server."
 task :csshx do
