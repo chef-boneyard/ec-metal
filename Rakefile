@@ -39,12 +39,6 @@ task :pedant => :setup do
 end
 task :verify => :pedant
 
-desc 'Bring the VMs online and then UPGRADE TORTURE'
-task :upgrade_torture => :setup do
-  EcMetal::Api.create_users_directory
-  shellout_chef_client('ec-harness::upgrade_torture')
-end
-
 desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
 task :upgrade => :setup do
   EcMetal::Api.create_users_directory
