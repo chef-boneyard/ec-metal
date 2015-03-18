@@ -12,6 +12,6 @@ cookbook 'yum-epel'
 cookbook 'docker', '~> 0.0'
 cookbook 'chef-client'
 
-cookbook 'push-jobs'
+cookbook 'push-jobs', :git => "https://github.com/manderson26/push-jobs", :branch => "ma/fix_containers"
 
 cookbook 'ec-tools', :git => 'https://github.com/irvingpop/ec-tools'
