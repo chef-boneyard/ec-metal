@@ -12,7 +12,7 @@ machine_batch 'cloud_create' do
       machine_options machine_options_for_provider(vmname, config)
       attribute 'private-chef', privatechef_attributes
       attribute 'root_ssh', node['harness']['root_ssh'].to_hash
-      attribute 'cloud', cloud_attributes('ec2')
+      attribute 'cloud', cloud_attributes(node['harness']['provider'])
       recipe 'private-chef::hostname'
       recipe 'private-chef::ec2'
     end
