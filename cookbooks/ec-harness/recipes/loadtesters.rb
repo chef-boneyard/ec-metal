@@ -4,10 +4,9 @@ require 'chef/config'
 
 include_recipe "ec-harness::#{node['harness']['provider']}"
 
-topo = TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['loadtesters'])
 if node['harness']['ec2']
   fog = FogHelper.new(region: node['harness']['ec2']['region'])
-  elb_name = topo.bootstrap_host_name.gsub(/[.]/, '-')
+  elb_name = ecm_topo.bootstrap_host_name.gsub(/[.]/, '-')
 end
 
 # use bootstrap_host_name - it should be in /etc/hosts already
@@ -23,7 +22,7 @@ chef_user_pem = ::File.join(users_path, chef_user, '.chef', "#{chef_user}.pem")
 if node['harness']['ec2'] && node['harness']['ec2']['elb'] && node['harness']['ec2']['elb'] == true
   chef_server =  fog.get_elb_dns_name(elb_name)
 else
-  chef_server = ::Resolv.getaddress(topo.bootstrap_host_name)
+  chef_server = ::Resolv.getaddress(ecm_topo.bootstrap_host_name)
 end
 chef_server_url = "https://#{chef_server}/organizations/#{chef_org}"
 harness_knife_bin = ::File.join(node['harness']['harness_dir'], 'bin', 'knife')
@@ -33,7 +32,7 @@ berks_config = ::File.join(node['harness']['repo_path'], 'berks_config.json')
 
 # OMG please save me from the below horribleness
 execute 'rsync user keys' do
-  command "rsync -avz --delete -e 'ssh -i #{private_key_path}' root@#{topo.bootstrap_host_name}:/srv/piab/users/ #{users_path}"
+  command "rsync -avz --delete -e 'ssh -i #{private_key_path}' root@#{ecm_topo.bootstrap_host_name}:/srv/piab/users/ #{users_path}"
   action :run
 end
 
@@ -83,12 +82,12 @@ machine_batch 'fly_my_pretties_fly' do
 
       1.upto(node['harness']['loadtesters']['num_loadtesters']) do |i|
         machine "#{ENV['USER']}-loadtester-#{i}" do
-          add_machine_options node['harness']['provisioner_options'][vmname]
+          machine_options machine_options_for_provider(vmname, config)
           attribute 'root_ssh', node['harness']['root_ssh'].to_hash
 
           recipe 'loadtester_host::default'
           file '/etc/chef/validation.pem', chef_org_validation_pem
-          file '/etc/chef/ohai/hints/ec2.json', '/etc/hosts.equiv'  #fixme, make an empty file
+          # file '/etc/chef/ohai/hints/ec2.json', '/etc/hosts.equiv'  #fixme, make an empty file
           # converge true
         end
       end
