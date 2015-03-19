@@ -2,6 +2,16 @@
 
 class VagrantConfigHelper
 
+  def self.generate_config(vnmame, config, node)
+    local_provisioner_options = {
+      :vagrant_options => {
+        'vm.box' => node['harness']['vagrant']['box'],
+        'vm.box_url' => node['harness']['vagrant']['box_url']
+      },
+      'vagrant_config' => generate_vagrant_config(vmname, config, node)
+    }
+  end
+
   def self.generate_vagrant_config(vmname, config, node)
     # Vagrant/Virtualbox notes:
     # * it sucks that you have to hardcode "IDE Controller", recent opscode
