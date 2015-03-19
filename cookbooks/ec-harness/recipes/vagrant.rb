@@ -1,5 +1,4 @@
-require 'cheffish'
-require 'chef_metal_vagrant'
+require 'chef/provisioning/vagrant_driver'
 
 harness_dir = node['harness']['harness_dir']
 repo_path = node['harness']['repo_path']

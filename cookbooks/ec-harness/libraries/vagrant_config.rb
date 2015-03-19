@@ -2,7 +2,7 @@
 
 class VagrantConfigHelper
 
-  def self.generate_config(vnmame, config, node)
+  def self.generate_config(vmname, config, node)
     local_provisioner_options = {
       :vagrant_options => {
         'vm.box' => node['harness']['vagrant']['box'],
