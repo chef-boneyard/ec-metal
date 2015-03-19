@@ -2,7 +2,7 @@ require_relative 'provider_specific/provider_specific.rb'
 
 require "mixlib/shellout"
 require 'pathname'
-require 'bundler'
+# require 'bundler'
 
 module EcMetal
   class Api
@@ -18,7 +18,7 @@ module EcMetal
       ENV['ECM_CHEF_REPO'] = repo_dir
 
       # Optionally pass "debug" argument from the "rake up" task to the chef-client run
-      chef_client_command = "bundle exec chef-client --config #{KNIFE} -z -o ec-harness::private_chef_ha --force-formatter"
+      chef_client_command = "chef-client --config #{KNIFE} -z -o ec-harness::default --force-formatter"
 
       if log_level
         chef_client_command += " -l #{log_level}"
@@ -31,7 +31,7 @@ module EcMetal
     def self.destroy
       ENV['HARNESS_DIR'] = harness_dir
       ENV['ECM_CHEF_REPO'] = repo_dir
-      run("bundle exec chef-client --config #{KNIFE} -z -o ec-harness::cleanup --force-formatter")
+      run("chef-client --config #{KNIFE} -z -o ec-harness::cleanup --force-formatter")
     end
 
     def self.config
@@ -50,7 +50,6 @@ module EcMetal
       keygen
       cachedir
       config_copy
-      bundle
       berks_install
     end
 
@@ -90,18 +89,18 @@ module EcMetal
       # harness dir may be something other than the ec-metal dir, so we need to explicitly set it
       berks_file = Pathname.new(File.dirname(__FILE__)).parent.to_s + "/Berksfile"
       run("rm -r #{cookbooks_path}") if Dir.exists?(cookbooks_path)
-      run("bundle exec berks vendor --berksfile='#{berks_file}' #{cookbooks_path}")
+      run("berks vendor -q --berksfile='#{berks_file}' #{cookbooks_path}")
     end
 
     def self.berks_update
       berks_file = Pathname.new(File.dirname(__FILE__)).parent.to_s + "/Berksfile"
-      run("bundle exec berks update --berksfile='#{berks_file}'")
+      run("berks update --berksfile='#{berks_file}'")
     end
 
     # Only run this for ec-metal without wrappers
-    def self.bundle
-      run("bundle install --path vendor/bundle --binstubs", 3*MINUTE_IN_DEC_SECS)
-    end
+    # def self.bundle
+    #   run("bundle install --path vendor/bundle --binstubs", 3*MINUTE_IN_DEC_SECS)
+    # end
 
     # Environment variables to be consumed by ec-harness and friends
     def self.harness_dir
@@ -120,7 +119,7 @@ module EcMetal
       STDOUT.sync = true
 
       printable_env = ENV.to_a.map{|val| val.join('=')}.join(' ')
-      puts "#{command} from #{harness_dir} with env #{printable_env}"
+      puts "#{command} from #{harness_dir}"
 
       shellout_params = {:env => ENV.to_hash, :cwd => harness_dir, :live_stream => STDOUT}
       shellout_params[:timeout] = timeout unless timeout.nil?
@@ -128,9 +127,9 @@ module EcMetal
       # TODO(jmink) determine why this env var needs to be set externally
       run = Mixlib::ShellOut.new("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{command}", shellout_params)
       run.run_command
-      puts run.stdout
-      puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
-      run.error!
+      # puts run.stdout
+      # puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
+      # run.error!
     end
   end
 end

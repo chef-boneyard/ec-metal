@@ -19,10 +19,10 @@ def shellout_chef_client(run_list)
   sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o #{run_list} --force-formatter")
 end
 
-desc 'Install required Gems into the vendor/bundle directory'
-task :bundle do
-  EcMetal::Api.bundle
-end
+# desc 'Install required Gems into the vendor/bundle directory'
+# task :bundle do
+#   EcMetal::Api.bundle
+# end
 
 desc 'Bring the VMs online and install/configure Enterprise Chef. Optionally: "rake up debug" for verbose output'
 task :up => :setup do
