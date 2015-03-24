@@ -10,10 +10,10 @@
     "use_private_ip_for_ssh": false,
     "elb": true
   },
-  "default_package": "https://web-dl.packagecloud.io/chef/stable/packages/el/6/private-chef-11.2.5-1.el6.x86_64.rpm",
-  "manage_package": "https://web-dl.packagecloud.io/chef/stable/packages/el/6/opscode-manage-1.6.2-1.el6.x86_64.rpm",
-  "reporting_package": "https://web-dl.packagecloud.io/chef/stable/packages/el/6/opscode-reporting-1.1.5-1.el6.x86_64.rpm",
-  "analytics_package": "https://web-dl.packagecloud.io/chef/stable/packages/el/6/opscode-analytics-1.0.4-1.el6.x86_64.rpm",
+  "default_package":   "https://web-dl.packagecloud.io/chef/stable/packages/el/6/chef-server-core-12.0.6-1.el6.x86_64.rpm",
+  "manage_package":    "https://web-dl.packagecloud.io/chef/stable/packages/el/6/opscode-manage-1.11.2-1.el5.x86_64.rpm",
+  "reporting_package": "https://web-dl.packagecloud.io/chef/stable/packages/el/6/opscode-reporting-1.2.3-1.x86_64.rpm",
+  "analytics_package": "https://web-dl.packagecloud.io/chef/stable/packages/el/6/opscode-analytics-1.1.1-1.x86_64.rpm",
   "apply_ec_bugfixes": false,
   "lemme_doit": false,
   "loadtesters": {

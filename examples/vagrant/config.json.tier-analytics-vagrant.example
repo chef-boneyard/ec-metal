@@ -7,9 +7,9 @@
     "disk2_size": "2"
   },
   "apply_ec_bugfixes": false,
-  "default_package": "private-chef_11.1.8-1_amd64.deb",
-  "manage_package": "opscode-manage_1.5.4-1_amd64.deb",
-  "analytics_package": "opscode-analytics_1.1.0-pre.1+20140825164752.git.2.69afcef-1_amd64.deb",
+  "default_package":   "chef-server-core_12.0.6-1_amd64.deb",
+  "manage_package":    "opscode-manage_1.11.2-1_amd64.deb",
+  "reporting_package": "opscode-reporting_1.2.3-1_amd64.deb",
   "packages": {
   },
   "layout": {
