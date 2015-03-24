@@ -1,23 +1,17 @@
 {
   "provider": "vagrant",
   "vagrant_options": {
-    "box": "opscode-centos-6.5",
-    "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.5_chef-provisionerless.box",
+    "box": "opscode-centos-6.6",
+    "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.6_chef-provisionerless.box",
     "disk2_size": "2"
   },
-  "apply_ec_bugfixes": true,
-  "default_package": "private-chef-11.1.3-1.el6.x86_64.rpm",
-  "manage_package": "opscode-manage-1.3.1-1.el6.x86_64.rpm",
+  "default_package": "chef-server-core-12.0.6-1.el6.x86_64.rpm",
+  "manage_package": "opscode-manage-1.11.2-1.el5.x86_64.rpm",
+  "reporting_package": "opscode-reporting-1.2.3-1.x86_64.rpm",
   "manage_options": {
     "public_port": 443,
     "platform.user": "pivotal",
     "disable_sign_up" : false
-  },
-  "packages": {
-    "PC1.2": "private-chef-1.2.8.2-1.el6.x86_64.rpm",
-    "PC1.4": "private-chef-1.4.6-1.el6.x86_64.rpm",
-    "EC11.0": "private-chef-11.0.2-1.el6.x86_64.rpm",
-    "EC11.1": "private-chef-11.1.3-1.el6.x86_64.rpm"
   },
   "layout": {
     "topology": "ha",

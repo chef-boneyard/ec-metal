@@ -5,7 +5,7 @@
     "box_url": "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.5_chef-provisionerless.box",
     "disk2_size": "2"
   },
-  "apply_ec_bugfixes": true,
+  "apply_ec_bugfixes": false,
   "osc_upgrade": true,
   "run_pedant" : true,
   "default_package": "private-chef-11.1.5+20140726004923.git.263.ff8e2dc-1.el6.x86_64.rpm",
