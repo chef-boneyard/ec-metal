@@ -22,9 +22,9 @@ module EcHarness
       nodeinfo = rest.get("/nodes/#{vmname}")
     rescue Net::HTTPServerException
       # Handle the 404 meaning the machine hasn't been created yet
-      nodeinfo = {'normal' => { 'metal' => {} } }
+      nodeinfo = {'normal' => { 'chef_provisioning' => {} } }
     end
-    driver_info = nodeinfo['normal']['metal']['location'] || {}
+    driver_info = nodeinfo['normal']['chef_provisioning']['location'] || {}
     return true if driver_info.has_key?('server_id')
     false
   end
@@ -68,10 +68,10 @@ module EcHarness
       attributes['configuration']['dark_launch'] = { 'actions' => true }
       attributes['configuration']['rabbitmq'] = {}
       attributes['configuration']['rabbitmq']['node_ip_address'] = '0.0.0.0'
-      if topo.is_ha?
+      if ecm_topo.is_ha?
         attributes['configuration']['rabbitmq']['vip'] = attributes['backend_vip']['ipaddress']
       else
-        attributes['configuration']['rabbitmq']['vip'] = topo.bootstrap_host_name
+        attributes['configuration']['rabbitmq']['vip'] = ecm_topo.bootstrap_host_name
       end
     end
     attributes
