@@ -2,7 +2,7 @@
 
 class PackageHelper
 
-  UNINSTALLED_VERSION = '0.0.0'
+  UNINSTALLED_VERSION ||= '0.0.0'
 
   def self.package_version(package)
     version = UNINSTALLED_VERSION
@@ -34,6 +34,8 @@ class PackageHelper
     else
       UNINSTALLED_VERSION
     end
+  rescue NoMethodError
+    UNINSTALLED_VERSION
   end
 
   def self.private_chef_installed_version(node)
