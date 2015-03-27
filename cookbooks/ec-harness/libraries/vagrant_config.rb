@@ -8,7 +8,7 @@ class VagrantConfigHelper
         'vm.box' => node['harness']['vagrant']['box'],
         'vm.box_url' => node['harness']['vagrant']['box_url']
       },
-      'vagrant_config' => generate_vagrant_config(vmname, config, node)
+      :vagrant_config => generate_vagrant_config(vmname, config, node)
     }
   end
 
