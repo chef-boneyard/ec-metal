@@ -24,11 +24,16 @@ This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA c
 
 <a name="start" />
 ## Getting Started
+
+### Requirements
+
+ec-metal requires ChefDK.  It has been tested and known to work with ChefDK 0.4.0 and future versions.  Please [download ChefDK from here](https://downloads.chef.io/chef-dk/) and set it as your default Ruby [following these instructions](https://docs.chef.io/install_dk.html)
+
 ### A config.json
 First you need a config.  You can choose one from examples/<name>.json or you can generate a config with the create_config rake task.
 
 Config creation example:
-`ECM_TARGET_PACKAGE_NAME='https://packagecloud.io/chef/stable/download?distro=precise&filename=private-chef_11.2.2-1_amd64.deb' bundle exec rake create_config[tier,private_chef,ubuntu-12.04,ec2]`
+`ECM_TARGET_PACKAGE_NAME='https://packagecloud.io/chef/stable/download?distro=precise&filename=private-chef_11.2.2-1_amd64.deb' rake create_config[tier,private_chef,ubuntu-12.04,ec2]`
 
 create_config known issues:
 * The default package isn't filled in unless you set the ECM_TARGET_PACKAGE_NAME env var.  Just edit the config manually
@@ -53,9 +58,9 @@ I've found I generally need the following env vars:
 * HARNESS_DIR - Where the chef repo should be and any extra ec-metal related files (example: $PWD)
 * ECM_CONFIG - Where the config from the last step is (example: $PWD/config.json)
 
-It's generally least surprising to put all these on the command line as NAME0=var0 .... NAMEn=varn bundle exec rake up
+It's generally least surprising to put all these on the command line as NAME0=var0 .... NAMEn=varn rake up
 
-Note rake up will often fail on the `bundle exec chef-client --config $PWD/.chef/knife.rb -z -o ec-harness::private_chef_ha` command with little explanation.  You can run that command with the above env vars to try and pry deeper into the maw of the beast.
+Note rake up will often fail on the `chef-client --config $PWD/.chef/knife.rb -z -o ec-harness::private_chef_ha` command with little explanation.  You can run that command with the above env vars to try and pry deeper into the maw of the beast.
 
 ### Useful hacks
 Things I've found that help get around issues:
@@ -96,19 +101,19 @@ Things I've found that help get around issues:
     }
 
 ### Example rake up command
-`ECM_KEYPAIR_PATH=~/oc/keys/ ECM_KEYPAIR_NAME=jmink REPO_PATH=$PWD/chef-repo ECM_CHEF_REPO=$PWD/chef-repo HARNESS_DIR=$PWD ECM_CONFIG=/Users/jmink/oc/ec-metal/config.json bundle exec rake up`
+`ECM_KEYPAIR_PATH=~/oc/keys/ ECM_KEYPAIR_NAME=jmink REPO_PATH=$PWD/chef-repo ECM_CHEF_REPO=$PWD/chef-repo HARNESS_DIR=$PWD ECM_CONFIG=/Users/jmink/oc/ec-metal/config.json rake up`
 
 
 ### Destroy
 When you're all done, or are getting strange errors that you think might be due to corrupted state try running:
-`<all the env vars> bundle exec rake destroy`
+`<all the env vars> rake destroy`
 
 What destroy does is kill all your current state and shut down the virtual machines you've been working with so the next rake up command will have a fresh slate.
 
 Unfortunately it needs all the env vars spoken of above in the up command to work properly.
 
 Here's an example with all the env vars:
-`ECM_KEYPAIR_PATH=~/oc/keys/ ECM_KEYPAIR_NAME=jmink REPO_PATH=$PWD/chef-repo ECM_CHEF_REPO=$PWD/chef-repo HARNESS_DIR=$PWD ECM_CONFIG=/Users/jmink/oc/ec-metal/config.json bundle exec rake destroy`
+`ECM_KEYPAIR_PATH=~/oc/keys/ ECM_KEYPAIR_NAME=jmink REPO_PATH=$PWD/chef-repo ECM_CHEF_REPO=$PWD/chef-repo HARNESS_DIR=$PWD ECM_CONFIG=/Users/jmink/oc/ec-metal/config.json rake destroy`
 
 If you're having trouble getting the destroy to work and you just need to nuke things from orbit you can rm the chef-repo dir and then kill the machines by hand through the ec2 interface (https://console.aws.amazon.com/ec2/v2/home?region=us-west-2#Instances) or through virtual box.
 
