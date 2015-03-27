@@ -10,10 +10,10 @@
     "use_private_ip_for_ssh": false,
     "elb": true
   },
-  "default_package":   "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/trusty/chef-server-core_12.0.6-1_amd64.deb",
+  "default_package":   "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/trusty/chef-server-core_12.0.7-1_amd64.deb",
   "manage_package":    "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/trusty/opscode-manage_1.11.2-1_amd64.deb",
   "reporting_package": "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/trusty/opscode-reporting_1.2.3-1_amd64.deb",
-  "analytics_package": "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/trusty/opscode-analytics_1.1.1-1_amd64.deb",
+  "analytics_package": "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/trusty/opscode-analytics_1.1.2-1_amd64.deb",
   "apply_ec_bugfixes": false,
   "lemme_doit": false,
   "loadtesters": {
