@@ -8,14 +8,10 @@ repo_path = node['harness']['repo_path']
 with_chef_local_server :chef_repo_path => repo_path,
   :cookbook_path => [ File.join(harness_dir, 'cookbooks'),
                       File.join(repo_path, 'cookbooks'),
-    File.join(repo_path, 'vendor', 'cookbooks') ],
-    :port => 9010.upto(9999)
+                      File.join(repo_path, 'vendor', 'cookbooks') ],
+  :port => 9010.upto(9999)
 
 with_driver "fog:AWS:default:#{node['harness']['ec2']['region']}"
-
-# with_machine_options :ssh_username => node['harness']['ec2']['ssh_username'],
-#   :use_private_ip_for_ssh => node['harness']['ec2']['use_private_ip_for_ssh']
-
 
 # override all keypair settings if passed as env var
 node.set['harness']['ec2']['keypair_name'] = ENV['ECM_KEYPAIR_NAME'] unless ENV['ECM_KEYPAIR_NAME'].nil?

@@ -69,7 +69,6 @@ execute 'ghetto-berks-uploader' do
   action :run
 end
 
-
 # finally back to the task at hand
 with_chef_server chef_server_url,
                  client_name: chef_user,
@@ -87,8 +86,6 @@ machine_batch 'fly_my_pretties_fly' do
 
           recipe 'loadtester_host::default'
           file '/etc/chef/validation.pem', chef_org_validation_pem
-          # file '/etc/chef/ohai/hints/ec2.json', '/etc/hosts.equiv'  #fixme, make an empty file
-          # converge true
         end
       end
 
