@@ -49,6 +49,7 @@ module EcMetal
     # Do all the basic env setup required for the up, upgrade, etc commands
     def self.setup
       check_chefdk
+      cleanup_bundler
       print_enviornment
       keygen
       cachedir
@@ -59,13 +60,24 @@ module EcMetal
     def self.check_chefdk
       printf 'Checking your ChefDK... '
       # output like: Chef Development Kit Version: 0.4.0
-      chefdk_version = `chef --version`.split(':')[1].chomp
+      chefdk_version = `chef --version`.lines.first.split(':')[1].chomp
       unless Gem::Version.new(chefdk_version) >= Gem::Version.new(MINIMUM_CHEFDK_VERSION)
         raise "Your ChefDK version #{chefdk_version} is less than the required version #{MINIMUM_CHEFDK_VERSION}"
       end
       puts 'OK'
     rescue
       raise 'Error detecting ChefDK.  Please install ChefDK and set it as your system Ruby before proceeding: https://docs.chef.io/install_dk.html'
+    end
+
+    def self.cleanup_bundler
+      if Dir.entries(harness_dir).include?('Gemfile.lock')
+        puts 'Cleaning up your artisanally crafted bundled gems, please re-run the rake task to continue'
+        File.delete(File.join(harness_dir, 'Gemfile.lock'))
+        exit 1
+      end
+      if Dir.entries(File.join(harness_dir, 'vendor')).include?('bundle')
+        puts "WARNING: bundle directory detected at #{File.join(harness_dir, 'vendor', 'bundle')}. It is now safe to completely remove it"
+      end
     end
 
     def self.print_enviornment
