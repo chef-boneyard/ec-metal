@@ -7,6 +7,8 @@ require 'pathname'
 module EcMetal
   class Api
 
+    MINIMUM_CHEFDK_VERSION = '0.4.0'
+
     MINUTE_IN_DEC_SECS = 600
     KNIFE = File.join(File.dirname(File.dirname(__FILE__)), '.chef', 'knife.rb')
 
@@ -46,11 +48,24 @@ module EcMetal
 
     # Do all the basic env setup required for the up, upgrade, etc commands
     def self.setup
+      check_chefdk
       print_enviornment
       keygen
       cachedir
       config_copy
       berks_install
+    end
+
+    def self.check_chefdk
+      printf 'Checking your ChefDK... '
+      # output like: Chef Development Kit Version: 0.4.0
+      chefdk_version = `chef --version`.split(':')[1].chomp
+      unless Gem::Version.new(chefdk_version) >= Gem::Version.new(MINIMUM_CHEFDK_VERSION)
+        raise "Your ChefDK version #{chefdk_version} is less than the required version #{MINIMUM_CHEFDK_VERSION}"
+      end
+      puts 'OK'
+    rescue
+      raise 'Error detecting ChefDK.  Please install ChefDK and set it as your system Ruby before proceeding: https://docs.chef.io/install_dk.html'
     end
 
     def self.print_enviornment
