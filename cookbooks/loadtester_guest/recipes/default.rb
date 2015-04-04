@@ -14,3 +14,19 @@ include_recipe 'chef-client::cron'
 service 'cron' do
   action :start
 end
+
+#
+#
+#
+node.set['push_jobs']['init_style'] = 'container'
+
+node.set['push_jobs']['package_url'] = 'https://mark-testing.s3.amazonaws.com/opscode-push-jobs-client_1.1.5-1_amd64.deb?AWSAccessKeyId=AKIAIRISJZOEYLU52WCA&Expires=1457825224&Signature=zm2qixrhrI49RrqRwl1q5%2BsfS7w%3D'
+node.set['push_jobs']['package_checksum'] = 'd7b40ebb18c7c7dbc32322c9bcd721279e707fd1bee3609a37055838afbf67ea'
+
+node.set['push_jobs']['whitelist'] = {
+  "chef-client" => "chef-client",
+  "sleep" => "sleep 5"
+}
+
+include_recipe 'push-jobs::default'
+

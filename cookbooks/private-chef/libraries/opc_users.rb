@@ -46,6 +46,7 @@ class Chef
           execute "create_org_#{orgname}" do
             command "#{knife_opc_cmd} org create #{orgname} #{orgname} -f #{user_root}/#{orgname}-validator.pem"
             action :run
+            returns [0, 100]
           end
 
           users.each do |username|
@@ -82,6 +83,7 @@ class Chef
                          ]
               command cmd_args.join(' ')
               action :run
+              returns [0, 100]
             end
 
             execute "associate_user_#{username}_to_org_#{orgname}" do

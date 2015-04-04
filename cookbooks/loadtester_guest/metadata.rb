@@ -7,3 +7,4 @@ long_description 'Installs/Configures loadtester_guest'
 version          '0.2.1'
 
 depends 'chef-client'
+depends 'push-jobs'

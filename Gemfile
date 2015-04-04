@@ -9,6 +9,7 @@ gem 'berkshelf',          '~> 3.0'
 gem 'chef',               '~> 11.0'
 
 gem 'knife-opc',          '~> 0.1.1'
+gem 'knife-push'
 gem 'rake'
 
 # net-ssh 2.9.2 fails. So pin to 2.9.1.

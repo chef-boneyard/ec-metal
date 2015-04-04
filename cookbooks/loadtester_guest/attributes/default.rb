@@ -10,6 +10,7 @@ default["chef_client"]["splay"] = 1800
 
 # start cron in foreground mode because runit
 default['container_service']['cron']['command'] = "/usr/sbin/cron -f -L15"
+default['container_service']['opscode-push-jobs-client']['command'] = "/opt/opscode-push-jobs-client/bin/pushy-client -c /etc/chef/push-jobs-client.rb"
 
 # set environment
 default['loadtester_guest']['chef_environment'] = 'loadtest'
