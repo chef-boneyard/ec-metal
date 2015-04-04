@@ -1,15 +1,6 @@
 # encoding: utf-8
 
-# Get my hostname from the frontend or backend "hostname" attribute
-def getmyhostname
-  mydata = TopoHelper.new(ec_config: node['private-chef']).merged_topology
-    .select { |k,v| k == node.name }
-    .values
-    .first
-  mydata['hostname']
-end
-
-myhostname = getmyhostname
+myhostname = TopoHelper.new(ec_config: node['private-chef']).myhostname(node.name)
 
 # Opscode-omnibus wants hostname == fqdn, so we have to do this grossness
 execute 'force-hostname-fqdn' do

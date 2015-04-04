@@ -1,0 +1,7 @@
+source "https://supermarket.chef.io"
+
+metadata
+
+cookbook 'ec-tools', :git => 'https://github.com/irvingpop/ec-tools'
+cookbook 'yum-elrepo', :git => 'https://github.com/irvingpop/yum-elrepo', :branch => 'add_elrepo_testing_extras'
+cookbook 'ec-common', :path => '../ec-common'

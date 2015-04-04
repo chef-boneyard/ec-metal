@@ -19,10 +19,10 @@ def shellout_chef_client(run_list)
   sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o #{run_list} --force-formatter")
 end
 
-desc 'Install required Gems into the vendor/bundle directory'
-task :bundle do
-  EcMetal::Api.bundle
-end
+# desc 'Install required Gems into the vendor/bundle directory'
+# task :bundle do
+#   EcMetal::Api.bundle
+# end
 
 desc 'Bring the VMs online and install/configure Enterprise Chef. Optionally: "rake up debug" for verbose output'
 task :up => :setup do
@@ -38,12 +38,6 @@ task :pedant => :setup do
   shellout_chef_client('ec-harness::pedant')
 end
 task :verify => :pedant
-
-desc 'Bring the VMs online and then UPGRADE TORTURE'
-task :upgrade_torture => :setup do
-  EcMetal::Api.create_users_directory
-  shellout_chef_client('ec-harness::upgrade_torture')
-end
 
 desc 'Simple upgrade step, installs the package from default_package. Machines must be running'
 task :upgrade => :setup do

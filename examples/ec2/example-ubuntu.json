@@ -3,40 +3,40 @@
   "ec2_options": {
     "region": "us-west-2",
     "vpc_subnet": "subnet-8b0519ff",
-    "ami_id": "ami-c3abd6f3",
+    "ami_id": "ami-3b14370b",
     "ssh_username": "ubuntu",
     "use_private_ip_for_ssh": false
   },
-  "apply_ec_bugfixes": true,
-  "default_package": "http://s3.amazonaws.com/opscode-private-chef/ubuntu/12.04/x86_64/private-chef_11.1.4-1_amd64.deb",
-  "manage_package": "http://s3.amazonaws.com/opscode-private-chef/ubuntu/12.04/x86_64/opscode-manage_1.3.1-1_amd64.deb",
+  "default_package":   "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/trusty/chef-server-core_12.0.6-1_amd64.deb",
+  "manage_package":    "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/trusty/opscode-manage_1.11.2-1_amd64.deb",
+  "reporting_package": "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/trusty/opscode-reporting_1.2.3-1_amd64.deb",
   "layout": {
     "topology": "ha",
-    "api_fqdn": "api.precise.aws",
-    "manage_fqdn": "manage.precise.aws",
-    "analytics_fqdn": "analytics.precise.aws",
+    "api_fqdn": "api.trusty.aws",
+    "manage_fqdn": "manage.trusty.aws",
+    "analytics_fqdn": "analytics.trusty.aws",
     "backend_vip": {
-      "hostname": "backend.precise.aws",
+      "hostname": "backend.trusty.aws",
       "ipaddress": "33.33.33.10",
       "device": "eth0",
       "heartbeat_device": "eth0"
     },
     "backends": {
       "backend1": {
-        "hostname": "backend1.precise.aws",
+        "hostname": "backend1.trusty.aws",
         "instance_type": "c3.xlarge",
         "ebs_optimized": true,
         "bootstrap": true
       },
       "backend2": {
-        "hostname": "backend2.precise.aws",
+        "hostname": "backend2.trusty.aws",
         "ebs_optimized": true,
         "instance_type": "c3.xlarge"
       }
     },
     "frontends": {
       "frontend1": {
-        "hostname": "frontend1.precise.aws",
+        "hostname": "frontend1.trusty.aws",
         "ebs_optimized": false,
         "instance_type": "m3.medium"
       }

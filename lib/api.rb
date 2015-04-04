@@ -2,10 +2,12 @@ require_relative 'provider_specific/provider_specific.rb'
 
 require "mixlib/shellout"
 require 'pathname'
-require 'bundler'
+# require 'bundler'
 
 module EcMetal
   class Api
+
+    MINIMUM_CHEFDK_VERSION = '0.4.0'
 
     MINUTE_IN_DEC_SECS = 600
     KNIFE = File.join(File.dirname(File.dirname(__FILE__)), '.chef', 'knife.rb')
@@ -18,7 +20,7 @@ module EcMetal
       ENV['ECM_CHEF_REPO'] = repo_dir
 
       # Optionally pass "debug" argument from the "rake up" task to the chef-client run
-      chef_client_command = "bundle exec chef-client --config #{KNIFE} -z -o ec-harness::private_chef_ha --force-formatter"
+      chef_client_command = "chef-client --config #{KNIFE} -z -o ec-harness::default --force-formatter"
 
       if log_level
         chef_client_command += " -l #{log_level}"
@@ -31,7 +33,7 @@ module EcMetal
     def self.destroy
       ENV['HARNESS_DIR'] = harness_dir
       ENV['ECM_CHEF_REPO'] = repo_dir
-      run("bundle exec chef-client --config #{KNIFE} -z -o ec-harness::cleanup --force-formatter")
+      run("chef-client --config #{KNIFE} -z -o ec-harness::cleanup --force-formatter")
     end
 
     def self.config
@@ -46,12 +48,36 @@ module EcMetal
 
     # Do all the basic env setup required for the up, upgrade, etc commands
     def self.setup
+      check_chefdk
+      cleanup_bundler
       print_enviornment
       keygen
       cachedir
       config_copy
-      bundle
       berks_install
+    end
+
+    def self.check_chefdk
+      printf 'Checking your ChefDK... '
+      # output like: Chef Development Kit Version: 0.4.0
+      chefdk_version = `chef --version`.lines.first.split(':')[1].chomp
+      unless Gem::Version.new(chefdk_version) >= Gem::Version.new(MINIMUM_CHEFDK_VERSION)
+        raise "Your ChefDK version #{chefdk_version} is less than the required version #{MINIMUM_CHEFDK_VERSION}"
+      end
+      puts 'OK'
+    rescue
+      raise 'Error detecting ChefDK.  Please install ChefDK and set it as your system Ruby before proceeding: https://docs.chef.io/install_dk.html'
+    end
+
+    def self.cleanup_bundler
+      if Dir.entries(harness_dir).include?('Gemfile.lock')
+        puts 'Cleaning up your artisanally crafted bundled gems, please re-run the rake task to continue'
+        File.delete(File.join(harness_dir, 'Gemfile.lock'))
+        exit 1
+      end
+      if Dir.entries(File.join(harness_dir, 'vendor')).include?('bundle')
+        puts "WARNING: bundle directory detected at #{File.join(harness_dir, 'vendor', 'bundle')}. It is now safe to completely remove it"
+      end
     end
 
     def self.print_enviornment
@@ -90,18 +116,18 @@ module EcMetal
       # harness dir may be something other than the ec-metal dir, so we need to explicitly set it
       berks_file = Pathname.new(File.dirname(__FILE__)).parent.to_s + "/Berksfile"
       run("rm -r #{cookbooks_path}") if Dir.exists?(cookbooks_path)
-      run("bundle exec berks vendor --berksfile='#{berks_file}' #{cookbooks_path}")
+      run("berks vendor -q --berksfile='#{berks_file}' #{cookbooks_path}")
     end
 
     def self.berks_update
       berks_file = Pathname.new(File.dirname(__FILE__)).parent.to_s + "/Berksfile"
-      run("bundle exec berks update --berksfile='#{berks_file}'")
+      run("berks update --berksfile='#{berks_file}'")
     end
 
     # Only run this for ec-metal without wrappers
-    def self.bundle
-      run("bundle install --path vendor/bundle --binstubs", 3*MINUTE_IN_DEC_SECS)
-    end
+    # def self.bundle
+    #   run("bundle install --path vendor/bundle --binstubs", 3*MINUTE_IN_DEC_SECS)
+    # end
 
     # Environment variables to be consumed by ec-harness and friends
     def self.harness_dir
@@ -120,7 +146,7 @@ module EcMetal
       STDOUT.sync = true
 
       printable_env = ENV.to_a.map{|val| val.join('=')}.join(' ')
-      puts "#{command} from #{harness_dir} with env #{printable_env}"
+      puts "#{command} from #{harness_dir}"
 
       shellout_params = {:env => ENV.to_hash, :cwd => harness_dir, :live_stream => STDOUT}
       shellout_params[:timeout] = timeout unless timeout.nil?
@@ -128,9 +154,9 @@ module EcMetal
       # TODO(jmink) determine why this env var needs to be set externally
       run = Mixlib::ShellOut.new("BERKSHELF_CHEF_CONFIG=$PWD/berks_config #{command}", shellout_params)
       run.run_command
-      puts run.stdout
-      puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
-      run.error!
+      # puts run.stdout
+      # puts "error messages for #{command}: #{run.stderr}" unless run.stderr.nil?
+      # run.error!
     end
   end
 end

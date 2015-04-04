@@ -2,7 +2,7 @@
 
 class TopoHelper
 
-  TOPO_TYPES = %w(analytics_backends
+  TOPO_TYPES ||= %w(analytics_backends
                   analytics_frontends
                   analytics_standalones
                   analytics_workers
@@ -173,6 +173,15 @@ class TopoHelper
       .first['hostname']
       .split('.')[1..-1]
       .join('.')
+  end
+
+  def myhostname(nodename)
+    merged_topology
+      .select { |k,v| k == nodename }
+      .values
+      .first['hostname']
+  rescue
+    'unknownhost'
   end
 
   def is_ha?
