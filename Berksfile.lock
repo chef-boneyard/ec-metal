@@ -8,6 +8,10 @@ DEPENDENCIES
     revision: 90679033c6f91168a2e086a70563e29e9d29add1
   hostsfile (~> 2.0)
   lvm (~> 1.0)
+  push-jobs
+    git: https://github.com/manderson26/push-jobs
+    revision: 32564ba59b831af39da4981cb678896f0cebb741
+    branch: ma/fix_containers
   yum (~> 3.0)
   yum-elrepo
     git: https://github.com/irvingpop/yum-elrepo
@@ -69,6 +73,9 @@ GRAPH
   modules (0.2.0)
   ohai (2.0.1)
   polipo (0.1.0)
+  push-jobs (2.2.14)
+    runit (>= 0.0.0)
+    windows (>= 0.0.0)
   runit (1.5.18)
     build-essential (>= 0.0.0)
     yum (~> 3.0)
