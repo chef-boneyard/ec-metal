@@ -49,6 +49,7 @@ class VagrantConfigHelper
       node['harness']['vm_config']['backends'].include?(vmname)
       vm_disk2 = ::File.join(node['harness']['vms_dir'], vmname, 'disk2.vmdk')
       disk2_size = node['harness']['vagrant']['disk2_size'] || 2
+      storage_controller = node['harness']['vagrant']['storage_controller'] || 'IDE Controller'
       vagrant_config += <<-ENDCONFIG
       config.vm.network 'private_network', ip: "#{config['cluster_ipaddress']}"
       config.vm.provider 'virtualbox' do |v|
@@ -57,7 +58,7 @@ class VagrantConfigHelper
                     '--size', #{disk2_size} * 1024,
                     '--format', 'VMDK']
         v.customize ['storageattach', :id,
-                    '--storagectl', 'IDE Controller',
+                    '--storagectl', "#{storage_controller}",
                     '--port', 1,
                     '--device', 0,
                     '--type', 'hdd',
