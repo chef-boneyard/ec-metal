@@ -75,7 +75,8 @@ module EcMetal
         File.delete(File.join(harness_dir, 'Gemfile.lock'))
         exit 1
       end
-      if Dir.entries(File.join(harness_dir, 'vendor')).include?('bundle')
+      if Dir.entries(harness_dir).include?('vendor') &&
+        Dir.entries(File.join(harness_dir, 'vendor')).include?('bundle')
         puts "WARNING: bundle directory detected at #{File.join(harness_dir, 'vendor', 'bundle')}. It is now safe to completely remove it"
       end
     end
