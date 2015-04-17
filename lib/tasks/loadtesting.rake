@@ -7,7 +7,7 @@ ENV['ECM_CHEF_REPO'] = EcMetal::Api.repo_dir
 desc 'Spin up load-testing machines'
 task :loadtesters do
   # run twice because AWS
-  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::loadtesters")
+  sh('chef-client -z -o ec-harness::loadtesters')
 end
 task :setup_loadtest => :loadtesters
 
@@ -27,7 +27,7 @@ task :run_loadtest do
         v.map { |i| search_req += "name:*loadtester-#{i} OR " }
         search_req.chomp!(' OR ')
         puts "Starting group at #{Time.now}: #{search_req}"
-        sh("#{EcMetal::Api.harness_dir}/bin/knife ssh '#{search_req}' -a cloud.public_ipv4 'for i in {1..#{subwave_size}}; do sudo docker run -d ponyville/ubuntu; done' -x ubuntu -i #{EcMetal::Api.repo_dir}/keys/id_rsa")
+        sh("knife ssh '#{search_req}' -a cloud.public_ipv4 'for i in {1..#{subwave_size}}; do sudo docker run -d ponyville/ubuntu; done' -x ubuntu -i #{EcMetal::Api.repo_dir}/keys/id_rsa")
         puts "Finishing group at #{Time.now}: #{search_req}"
         puts "----------------------------------------------------------------\n\n\n\n"
       end
@@ -37,15 +37,15 @@ end
 
 desc 'Destroy the load-testing machines'
 task :cleanup_loadtest do
-  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::loadtesters_destroy")
+  sh('chef-client -z -o ec-harness::loadtesters_destroy')
 end
 task :destroy_loadtest => :cleanup_loadtest
 
 task :pivotal => [:keygen, :cachedir, :config_copy, :berks_install] do
-  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::pivotal")
+  sh('chef-client -z -o ec-harness::pivotal')
 end
 
 desc 'Spin up load-testing machines'
 task :loadtest => [:berks_install] do
-  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o ec-harness::loadtesters")
+  sh('chef-client -z -o ec-harness::loadtesters')
 end
