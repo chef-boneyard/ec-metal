@@ -1,4 +1,7 @@
 name 'private-chef'
+maintainer       'Irving Popovetsky'
+maintainer_email 'irving@getchef.com'
+license          'All rights reserved'
 version '0.0.1'
 description 'A poorly named cookbook which is used to drive the installation of the private-chef (now Enterprise Chef) cookbook'
 
