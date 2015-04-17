@@ -24,7 +24,7 @@ module EcHarness
       # Handle the 404 meaning the machine hasn't been created yet
       nodeinfo = {'normal' => { 'chef_provisioning' => {} } }
     end
-    driver_info = nodeinfo['normal']['chef_provisioning']['location'] || {}
+    driver_info = nodeinfo['normal']['chef_provisioning']['reference'] || {}
     return true if driver_info.has_key?('server_id')
     false
   end
