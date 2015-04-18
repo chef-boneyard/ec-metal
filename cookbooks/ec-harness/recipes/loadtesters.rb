@@ -81,10 +81,10 @@ with_chef_server chef_server_url,
                  signing_key_filename: chef_user_pem
                  # ssl_verify_mode: :verify_none
 
-machine_batch 'fly_my_pretties_fly' do
-  action [:converge]
+node['harness']['vm_config']['loadtesters'].each do |vmname, config|
+  machine_batch "fly_my_pretties_fly-#{vmname}" do
+    action [:converge]
 
-    node['harness']['vm_config']['loadtesters'].each do |vmname, config|
 
       1.upto(node['harness']['loadtesters']['num_loadtesters']) do |i|
         machine "#{ENV['USER']}-#{vmname}-#{i}" do
