@@ -2,9 +2,11 @@
 
 # dumb stuff because the docker cookbook doesn't support Ubuntu 14.10 yet
 if node['platform_family'] == 'debian' && node['platform_version'].to_f == 14.10
-  default['docker']['package']['repo_url'] = 'https://get.docker.io/ubuntu'
-  default['docker']['package']['name'] = 'lxc-docker'
   default['loadtester_host']['use_btrfs'] = true
+elsif node['platform_family'] == 'debian' && node['platform_version'].to_f == 15.04
+  default['loadtester_host']['use_overlayfs'] = true
+  default['docker']['ipv4_forward'] = false
+  default['docker']['ipv6_forward'] = false
 else
   # docker 1.4.x giving me devicemapper issues
   default['docker']['version'] = '1.3.3'
@@ -25,4 +27,8 @@ end
 
 if node['loadtester_host']['use_btrfs'] == true
   default['docker']['options'] = '-s btrfs'
+end
+
+if node['loadtester_host']['use_overlayfs'] == true
+  default['docker']['options'] = '-s overlay'
 end

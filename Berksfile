@@ -9,7 +9,8 @@ cookbook 'yum-elrepo', :git => 'https://github.com/irvingpop/yum-elrepo', :branc
 cookbook 'yum-epel'
 
 # For loadtester hosts/guests
-cookbook 'docker', '~> 0.0'
+#cookbook 'docker', :git => "https://github.com/irvingpop/chef-docker.git", :branch => "ubuntu_vivid"
+cookbook 'docker', :path => "../chef-docker"
 cookbook 'chef-client'
 
 cookbook 'push-jobs', :git => "https://github.com/manderson26/push-jobs", :branch => "ma/fix_containers"
