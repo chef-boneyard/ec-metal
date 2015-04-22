@@ -3,7 +3,9 @@ DEPENDENCIES
   aws (~> 2.0)
   chef-client
   docker
-    path: ../chef-docker
+    git: https://github.com/irvingpop/chef-docker.git
+    revision: b2783db06830cc4e015bd3a4ac8580749c03ba94
+    branch: ubuntu_vivid
   ec-tools
     git: https://github.com/irvingpop/ec-tools
     revision: 90679033c6f91168a2e086a70563e29e9d29add1
@@ -52,7 +54,7 @@ GRAPH
     yum-epel (>= 0.0.0)
   dpkg_autostart (0.1.12)
   ec-tools (0.2.0)
-  git (4.2.0)
+  git (4.2.1)
     build-essential (>= 0.0.0)
     dmg (>= 0.0.0)
     windows (>= 0.0.0)
@@ -71,14 +73,13 @@ GRAPH
     polipo (>= 0.0.0)
   modules (0.2.0)
   ohai (2.0.1)
+  packagecloud (0.0.17)
   polipo (0.1.0)
   push-jobs (2.2.14)
     runit (>= 0.0.0)
     windows (>= 0.0.0)
-  runit (1.5.18)
-    build-essential (>= 0.0.0)
-    yum (~> 3.0)
-    yum-epel (>= 0.0.0)
+  runit (1.6.0)
+    packagecloud (>= 0.0.0)
   sysctl (0.6.2)
     ohai (>= 0.0.0)
   windows (1.36.6)
