@@ -24,10 +24,10 @@ task :run_loadtest do
       (1..num_loadtesters).group_by { |i| i%num_groups }.each do |k,v|
       # each group
         search_req = ""
-        v.map { |i| search_req += "name:*loadtester-#{i} OR " }
+        v.map { |i| search_req += "name:*loadtester*-#{i} OR " }
         search_req.chomp!(' OR ')
         puts "Starting group at #{Time.now}: #{search_req}"
-        sh("knife ssh '#{search_req}' -a cloud.public_ipv4 'for i in {1..#{subwave_size}}; do sudo docker run -d ponyville/ubuntu; done' -x ubuntu -i #{EcMetal::Api.repo_dir}/keys/id_rsa")
+        sh("knife ssh '#{search_req}' -a cloud.public_ipv4 'for i in {1..#{subwave_size}}; do sudo docker run -d ponyville/ubuntu; sleep 0.1; done' -x ubuntu -i #{EcMetal::Api.repo_dir}/keys/id_rsa")
         puts "Finishing group at #{Time.now}: #{search_req}"
         puts "----------------------------------------------------------------\n\n\n\n"
       end
