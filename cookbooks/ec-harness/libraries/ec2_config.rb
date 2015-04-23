@@ -11,7 +11,7 @@ class Ec2ConfigHelper
   def self.generate_config(vmname, config, node)
 
     # override all keypair settings if passed as env var
-    keypair_name = ENV['ECM_KEYPAIR_NAME'] || "#{ENV['USER']}@#{::File.basename(harness_dir)}"
+    keypair_name = ENV['ECM_KEYPAIR_NAME'] || "#{ENV['USER']}@#{::File.basename(node['harness']['harness_dir'])}"
     ami_id = config['ami_id'] || node['harness']['ec2']['ami_id']
     @root_block_device ||= FogHelper.new(ami: ami_id, region: node['harness']['ec2']['region']).get_root_blockdevice
 
@@ -45,7 +45,7 @@ class Ec2ConfigHelper
   def self.generate_config_aws(vmname, config, node)
 
     # override all keypair settings if passed as env var
-    keypair_name = ENV['ECM_KEYPAIR_NAME'] || "#{ENV['USER']}@#{::File.basename(harness_dir)}"
+    keypair_name = ENV['ECM_KEYPAIR_NAME'] || "#{ENV['USER']}@#{::File.basename(node['harness']['harness_dir'])}"
     ami_id = config['ami_id'] || node['harness']['ec2']['ami_id']
     @root_block_device ||= FogHelper.new(ami: ami_id, region: node['harness']['ec2']['region']).get_root_blockdevice
 
