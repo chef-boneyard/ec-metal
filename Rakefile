@@ -16,7 +16,7 @@ end
 
 # run chef-client commands not part of the api
 def shellout_chef_client(run_list)
-  sh("#{EcMetal::Api.harness_dir}/bin/chef-client -z -o #{run_list} --force-formatter")
+  sh("chef-client -z -o #{run_list} --force-formatter")
 end
 
 # desc 'Install required Gems into the vendor/bundle directory'
