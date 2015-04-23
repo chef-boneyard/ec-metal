@@ -29,9 +29,10 @@ with_chef_server chef_server_url,
                  signing_key_filename: chef_user_pem
 
 
-machine_batch 'destroy_all_the_loadtesters' do
-  action :destroy
-      1.upto(node['harness']['loadtesters']['num_loadtesters']) do |i|
-        machine "#{ENV['USER']}-loadtester-#{i}"
-      end
+node['harness']['vm_config']['loadtesters'].each do |vmname, config|
+  log 1.upto(node['harness']['loadtesters']['num_loadtesters']).map {|i| "#{ENV['USER']}-#{vmname}-#{i}" }
+  machine_batch "cleanup_loadtesters_#{vmname}" do
+    action :destroy
+    machines 1.upto(node['harness']['loadtesters']['num_loadtesters']).map {|i| "#{ENV['USER']}-#{vmname}-#{i}" }
+  end
 end

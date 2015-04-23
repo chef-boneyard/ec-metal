@@ -1,3 +1,4 @@
+
 #!/opt/chef/embedded/bin/ruby
 # Reassigns an EBS volume to me for EC failover
 # Created by Chef private-chef::ec2
@@ -9,7 +10,7 @@ require 'timeout'
 REGION = "<%= node['cloud']['region'] %>"
 AWS_ACCESS_KEY_ID = "<%= node['cloud']['aws_access_key_id'] %>"
 AWS_SECRET_ACCESS_KEY = "<%= node['cloud']['aws_secret_access_key'] %>"
-SERVER_ID = "<%= node['metal']['location']['server_id'] %>"
+SERVER_ID = "<%= node['chef_provisioning']['reference']['server_id'] %>"
 VOLUME_ID = "<%= node['aws']['ebs_volume'][@bootstrap_host_name]['volume_id'] %>"
 AWS_DEVICE = '/dev/sdd'
 LVM_VG = 'opscode'

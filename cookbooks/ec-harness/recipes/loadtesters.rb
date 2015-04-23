@@ -25,9 +25,7 @@ else
   chef_server = ::Resolv.getaddress(ecm_topo.bootstrap_host_name)
 end
 chef_server_url = "https://#{chef_server}/organizations/#{chef_org}"
-harness_knife_bin = ::File.join(node['harness']['harness_dir'], 'bin', 'knife')
-harness_knife_config = ::File.join(node['harness']['harness_dir'], '.chef', 'knife.rb')
-berks_bin = ::File.join(node['harness']['harness_dir'], 'bin', 'berks')
+harness_knife_config = ::File.join(users_path, chef_user, '.chef', 'knife.rb')
 berks_config = ::File.join(node['harness']['repo_path'], 'berks_config.json')
 
 # OMG please save me from the below horribleness
@@ -36,8 +34,16 @@ execute 'rsync user keys' do
   action :run
 end
 
+execute 'ssl-hackery-global' do
+  command "knife ssl fetch -s #{chef_server_url}"
+end
+
+execute 'ssl-hackery-user' do
+  command "knife ssl fetch -c #{harness_knife_config}"
+end
+
 execute 'ghetto-cookbook-uploader' do
-  command "#{harness_knife_bin} upload /cookbooks -s #{chef_server_url} -k #{chef_user_pem} -u #{chef_user} -c #{harness_knife_config}"
+  command "knife upload /cookbooks -c #{harness_knife_config} --chef-repo-path #{node['harness']['harness_dir']}"
   action :run
 end
 
@@ -58,13 +64,13 @@ file berks_config do
 end
 
 execute 'ghetto-berks-install' do
-  command "#{berks_bin} install -c #{berks_config}"
+  command "berks install -c #{berks_config}"
   cwd node['harness']['harness_dir']
   action :run
 end
 
 execute 'ghetto-berks-uploader' do
-  command "#{berks_bin} upload -c #{berks_config}"
+  command "berks upload -c #{berks_config}"
   cwd node['harness']['harness_dir']
   action :run
 end
@@ -73,15 +79,21 @@ end
 with_chef_server chef_server_url,
                  client_name: chef_user,
                  signing_key_filename: chef_user_pem
+                 # ssl_verify_mode: :verify_none
 
-machine_batch 'fly_my_pretties_fly' do
-  action [:converge]
+node['harness']['vm_config']['loadtesters'].each do |vmname, config|
+  machine_batch "fly_my_pretties_fly-#{vmname}" do
+    action [:converge]
 
-    node['harness']['vm_config']['loadtesters'].each do |vmname, config|
 
       1.upto(node['harness']['loadtesters']['num_loadtesters']) do |i|
-        machine "#{ENV['USER']}-loadtester-#{i}" do
+        machine "#{ENV['USER']}-#{vmname}-#{i}" do
           machine_options machine_options_for_provider(vmname, config)
+          add_machine_options(
+            convergence_options: {
+              ssl_verify_mode: :verify_none
+            }
+          )
           attribute 'root_ssh', node['harness']['root_ssh'].to_hash
 
           recipe 'loadtester_host::default'

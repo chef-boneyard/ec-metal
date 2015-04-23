@@ -16,13 +16,14 @@ cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
 cookbook_path            [::File.join(harness_dir, 'cookbooks'),
                          File.join(repo, 'cookbooks'),
                          ]
-verify_api_cert          true
 private_key_paths	 [keys_dir]
 
-keypair_name ||= "#{ENV['USER']}@#{::File.basename(harness_dir)}"
 private_keys   keypair_name => ::File.join(keys_dir, 'id_rsa')
 public_keys    keypair_name => ::File.join(keys_dir, 'id_rsa.pub')
 
 chef_zero		 :port => 9010.upto(9999)
 lockfile                 ::File.join(harness_dir, 'chef-client-running.pid')
+
+# because SSL is hard
 verify_api_cert         false
+ssl_verify_mode         :verify_none

@@ -53,18 +53,6 @@ file '/etc/hostname' do
   content "#{node.name}\n"
 end
 
-case node['platform_family']
-when 'rhel'
-  %w(gcc libxml2-devel libxslt-devel).each do |develpkg|
-    package develpkg
-  end
-when 'debian'
-  include_recipe 'apt'
-  %w(build-essential libxslt-dev libxml2-dev).each do |develpkg|
-    package develpkg
-  end
-end
-
 directory '/var/lib/docker' do
   owner "root"
   group "root"
@@ -171,7 +159,7 @@ file "/var/chef/dockerfiles/#{docker_repo}/ubuntu/chef/.node_name" do
   owner "root"
   group "root"
   mode "0644"
-  content "build-#{node.name.split('-')[2]}-#{Time.now.strftime('%Y%m%d-%H%M%S')}\n"
+  content "build-#{node.name.split('-')[2]}-#{Time.now.strftime('%Y%m%d-%H.%M.%S.%L')}\n"
  end
 
 execute 'container build' do

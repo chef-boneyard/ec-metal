@@ -94,11 +94,15 @@ def get_ssl_id
     .body['Certificate']['Arn'] #FML Excon bs
 end
 
+def server_id
+  node['chef_provisioning']['reference']['server_id']
+end
+
 def register_node
-  log "Registering node #{node['metal']['location']['server_id']} to ELB #{elb_name}"
+  log "Registering node #{server_id} to ELB #{elb_name}"
   fog
     .get_elb
-    .register_instances([node['metal']['location']['server_id']], elb_name)
+    .register_instances([server_id], elb_name)
 end
 
 def node_registered?
@@ -107,5 +111,5 @@ def node_registered?
     .load_balancers
     .get(elb_name)
     .instances
-    .include?(node['metal']['location']['server_id'])
+    .include?(server_id)
 end
