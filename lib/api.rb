@@ -7,7 +7,7 @@ require 'pathname'
 module EcMetal
   class Api
 
-    MINIMUM_CHEFDK_VERSION = '0.4.0'
+    MINIMUM_CHEFDK_VERSION = '0.5.0.rc.4'
 
     MINUTE_IN_DEC_SECS = 600
     KNIFE = File.join(File.dirname(File.dirname(__FILE__)), '.chef', 'knife.rb')
