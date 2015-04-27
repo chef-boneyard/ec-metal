@@ -27,7 +27,12 @@ This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA c
 
 ### Requirements
 
-ec-metal requires ChefDK.  It has been tested and known to work with ChefDK 0.4.0 and future versions.  Please [download ChefDK from here](https://downloads.chef.io/chef-dk/) and set it as your default Ruby [following these instructions](https://docs.chef.io/install_dk.html)
+ec-metal requires ChefDK.  It has been tested and known to work with ChefDK 0.5.0 (rc3) and future versions.  Please download the latest ChefDK pre-release by running:
+```bash
+curl -L https://www.getchef.com/chef/install.sh | sudo bash -s -- -P chefdk -p
+```
+
+and set it as your default Ruby [following these instructions](https://docs.chef.io/install_dk.html)
 
 ### A config.json
 First you need a config.  You can choose one from examples/<name>.json or you can generate a config with the create_config rake task.
