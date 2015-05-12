@@ -12,7 +12,6 @@ end
 
 action :install do
   log "action :install, I don't do anything anymore!"
-        recipe 'private-chef::org_torture'
 end
 
 action :pedant do
