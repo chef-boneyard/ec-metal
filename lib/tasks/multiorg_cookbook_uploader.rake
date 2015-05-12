@@ -51,9 +51,7 @@ else
   CHEF_SERVER = resolve_bootstrap_host_name
 end
 # chef_server_url = "https://#{chef_server}/organizations/#{chef_org}"
-HARNESS_KNIFE_BIN = ::File.join(harness_dir, 'bin', 'knife')
 HARNESS_KNIFE_CONFIG = ::File.join(harness_dir, '.chef', 'knife.rb')
-BERKS_BIN = ::File.join(harness_dir, 'bin', 'berks')
 BERKS_CONFIG_DIR = ::File.join(harness_dir, 'berks_configs')
 
 
@@ -81,7 +79,7 @@ task :berks_prep do
   Dir.mkdir(BERKS_CONFIG_DIR) unless Dir.exists?(BERKS_CONFIG_DIR)
   berks_config_file = ::File.join(repo_dir, 'berks_config.json')
   File.open(berks_config_file, 'w') { |file| file.write(JSON.dump(berks_config_json('ponyville')))}
-  sh "#{BERKS_BIN} install -c #{berks_config_file} -q"
+  sh "berks install -c #{berks_config_file} -q"
 end
 
 task :multiorg_prep => [:berks_prep] do
@@ -101,8 +99,8 @@ task :multiorg_uploader => [:multiorg_prep] do
     orgname = "org#{orgnum}"
     puts "Uploading STARTING to org #{orgname} at #{start_time.to_s}"
     berks_config_file = ::File.join(BERKS_CONFIG_DIR, "#{orgname}.json")
-    sh "#{HARNESS_KNIFE_BIN} upload /cookbooks -s #{chef_server_url(orgname)} -k #{CHEF_USER_PEM} -u #{CHEF_USER} -c #{HARNESS_KNIFE_CONFIG}"
-    sh "#{BERKS_BIN} upload -c #{berks_config_file}"
+    sh "knife upload /cookbooks -s #{chef_server_url(orgname)} -k #{CHEF_USER_PEM} -u #{CHEF_USER} -c #{HARNESS_KNIFE_CONFIG}"
+    sh "berks upload -c #{berks_config_file}"
     end_time = Time.now
     duration_secs = end_time.to_i - start_time.to_i
     puts "Uploading COMPLETE to org #{orgname} at #{end_time}"
