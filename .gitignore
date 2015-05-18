@@ -1,6 +1,7 @@
 .bundle
 bin/*
 config.json
+config.json.*
 clients
 nodes
 vagrant_vms
@@ -12,6 +13,7 @@ data_bags
 chef-client-running.pid
 chef-repo
 .chef/trusted_certs/
+berks_configs
 
 *.lock
 
