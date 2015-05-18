@@ -27,9 +27,9 @@ This tool uses chef-metal to provision, install and upgrade Enterprise Chef HA c
 
 ### Requirements
 
-ec-metal requires ChefDK.  It has been tested and known to work with ChefDK 0.5.0 (rc3) and future versions.  Please download the latest ChefDK pre-release by running:
+ec-metal requires ChefDK.  It has been tested and known to work with ChefDK 0.5.0 and future versions.  Please download the latest ChefDK by running:
 ```bash
-curl -L https://www.getchef.com/chef/install.sh | sudo bash -s -- -P chefdk -p
+curl -L https://www.getchef.com/chef/install.sh | sudo bash -s -- -P chefdk
 ```
 
 and set it as your default Ruby [following these instructions](https://docs.chef.io/install_dk.html)
