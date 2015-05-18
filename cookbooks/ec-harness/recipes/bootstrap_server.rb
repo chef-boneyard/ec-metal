@@ -31,7 +31,7 @@ machine_batch 'bootstrap_node' do
       recipe 'private-chef::users' if vmname == ecm_topo_chef.bootstrap_node_name
       recipe 'private-chef::loadbalancer' if ecm_topo_chef.is_frontend?(vmname) &&
         node['harness']['provider'] == 'ec2'
-      recipe 'private-chef::org_torture'
+      recipe 'private-chef::org_torture' if node['harness']['org_torture'] == true
 
       converge true
     end
