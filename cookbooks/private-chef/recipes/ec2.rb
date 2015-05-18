@@ -60,33 +60,34 @@ execute 'Remove /mnt from fstab' do
   only_if 'grep /mnt /etc/fstab'
 end
 
-case node['platform_family']
-when 'rhel'
-  %w(gcc libxml2-devel libxslt-devel).each do |develpkg|
-    package develpkg
-  end
-when 'debian'
-  include_recipe 'apt'
-  %w(build-essential libxslt-dev libxml2-dev).each do |develpkg|
-    package develpkg
-  end
-end
+# not needed now with ChefDK
+# case node['platform_family']
+# when 'rhel'
+#   %w(gcc libxml2-devel libxslt-devel).each do |develpkg|
+#     package develpkg
+#   end
+# when 'debian'
+#   include_recipe 'apt'
+#   %w(build-essential libxslt-dev libxml2-dev).each do |develpkg|
+#     package develpkg
+#   end
+# end
 
-# temporary workaround until Nokogiri is fixed again - IP 11/11/2014
-gem_package 'nokogiri' do
-  gem_binary('/opt/chef/embedded/bin/gem')
-  version '1.6.3.1'
-  if node['platform_family'] == 'rhel'
-    options('--no-rdoc --no-ri -- --use-system-libraries')
-  else
-    options('--no-rdoc --no-ri')
-  end
-end
+# # temporary workaround until Nokogiri is fixed again - IP 11/11/2014
+# gem_package 'nokogiri' do
+#   gem_binary('/opt/chef/embedded/bin/gem')
+#   version '1.6.3.1'
+#   if node['platform_family'] == 'rhel'
+#     options('--no-rdoc --no-ri -- --use-system-libraries')
+#   else
+#     options('--no-rdoc --no-ri')
+#   end
+# end
 
-gem_package 'fog' do
-  gem_binary('/opt/chef/embedded/bin/gem')
-  options('--no-rdoc --no-ri')
-end
+# gem_package 'fog' do
+#   gem_binary('/opt/chef/embedded/bin/gem')
+#   options('--no-rdoc --no-ri')
+# end
 
 directory '/var/opt/opscode/keepalived/bin' do
   owner 'root'
