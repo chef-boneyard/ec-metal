@@ -91,7 +91,9 @@ node['harness']['vm_config']['loadtesters'].each do |vmname, config|
           machine_options machine_options_for_provider(vmname, config)
           add_machine_options(
             convergence_options: {
-              ssl_verify_mode: :verify_none
+              ssl_verify_mode: :verify_none,
+              install_sh_arguments: '',
+              chef_version: '12.2.1'
             }
           )
           attribute 'root_ssh', node['harness']['root_ssh'].to_hash
