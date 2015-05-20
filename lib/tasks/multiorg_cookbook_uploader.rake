@@ -1,5 +1,10 @@
 require_relative '../../cookbooks/ec-common/libraries/topo_helper'
+require_relative '../../cookbooks/ec-common/libraries/fog_helper'
 require 'resolv'
+
+def fog
+  FogHelper.new(region: CONFIG['ec2_options']['region'])
+end
 
 # cargo culted from: http://t-a-w.blogspot.com/2010/05/very-simple-parallelization-with-ruby.html
 def Exception.ignoring_exceptions
@@ -32,6 +37,10 @@ def resolve_bootstrap_host_name
   ::Resolv.getaddress(topo.bootstrap_host_name)
 rescue Resolv::ResolvError
   'notcreatedyet'
+end
+
+def elb_name
+  resolve_bootstrap_host_name.gsub(/[.]/, '-')
 end
 
 harness_dir = ENV['HARNESS_DIR'] = EcMetal::Api.harness_dir

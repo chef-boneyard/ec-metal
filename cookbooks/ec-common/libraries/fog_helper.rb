@@ -42,6 +42,8 @@ class FogHelper
   def get_elb_dns_name(id)
     @elb ||= get_elb
     @elb.load_balancers.get(id).dns_name
+  rescue
+    'notcreatedyet'
   end
 
   def get_root_blockdevice
