@@ -1,8 +1,9 @@
 # encoding: utf-8
 
-require 'chef/config'
+# require 'chef/config'
 
-include_recipe "ec-harness::#{node['harness']['provider']}"
+# include_recipe "ec-harness::#{node['harness']['provider']}"
+include_recipe "ec-harness::ec2_aws"
 
 if node['harness']['ec2']
   fog = FogHelper.new(region: node['harness']['ec2']['region'])
@@ -88,7 +89,8 @@ node['harness']['vm_config']['loadtesters'].each do |vmname, config|
 
       1.upto(node['harness']['loadtesters']['num_loadtesters']) do |i|
         machine "#{ENV['USER']}-#{vmname}-#{i}" do
-          machine_options machine_options_for_provider(vmname, config)
+          # machine_options machine_options_for_provider(vmname, config)
+          machine_options Ec2ConfigHelper.generate_config_aws(vmname, config, node)
           add_machine_options(
             convergence_options: {
               ssl_verify_mode: :verify_none,
