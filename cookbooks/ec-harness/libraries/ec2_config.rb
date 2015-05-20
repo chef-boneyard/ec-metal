@@ -36,6 +36,9 @@ class Ec2ConfigHelper
         :tags => {
           'EcMetal' => node['harness']['ec2']['ec_metal_tag']
         }
+      },
+      :convergence_options => {
+        :install_sh_arguments => '-P chefdk'
       }
     }
 
@@ -72,6 +75,9 @@ class Ec2ConfigHelper
         # :tags => {
         #   'EcMetal' => node['harness']['ec2']['ec_metal_tag']
         # }
+      },
+      :convergence_options => {
+        :install_sh_arguments => '-P chefdk'
       }
     }
 

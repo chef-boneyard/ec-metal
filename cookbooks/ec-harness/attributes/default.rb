@@ -18,6 +18,9 @@ default['harness']['apply_ec_bugfixes'] = config_json['apply_ec_bugfixes'] || fa
 # Provide an option to intentionally bomb out before running the upgrade reconfigure, so it can be done manually
 default['harness']['vm_config']['lemme_doit'] = config_json['lemme_doit'] || false
 
+# Provide an option to run the "org torturer" which creates 900 orgs.  see: https://gist.github.com/irvingpop/bf4b983b5db7b5b9cbc7
+default['harness']['org_torture'] = config_json['org_torture'] || false
+
 # addon packages
 default['harness']['manage_package'] = ENV['ECM_MANAGE_PACKAGE'] || config_json['manage_package']
 default['harness']['reporting_package'] = ENV['ECM_REPORTING_PACKAGE'] || config_json['reporting_package']

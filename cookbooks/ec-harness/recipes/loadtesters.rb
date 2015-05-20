@@ -30,7 +30,7 @@ berks_config = ::File.join(node['harness']['repo_path'], 'berks_config.json')
 
 # OMG please save me from the below horribleness
 execute 'rsync user keys' do
-  command "rsync -avz --delete -e 'ssh -i #{private_key_path}' root@#{ecm_topo.bootstrap_host_name}:/srv/piab/users/ #{users_path}"
+  command "rsync -avz --delete -e 'ssh -i #{private_key_path} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' root@#{ecm_topo.bootstrap_host_name}:/srv/piab/users/ #{users_path}"
   action :run
 end
 
@@ -91,7 +91,9 @@ node['harness']['vm_config']['loadtesters'].each do |vmname, config|
           machine_options machine_options_for_provider(vmname, config)
           add_machine_options(
             convergence_options: {
-              ssl_verify_mode: :verify_none
+              ssl_verify_mode: :verify_none,
+              install_sh_arguments: '',
+              chef_version: '12.2.1'
             }
           )
           attribute 'root_ssh', node['harness']['root_ssh'].to_hash

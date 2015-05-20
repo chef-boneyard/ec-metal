@@ -172,12 +172,16 @@ def create_drbd_dirs
 end
 
 def fstype
-  if system('which mkfs.ext4')
+  if node['platform_family'] == 'debian' || node['platform'] == 'centos'
+    package 'xfsprogs'
+    'xfs'
+  elsif system('which mkfs.ext4')
     'ext4'
   else
     'ext3'
   end
 end
+
 
 def create_lvm(disks, mountpoint = nil)
   stupid_chown_trick = false
