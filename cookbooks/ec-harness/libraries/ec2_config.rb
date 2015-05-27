@@ -71,10 +71,10 @@ class Ec2ConfigHelper
             }
           },
           {device_name: '/dev/sdb', virtual_name: 'ephemeral0'}
-        ],
-        # :tags => {
-        #   'EcMetal' => node['harness']['ec2']['ec_metal_tag']
-        # }
+        ]
+      },
+      :aws_tags => {
+        'EcMetal' => node['harness']['ec2']['ec_metal_tag']
       },
       :convergence_options => {
         :install_sh_arguments => '-P chefdk'
