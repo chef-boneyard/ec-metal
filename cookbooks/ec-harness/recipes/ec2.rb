@@ -23,3 +23,7 @@ fog_key_pair keypair_name do
   public_key_path File.join(repo_path, 'keys', 'id_rsa.pub')
 end
 
+link File.join(repo_path, 'keys', keypair_name) do
+  to File.join(repo_path, 'keys', 'id_rsa')
+  not_if { File.exist?(File.join(repo_path, 'keys', keypair_name)) }
+end
