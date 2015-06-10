@@ -14,6 +14,7 @@ ecm_topo_chef.merged_topology.each do |vmname, config|
 end
 
 # install
+node.set['harness']['run_pedant'] = false
 include_recipe 'ec-harness::default'
 
 # Start services
@@ -32,3 +33,5 @@ topo_fe.merged_topology.each do |vmname, config|
     machine vmname
   end
 end
+
+include_recipe 'ec-harness::pedant'
