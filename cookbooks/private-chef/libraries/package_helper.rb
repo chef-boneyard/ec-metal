@@ -9,7 +9,7 @@ class PackageHelper
     if ( (package =~ /^private-chef/) || (package =~ /^chef-server-(\d+)/) )
       version = package.gsub(/[_+%]/, '-').split('-')[2]
     elsif package =~ /^chef-server-core/
-      version = package.gsub(/[_+%]/, '-').split('-')[3]
+      version = package.gsub(/[_+%~]/, '-').split('-')[3]
     else
       return version
     end
