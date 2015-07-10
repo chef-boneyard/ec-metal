@@ -28,7 +28,7 @@ class PackageHelper
 
     if pkg_provider.current_resource.version
       pkg_provider.current_resource.version
-        .gsub(/[_+]/, '-')
+        .gsub(/[_+~]/, '-')
         .split('-')
         .first
     else
