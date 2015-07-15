@@ -56,9 +56,13 @@ if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend
     only_if { topology.is_ha? }
     only_if { topology.is_backend?(node.name) }
   end
+elsif node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend_storage_type'] == 'ephemeral'
+  private_chef_backend_storage 'ephemeral_data_store' do
+    action :ephemeral
+    only_if { topology.is_backend?(node.name) }
+  end
 elsif topology.is_ha?
   private_chef_backend_storage 'drbd_el_traditicional' do
     action :drbd
   end
 end
-

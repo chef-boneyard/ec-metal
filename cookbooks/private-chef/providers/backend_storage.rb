@@ -34,6 +34,16 @@ action :ebs_standalone do
   new_resource.updated_by_last_action(true)
 end
 
+action :ephemeral do
+  create_lvm([ disk_devmap[1], disk_devmap[2] ],  '/var/opt/opscode') # assume drbd/ebs volume is the fourth disk (/dev/sdd)
+  new_resource.updated_by_last_action(true)
+end
+
+action :ephemeral_analytics do
+  create_lvm([ disk_devmap[1], disk_devmap[2] ],  '/var/opt/opscode-analytics') # assume drbd/ebs volume is the fourth disk (/dev/sdd)
+  new_resource.updated_by_last_action(true)
+end
+
 action :ebs_save_databag do
   save_ebs_volumes_db
 end
@@ -199,8 +209,10 @@ def create_lvm(disks, mountpoint = nil)
 
     logical_volume 'drbd' do
       size        '80%VG'
-      if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend_storage_type'] == 'ebs'
-        filesystem fs_type
+      if node['cloud'] && node['cloud']['provider'] == 'ec2'
+        if node['cloud']['backend_storage_type'] == 'ebs' || node['cloud']['backend_storage_type'] == 'ephemeral'
+          filesystem fs_type
+        end
       end
       # Only let lvm create/manage the mountpoint for standalone/tier servers
       mount_point mountpoint if mountpoint

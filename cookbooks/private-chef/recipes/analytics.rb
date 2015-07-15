@@ -6,6 +6,22 @@
 # All Rights Reserved
 #
 
+if node['cloud'] && node['cloud']['provider'] == 'ec2' && node['cloud']['backend_storage_type'] == 'ephemeral'
+  include_recipe 'lvm::default'
+  # Start+Enable the lvmetad service on RHEL7, it is enabled by default
+  if node['platform_family'] == 'rhel' && node['platform_version'].to_i >= 7
+    service 'lvm2-lvmetad' do
+      action [:enable, :start]
+      provider Chef::Provider::Service::Systemd
+      only_if '/sbin/lvm dumpconfig global/use_lvmetad | grep use_lvmetad=1'
+    end
+  end
+
+  private_chef_backend_storage 'ephemeral_data_store' do
+    action :ephemeral_analytics
+  end
+end
+
 installer_file = node['analytics']['analytics_installer_file']
 installer_name = ::File.basename(installer_file.split('?').first)
 installer_path = "#{Chef::Config[:file_cache_path]}/#{installer_name}"
@@ -105,4 +121,3 @@ execute 'reconfigure-analytics' do
   command 'opscode-analytics-ctl reconfigure'
   action :run
 end
-
