@@ -15,7 +15,7 @@ end
 
 package installer_name do
   source installer_path
-  provider Chef::Provider::Package::Dpkg if platform?("ubuntu","debian")
+  provider Chef::Provider::Package::Dpkg if platform_family?('debian')
   action :install
 end
 

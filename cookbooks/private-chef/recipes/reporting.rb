@@ -21,8 +21,7 @@ end
 
 package installer_name do
   source installer_path
-  provider Chef::Provider::Package::Rpm if platform_family?('rhel')
-  provider Chef::Provider::Package::Dpkg if platform?('ubuntu','debian')
+  provider Chef::Provider::Package::Dpkg if platform_family?('debian')
   action :install
 end
 
@@ -46,4 +45,3 @@ execute 'reconfigure-reporting' do
   command 'opscode-reporting-ctl reconfigure'
   action :run
 end
-
