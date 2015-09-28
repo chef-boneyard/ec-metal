@@ -1,7 +1,10 @@
 case node['platform_family']
 when 'debian'
   include_recipe 'apt'
-  package "linux-image-extra-#{node['kernel']['release']}" if node['cloud'] && node['cloud']['provider'] == 'ec2'
+  package "linux-image-extra-#{node['kernel']['release']}" if
+    node['cloud'] &&
+    node['cloud']['provider'] == 'ec2' &&
+    node['cloud']['backend_storage_type'] == 'drbd'
 when 'rhel'
   include_recipe 'yum-epel'
   include_recipe 'yum-elrepo'
