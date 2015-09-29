@@ -2,9 +2,6 @@
 
 require 'chef/config'
 
-# include_recipe "ec-harness::#{node['harness']['provider']}"
-include_recipe "ec-harness::ec2_aws"
-
 if node['harness']['ec2']
   fog = FogHelper.new(region: node['harness']['ec2']['region'])
   elb_name = ecm_topo.bootstrap_host_name.gsub(/[.]/, '-')
