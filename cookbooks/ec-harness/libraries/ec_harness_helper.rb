@@ -25,7 +25,7 @@ module EcHarness
       nodeinfo = {'normal' => { 'chef_provisioning' => {} } }
     end
     driver_info = nodeinfo['normal']['chef_provisioning']['reference'] || {}
-    return true if driver_info.has_key?('server_id')
+    return true if driver_info.has_key?('instance_id')
     false
   end
 

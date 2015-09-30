@@ -159,7 +159,7 @@ file "/var/chef/dockerfiles/#{docker_repo}/ubuntu/chef/.node_name" do
   owner "root"
   group "root"
   mode "0644"
-  content "build-#{node.name.split('-')[2]}-#{Time.now.strftime('%Y%m%d-%H.%M.%S.%L')}\n"
+  content "build-#{node.name.split('-')[2]}-#{Time.now.strftime('%Y%m%d-%H%M%S.%L')}-#{rand(1000)}\n"
  end
 
 execute 'container build' do

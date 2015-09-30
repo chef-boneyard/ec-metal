@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'chef/config'
+# require 'chef/config'
 
 include_recipe "ec-harness::#{node['harness']['provider']}"
 
@@ -88,6 +88,7 @@ node['harness']['vm_config']['loadtesters'].each do |vmname, config|
 
       1.upto(node['harness']['loadtesters']['num_loadtesters']) do |i|
         machine "#{ENV['USER']}-#{vmname}-#{i}" do
+          # machine_options machine_options_for_provider(vmname, config)
           machine_options machine_options_for_provider(vmname, config)
           add_machine_options(
             convergence_options: {

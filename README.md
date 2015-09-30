@@ -71,7 +71,7 @@ Note rake up will often fail on the `chef-client --config $PWD/.chef/knife.rb -z
 Things I've found that help get around issues:
 * Quickly times out: It's trying to connect to artifactory and you aren't on the VPN.  Sign into the VPN
 * It complains that your chef server is older than 1.4.  Comment out that check.
-* It complains it can't find the /files or /templates files in your cookbook.  Try coppying them from ec-metal/cookbooks to ~/.chef/local-mode-cache/cache/cookbooks/
+* It complains it can't find the /files or /templates files in your cookbook. Try copying them from ec-metal/cookbooks to ~/.chef/local-mode-cache/cache/cookbooks/
 
 ### Example config
     {
@@ -206,7 +206,7 @@ The `layouts` object should not need to be changed in most cases.
 <a name="aws" />
 ## Running ec2 on AWS
 1. Create the .aws/config file as described here: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#d0e726
-  
+
   ```
   [default]
   region = us-east-1
@@ -258,7 +258,7 @@ The `layouts` object should not need to be changed in most cases.
 |-----|-------------|
 | region | aws region name |
 | vpc_subnet | aws subnet name |
-| ami_id | aws image id | 
+| ami_id | aws image id |
 | backend_vip -> ipaddress | aws vpc ip |
 
 **WARNING: The current EC2 configuration uses ephemeral disks which ARE LOST WHEN YOU SHUT DOWN THE NODE**

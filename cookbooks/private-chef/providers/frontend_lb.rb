@@ -95,7 +95,7 @@ def get_ssl_id
 end
 
 def server_id
-  node['chef_provisioning']['reference']['server_id']
+  node['chef_provisioning']['reference']['instance_id']
 end
 
 def register_node
