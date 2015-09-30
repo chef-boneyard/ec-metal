@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+include_recipe "ec-harness::#{node['harness']['provider']}"
+
 require 'chef/config'
 
 if node['harness']['ec2']
