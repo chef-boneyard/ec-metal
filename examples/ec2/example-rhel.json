@@ -6,7 +6,11 @@
     "ami_id": "ami-54ac4d3c",
     "ssh_username": "root",
     "use_private_ip_for_ssh": false,
-    "ec_metal_tag" : "EcMetal key will default to no value if attribute is omitted"
+    "tags": {
+      "my_tag": "A tag for your EC2 instance",
+      "another_tag": "If no tags are specified, will default to no tags",
+      "best_tag": "Tags are useful~!"
+    }
   },
   "apply_ec_bugfixes": false,
   "default_package":   "https://web-dl.packagecloud.io/chef/stable/packages/el/6/chef-server-core-12.0.6-1.el6.x86_64.rpm",
@@ -45,4 +49,3 @@
     }
   }
 }
-

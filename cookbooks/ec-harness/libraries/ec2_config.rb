@@ -32,7 +32,7 @@ class Ec2ConfigHelper
               delete_on_termination: true
             }
           },
-          {device_name: '/dev/sdb', virtual_name: 'ephemeral0'}
+          { device_name: '/dev/sdb', virtual_name: 'ephemeral0' }
         ]
       },
       :aws_tags => node['harness']['ec2']['tags'], # expecting a hash of tags
@@ -40,7 +40,5 @@ class Ec2ConfigHelper
         :install_sh_arguments => '-P chefdk'
       }
     }
-
   end
-
 end
