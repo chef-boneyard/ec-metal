@@ -21,9 +21,8 @@ machine_batch 'remaining_ec_servers' do
       recipe 'private-chef::hostname'
       recipe 'private-chef::hostsfile'
       recipe 'private-chef::rhel'
-      recipe 'private-chef::provision'
-      recipe 'private-chef::bugfixes' if node['harness']['apply_ec_bugfixes'] == true
       recipe 'private-chef::drbd' if ecm_topo_chef.is_backend?(vmname)
+      recipe 'private-chef::provision'
       recipe 'private-chef::provision_phase2'
       recipe 'private-chef::reporting' if node['harness']['reporting_package']
       recipe 'private-chef::manage' if node['harness']['manage_package'] &&

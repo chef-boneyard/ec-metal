@@ -71,7 +71,7 @@ module EcHarness
       if ecm_topo.is_ha?
         attributes['configuration']['rabbitmq']['vip'] = attributes['backend_vip']['ipaddress']
       else
-        attributes['configuration']['rabbitmq']['vip'] = ecm_topo.bootstrap_host_name
+        attributes['configuration']['rabbitmq']['vip'] = ecm_topo.bootstrap_host_ip
       end
     end
     attributes

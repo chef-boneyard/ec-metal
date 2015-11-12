@@ -104,7 +104,6 @@ class TopoHelper
         is_analytics_frontends?(nodename) || is_analytics_workers?(nodename)
   end
 
-
   def is_standalone?(nodename)
     is_topo_type?(nodename, 'standalones')
   end
@@ -134,7 +133,7 @@ class TopoHelper
   end
 
   def bootstrap_host_ip
-    bootstrap_node.values.first['ipaddress']
+    bootstrap_node.values.first['ipaddress'] || get_node_ip(bootstrap_node_name)
   end
 
   def bootstrap_node
@@ -189,6 +188,23 @@ class TopoHelper
   end
 
   private
+
+  def get_node_ip(vmname)
+    rest = Chef::ServerAPI.new()
+    begin
+      nodeinfo = rest.get("/nodes/#{vmname}")
+    rescue Net::HTTPServerException
+      # Handle the 404 meaning the machine hasn't been created yet
+      nodeinfo = {'automatic' => { 'ipaddress' => '127.0.0.1' } }
+    end
+
+    if nodeinfo.has_key?('automatic')
+      return nodeinfo['automatic']['ipaddress']
+    else
+      return '127.0.0.1'
+    end
+  end
+
 
   def layer_exists?(layer)
     @ec_config[layer].is_a?(Hash)

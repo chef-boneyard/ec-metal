@@ -31,14 +31,44 @@ class Ec2ConfigHelper
               volume_type: 'gp2',
               delete_on_termination: true
             }
-          },
-          { device_name: '/dev/sdb', virtual_name: 'ephemeral0' }
-        ]
+          }
+        ] + ephemeral_volumes(config['instance_type'])
       },
       :aws_tags => node['harness']['ec2']['tags'], # expecting a hash of tags
       :convergence_options => {
-        :install_sh_arguments => '-P chefdk'
+        :install_sh_arguments => '-P chefdk',
+        :root => '/opt/chefdk'
       }
     }
+  end
+
+  def self.ephemeral_volumes(instance_type)
+    ephemeral_volumes = []
+    number_volumes = instance_type_ephemeral_vols(instance_type)
+    return ephemeral_volumes if number_volumes == 0
+    1.upto(number_volumes).each do |i|
+      array_pos = i - 1
+      ephemeral_volumes << {device_name: diskmap[array_pos], virtual_name: "ephemeral#{array_pos}" }
+    end
+    ephemeral_volumes
+  end
+
+  def self.diskmap
+    ('b'..'z').map { |l| "sd#{l}" }
+  end
+
+  def self.instance_type_ephemeral_vols(instance_type)
+    case instance_type
+    when 'i2.8xlarge'
+      8
+    when 'i2.4xlarge'
+      4
+    when 'm3.xlarge', 'm3.2xlarge', 'c3.large', 'c3.xlarge', 'c3.2xlarge', 'c3.4xlarge', 'c3.8xlarge', 'r3.8xlarge', 'i2.2xlarge'
+      2
+    when 'm3.medium', 'm3.large', 'g2.2xlarge', 'r3.large', 'r3.xlarge', 'r3.2xlarge', 'r3.4xlarge', 'i2.xlarge'
+      1
+    else
+      0
+    end
   end
 end
