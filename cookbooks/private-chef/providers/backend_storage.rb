@@ -206,6 +206,7 @@ def create_lvm(disks, mountpoint = nil)
   fs_type = fstype
   lvm_volume_group 'opscode' do
     physical_volumes disks
+    wipe_signatures true
 
     logical_volume 'drbd' do
       size        '80%VG'
