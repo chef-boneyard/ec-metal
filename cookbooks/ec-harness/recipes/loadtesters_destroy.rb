@@ -32,8 +32,8 @@ with_chef_server chef_server_url,
 
 
 node['harness']['vm_config']['loadtesters'].each do |vmname, config|
-  log 1.upto(node['harness']['loadtesters']['num_loadtesters']).map {|i| "#{ENV['USER']}-#{vmname}-#{i}" }
-  machine_batch "cleanup_loadtesters_#{vmname}" do
+  # log 1.upto(node['harness']['loadtesters']['num_loadtesters']).map {|i| "#{ENV['USER']}-#{vmname}-#{i}" }
+  machine_batch do
     action :destroy
     machines 1.upto(node['harness']['loadtesters']['num_loadtesters']).map {|i| "#{ENV['USER']}-#{vmname}-#{i}" }
   end

@@ -1,4 +1,4 @@
-#!/opt/chef/embedded/bin/ruby
+#!/opt/chefdk/embedded/bin/ruby
 # Reassigns a VPC secondary IP address to the other backend node
 # Created by Chef private-chef::ec2
 require 'fog'
@@ -10,7 +10,7 @@ when "attach"
   region = "<%= node['cloud']['region'] %>"
   aws_access_key_id = "<%= node['cloud']['aws_access_key_id'] %>"
   aws_secret_access_key = "<%= node['cloud']['aws_secret_access_key'] %>"
-  server_id = "<%= node['chef_provisioning']['reference']['insance_id'] %>"
+  server_id = "<%= node['chef_provisioning']['reference']['instance_id'] %>"
   ipaddress = "<%= node['private-chef']['backend_vip']['ipaddress'] %>"
 
   compute = Fog::Compute.new( :region => region,
