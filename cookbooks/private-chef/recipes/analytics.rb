@@ -118,6 +118,6 @@ template '/etc/opscode-analytics/opscode-analytics.rb' do
 end
 
 execute 'reconfigure-analytics' do
-  command 'opscode-analytics-ctl reconfigure'
+  command 'opscode-analytics-ctl reconfigure --accept-license'
   action :run
 end

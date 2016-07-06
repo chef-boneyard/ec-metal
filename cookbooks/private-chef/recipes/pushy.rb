@@ -20,6 +20,6 @@ package installer_name do
 end
 
 execute "reconfigure-pushy" do
-  command "opscode-push-jobs-server-ctl reconfigure"
+  command "opscode-push-jobs-server-ctl reconfigure --accept-license"
   action :run
 end

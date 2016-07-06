@@ -34,7 +34,7 @@ ruby_block 'p-c-c reconfigure' do
       if node['osc-install']
         cmd = Mixlib::ShellOut.new('/opt/chef-server/bin/chef-server-ctl reconfigure', live_stream: STDOUT)
       else
-        cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl reconfigure', live_stream: STDOUT)
+        cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl reconfigure --accept-license', live_stream: STDOUT)
       end
       cmd.run_command
       if cmd.error?
