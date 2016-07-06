@@ -42,6 +42,6 @@ end
 
 
 execute 'reconfigure-reporting' do
-  command 'opscode-reporting-ctl reconfigure'
+  command 'opscode-reporting-ctl reconfigure --accept-license'
   action :run
 end
