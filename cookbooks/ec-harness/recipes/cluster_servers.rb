@@ -13,7 +13,7 @@ machine_batch 'remaining_ec_servers' do
 
     machine vmname do
       machine_options machine_options_for_provider(vmname, config)
-      attribute 'private-chef', privatechef_attributes
+      attribute 'private-chef', lazy { privatechef_attributes }
       attribute 'root_ssh', node['harness']['root_ssh'].to_hash
       attribute 'osc-install', node['harness']['osc_install']
       attribute 'osc-upgrade', node['harness']['osc_upgrade']
