@@ -10,6 +10,7 @@ DEPENDENCIES
     git: https://github.com/irvingpop/ec-tools
     revision: 48a0dcbee1e931796d476a6811d8d5db0dd6da39
   hostsfile (~> 2.0)
+  iptables (= 2.0.1)
   lvm
     git: https://github.com/chef-cookbooks/lvm
     revision: 3e4f5bed323a37dd009ea2069fdc2bc953c876c7
@@ -62,7 +63,7 @@ GRAPH
     yum-epel (>= 0.0.0)
   dpkg_autostart (0.2.0)
   ec-tools (0.2.1)
-  git (4.5.0)
+  git (4.6.0)
     build-essential (>= 0.0.0)
     dmg (>= 0.0.0)
     windows (>= 0.0.0)
@@ -71,7 +72,8 @@ GRAPH
   homebrew (2.1.0)
     build-essential (>= 2.1.2)
   hostsfile (2.4.5)
-  iptables (2.2.0)
+  iptables (2.0.1)
+    compat_resource (>= 0.0.0)
   iptables-ng (2.2.11)
   logrotate (1.9.2)
   lvm (1.5.2)
@@ -85,7 +87,7 @@ GRAPH
   modules (0.2.0)
   ohai (4.1.1)
     compat_resource (>= 12.10)
-  packagecloud (0.2.3)
+  packagecloud (0.2.4)
   polipo (0.1.0)
   push-jobs (2.2.1)
     runit (>= 0.0.0)
@@ -94,9 +96,9 @@ GRAPH
     packagecloud (>= 0.0.0)
   seven_zip (2.0.1)
     windows (>= 1.2.2)
-  sysctl (0.7.0)
-    ohai (>= 0.0.0)
-  windows (1.44.0)
+  sysctl (0.8.0)
+    ohai (~> 4.0)
+  windows (1.44.1)
     chef_handler (>= 0.0.0)
   yum (3.11.0)
   yum-elrepo (0.2.1)

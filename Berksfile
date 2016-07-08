@@ -7,6 +7,7 @@ cookbook 'lvm', git: 'https://github.com/chef-cookbooks/lvm', branch: 'irving/vg
 cookbook 'yum', '~> 3.0'
 cookbook 'yum-elrepo', :git => 'https://github.com/irvingpop/yum-elrepo', :branch => 'add_elrepo_testing_extras'
 cookbook 'yum-epel'
+cookbook 'iptables', '= 2.0.1'
 
 # For loadtester hosts/guests
 cookbook 'docker', :git => "https://github.com/irvingpop/chef-docker.git", :branch => "ubuntu_vivid"
