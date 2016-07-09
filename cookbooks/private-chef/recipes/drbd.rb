@@ -6,7 +6,6 @@ when 'debian'
     node['cloud']['provider'] == 'ec2' &&
     node['cloud']['backend_storage_type'] == 'drbd'
 when 'rhel'
-  include_recipe 'yum-epel'
   include_recipe 'yum-elrepo'
   # while we wait for the RHEL7.1 drbd module to get promoted to elrepo stable:
   include_recipe 'yum-elrepo::testing' if node['platform_version'].to_f == 7.1

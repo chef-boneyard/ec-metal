@@ -31,4 +31,10 @@ if platform_family?('rhel')
     mode '0644'
     content "*          soft    nofile     1048576\n*          hard    nofile     1048576"
   end
+
+  include_recipe 'yum-epel'
+
+  package 'atop'
+  package 'telnet'
+  package 'nc'
 end
