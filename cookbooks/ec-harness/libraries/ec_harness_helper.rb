@@ -5,7 +5,7 @@ require 'inifile'
 module EcHarness
   # Define our 3 reusable topology types and make them available in recipe DSL
   def ecm_topo
-    @topo ||= TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['loadtesters'])
+    TopoHelper.new(ec_config: node['harness']['vm_config'], exclude_layers: ['loadtesters'])
   end
 
   def ecm_topo_chef

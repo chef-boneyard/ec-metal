@@ -10,7 +10,7 @@ if node['harness']['analytics_package'] && is_analytics?
 
       machine vmname do
         machine_options machine_options_for_provider(vmname, config)
-        attribute 'private-chef', privatechef_attributes
+        attribute 'private-chef', lazy { privatechef_attributes }
         attribute 'analytics', analytics_attributes
         attribute 'root_ssh', node['harness']['root_ssh'].to_hash
 

@@ -133,6 +133,7 @@ class TopoHelper
   end
 
   def bootstrap_host_ip
+    # return the ipaddress if in the config (static hosts) or else look it up
     bootstrap_node.values.first['ipaddress'] || get_node_ip(bootstrap_node_name)
   end
 
