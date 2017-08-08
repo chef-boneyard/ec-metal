@@ -95,6 +95,7 @@ module EcHarness
     case provider
     when 'ec2'
       aws_credentials = load_aws_credentials
+      puts "[IRVING] aws_credentials = #{aws_credentials}"
       cloud_attrs['aws_access_key_id'] ||= aws_credentials['default'][:aws_access_key_id]
       cloud_attrs['aws_secret_access_key'] ||= aws_credentials['default'][:aws_secret_access_key]
     end
@@ -158,7 +159,7 @@ module EcHarness
   end
 
   def load_aws_credentials
-    config_file = ENV['AWS_CONFIG_FILE'] || File.expand_path('~/.aws/config')
+    config_file = ENV['AWS_CONFIG_FILE'] || File.expand_path('~/.aws/credentials')
     if File.file?(config_file)
       load_aws_ini(config_file)
     else

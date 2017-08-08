@@ -56,7 +56,13 @@ execute "reconfigure-private-chef-for-manage" do
   action :run
 end
 
+if PackageHelper.package_version(installer_name) < '2.3.0'
+  reconfigure_cmd = "#{manage_name}-ctl reconfigure"
+else
+  reconfigure_cmd = "#{manage_name}-ctl reconfigure --accept-license"
+end
+
 execute "reconfigure-manage" do
-  command "#{manage_name}-ctl reconfigure --accept-license"
+  command reconfigure_cmd
   action :run
 end

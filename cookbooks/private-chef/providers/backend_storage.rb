@@ -103,7 +103,7 @@ def create_ebs_volume
 end
 
 def rootdev
-  node.filesystem.select { |k,v| v['mount'] == '/' }.keys.first
+  node['filesystem']['by_mountpoint']['/']['devices'].first
 end
 
 # Return array of disk devices, so we can use first, second, third, etc

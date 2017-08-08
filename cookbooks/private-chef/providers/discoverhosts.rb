@@ -46,7 +46,7 @@ action :create do
     topo.found_topo_types.each do |whichend|
       node['private-chef'][whichend].each do |vmname, config|
         if vmname == node.name
-          ipaddress = node.ipaddress
+          ipaddress = node['ipaddress']
           log "Using IP address #{ipaddress} for myself: #{vmname}"
 
           # set a "special" alias pointed at ourself

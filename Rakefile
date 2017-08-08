@@ -86,17 +86,17 @@ end
 
 desc 'Add hosts entries to /etc/hosts'
 task :add_hosts do
-  config = get_config
-  config = fog_populate_ips(config) if config['provider'] == 'ec2'
-  create_hosts_entries(config['layout'])
-  print_final_message(config, EcMetal::Api.repo_dir)
+  # config = get_config
+  # config = fog_populate_ips(config) if config['provider'] == 'ec2'
+  # create_hosts_entries(config['layout'])
+  # print_final_message(config, EcMetal::Api.repo_dir)
 end
 
 desc 'Remove hosts entries to /etc/hosts'
 task :remove_hosts do
-  config = get_config
-  config = fog_populate_ips(config) if config['provider'] == 'ec2'
-  remove_hosts_entries(config['layout'])
+  # config = get_config
+  # config = fog_populate_ips(config) if config['provider'] == 'ec2'
+  # remove_hosts_entries(config['layout'])
 end
 
 task :cachedir do
@@ -113,9 +113,9 @@ end
 
 desc "Open csshx to the nodes of the server."
 task :csshx do
-  config = get_config
-  config = fog_populate_ips(config) if config['provider'] == 'ec2'
-  csshx(config, repo_dir)
+  # config = get_config
+  # config = fog_populate_ips(config) if config['provider'] == 'ec2'
+  # csshx(config, repo_dir)
 end
 
 desc "Execute a command on a remote machine"

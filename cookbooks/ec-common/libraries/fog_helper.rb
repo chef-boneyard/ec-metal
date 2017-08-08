@@ -92,7 +92,7 @@ class FogHelper
       :provider => 'AWS')
   end
 
-  def load_ini(credentials_ini_file='~/.aws/config', ini_profile='default')
+  def load_ini(credentials_ini_file='~/.aws/credentials', ini_profile='default')
     require 'inifile'
     credentials = {}
     inifile = IniFile.load(File.expand_path(credentials_ini_file))

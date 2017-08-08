@@ -205,7 +205,7 @@ The `layouts` object should not need to be changed in most cases.
 
 <a name="aws" />
 ## Running ec2 on AWS
-1. Create the .aws/config file as described here: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#d0e726
+1. Create the .aws/credentials file as described here: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#d0e726
 
   ```
   [default]

@@ -27,49 +27,66 @@ if node['private-chef']['lemme_doit'] == true
 end
 
 
-ruby_block 'p-c-c reconfigure' do
-  block do
-    begin
-      tries ||= 2
-      if node['osc-install']
-        cmd = Mixlib::ShellOut.new('/opt/chef-server/bin/chef-server-ctl reconfigure', live_stream: STDOUT)
-      else
-        cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl reconfigure --accept-license', live_stream: STDOUT)
-      end
-      cmd.run_command
-      if cmd.error?
-        cmd.error!
-      else
-        ::File.open("/var/log/p-c-c-reconfigure-#{Time.now.strftime("%Y%m%d_%H%M%S")}.log", 'w') { |lf| lf.write(cmd.stdout) }
-        puts '--- BEGIN private-chef-ctl reconfigure output ---'
-        puts cmd.stdout
-        puts '--- END private-chef-ctl reconfigure output ---'
-      end
-    rescue Exception => e
-      ::File.open("/var/log/p-c-c-reconfigure-#{Time.now.strftime("%Y%m%d_%H%M%S")}.log", 'w') { |lf| lf.write(cmd.stdout) }
-      puts "#{e} Previous private-chef-ctl reconfigure failed, sleeping for 30 and trying again"
-      sleep 30
-      unless (tries -= 1).zero?
-        retry
-      else
-        raise 'private-chef-ctl reconfigure failed and retries exceeded'
-      end
-    end
-  end
-  # Contentious change, but we should no longer baby the upgrade process:
-  not_if 'ls /tmp/private-chef-perform-upgrade'
-  not_if { node['osc-upgrade'] }
-  notifies :create, 'wait_for_ha_master[p-c-c reconfigure]', :immediately if topology.is_ha?
-  notifies :create, 'wait_for_server_ready[p-c-c reconfigure]', :immediately
+# ruby_block 'p-c-c reconfigure' do
+#   block do
+#     begin
+#       tries ||= 2
+#       if node['osc-install']
+#         cmd = Mixlib::ShellOut.new('/opt/chef-server/bin/chef-server-ctl reconfigure', live_stream: STDOUT)
+#       else
+#         # cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl reconfigure --accept-license', live_stream: STDOUT)
+#         cmd = Mixlib::ShellOut.new('/opt/opscode/bin/private-chef-ctl reconfigure', live_stream: STDOUT)
+#       end
+#       cmd.run_command
+#       if cmd.error?
+#         cmd.error!
+#       else
+#         ::File.open("/var/log/p-c-c-reconfigure-#{Time.now.strftime("%Y%m%d_%H%M%S")}.log", 'w') { |lf| lf.write(cmd.stdout) }
+#         puts '--- BEGIN private-chef-ctl reconfigure output ---'
+#         puts cmd.stdout
+#         puts '--- END private-chef-ctl reconfigure output ---'
+#       end
+#     rescue Exception => e
+#       ::File.open("/var/log/p-c-c-reconfigure-#{Time.now.strftime("%Y%m%d_%H%M%S")}.log", 'w') { |lf| lf.write(cmd.stdout) }
+#       puts "#{e} Previous private-chef-ctl reconfigure failed, sleeping for 30 and trying again"
+#       sleep 30
+#       unless (tries -= 1).zero?
+#         retry
+#       else
+#         raise 'private-chef-ctl reconfigure failed and retries exceeded'
+#       end
+#     end
+#   end
+#   # Contentious change, but we should no longer baby the upgrade process:
+#   not_if 'ls /tmp/private-chef-perform-upgrade'
+#   not_if { node['osc-upgrade'] }
+#   # notifies :create, 'wait_for_ha_master[reconfigure]', :immediately if topology.is_ha?
+#   # notifies :create, 'wait_for_server_ready[reconfigure]', :immediately
+# end
+
+if PackageHelper.package_version(node['private-chef']['installer_file']) < '12.8.0'
+  reconfigure_cmd = '/opt/opscode/bin/private-chef-ctl reconfigure'
+else
+  reconfigure_cmd = '/opt/opscode/bin/private-chef-ctl reconfigure --accept-license'
 end
 
-wait_for_ha_master 'p-c-c reconfigure' do
-  action :nothing
+execute 'p-c-c reconfigure' do
+  command reconfigure_cmd
+  action :run
+  live_stream true
+  retries 3
+  retry_delay 30
+  not_if 'ls /tmp/private-chef-perform-upgrade'
+  not_if { node['osc-upgrade'] }
+end
+
+wait_for_ha_master do
+  action :create
   only_if { node.name == topology.bootstrap_node_name }
 end
 
-wait_for_server_ready 'p-c-c reconfigure' do
-  action :nothing
+wait_for_server_ready do
+  action :create
   only_if { node.name == topology.bootstrap_node_name }
   not_if 'ls /tmp/private-chef-perform-upgrade'
 end

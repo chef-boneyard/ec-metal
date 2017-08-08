@@ -2,45 +2,47 @@
 
 topology = TopoHelper.new(ec_config: node['private-chef'])
 
-rootdev = node.filesystem.select { |k,v| v['mount'] == '/' }.keys.first
-rootdisk, rootpartition = rootdev.partition(/[0-9]/)
+# rootdev = node.filesystem.select { |k,v| v['mount'] == '/' }.keys.first
+# rootdisk, rootpartition = rootdev.partition(/[0-9]/)
 
-ephemeraldev = node.filesystem.select { |k,v| v['mount'] == '/mnt' }.keys.first || '/dev/null'
-
-def is_gpt?(rootdisk)
-  parted = `parted #{rootdisk} print -ms | grep ^#{rootdisk}`.split(':')[5]
-  parted == 'gpt'
-end
-
+# def is_gpt?(rootdisk)
+#   parted = `parted #{rootdisk} print -ms | grep ^#{rootdisk}`.split(':')[5]
+#   parted == 'gpt'
+# end
+#
 # Resize EBS root volume
 # special case for RHEL/HVM AMIs that require a reboot to notice the resized disk
-if node['platform_family'] == 'rhel' && node['platform_version'].to_f < 7.1
-  if is_gpt?(rootdisk)
-    reboot 'diskresize' do
-      action :cancel
-      delay_mins 1
-    end
+# if node['platform_family'] == 'rhel' && node['platform_version'].to_f < 7.1
+#   if is_gpt?(rootdisk)
+#     reboot 'diskresize' do
+#       action :cancel
+#       delay_mins 1
+#     end
+#
+#     package 'gdisk'
+#
+#     execute 'Resize root EBS volume' do
+#       command "growpart --update off #{rootdisk} #{rootpartition} && touch /.root_resized"
+#       action :run
+#       not_if { ::File.exists?('/.root_resized') }
+#       notifies :request_reboot, 'reboot[diskresize]'
+#     end
+#   else
+#     execute 'Resize root EBS volume' do
+#       command "resize2fs #{rootdev} && touch /.root_resized"
+#       action :run
+#       not_if { ::File.exists?('/.root_resized') }
+#     end
+#   end
+# end
 
-    package 'gdisk'
+if node['filesystem']['by_mountpoint'].has_key?('/mnt')
+  ephemeraldev = node['filesystem']['by_mountpoint']['/mnt']['devices'].first
 
-    execute 'Resize root EBS volume' do
-      command "growpart --update off #{rootdisk} #{rootpartition} && touch /.root_resized"
-      action :run
-      not_if { ::File.exists?('/.root_resized') }
-      notifies :request_reboot, 'reboot[diskresize]'
-    end
-  else
-    execute 'Resize root EBS volume' do
-      command "resize2fs #{rootdev} && touch /.root_resized"
-      action :run
-      not_if { ::File.exists?('/.root_resized') }
-    end
+  mount '/mnt' do
+    action [:umount, :disable]
+    device ephemeraldev
   end
-end
-
-mount '/mnt' do
-  action [:umount, :disable]
-  device ephemeraldev
 end
 
 directory '/var/opt/opscode/keepalived/bin' do

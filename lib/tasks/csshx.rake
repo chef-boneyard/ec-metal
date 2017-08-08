@@ -34,7 +34,7 @@ cssh_repo_dir = ENV['REPO_PATH'] ||= File.join(cssh_harness_dir, 'chef-repo')
 
 desc "Open csshx to the nodes of the server."
 task :csshx do
-  config = get_config
-  config = fog_populate_ips(config) if config['provider'] == 'ec2'
-  csshx(config, cssh_repo_dir)
+  # config = get_config
+  # # config = fog_populate_ips(config) if config['provider'] == 'ec2'
+  # csshx(config, cssh_repo_dir)
 end

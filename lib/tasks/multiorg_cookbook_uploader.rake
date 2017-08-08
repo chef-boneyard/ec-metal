@@ -1,10 +1,10 @@
 require_relative '../../cookbooks/ec-common/libraries/topo_helper'
-require_relative '../../cookbooks/ec-common/libraries/fog_helper'
+# require_relative '../../cookbooks/ec-common/libraries/fog_helper'
 require 'resolv'
 
-def fog
-  FogHelper.new(region: CONFIG['ec2_options']['region'])
-end
+# def fog
+#   FogHelper.new(region: CONFIG['ec2_options']['region'])
+# end
 
 # cargo culted from: http://t-a-w.blogspot.com/2010/05/very-simple-parallelization-with-ruby.html
 def Exception.ignoring_exceptions
@@ -54,11 +54,11 @@ USERS_PATH = ::File.join(harness_dir, 'users')
 # chef_org_validation_pem = ::File.join(users_path, "#{chef_org}-validator.pem")
 CHEF_USER = 'pinkiepie'
 CHEF_USER_PEM = ::File.join(USERS_PATH, CHEF_USER, '.chef', "#{CHEF_USER}.pem")
-if CONFIG['ec2_options'] && CONFIG['ec2_options']['elb'] && CONFIG['ec2_options']['elb'] == true
-  CHEF_SERVER =  fog.get_elb_dns_name(elb_name)
-else
-  CHEF_SERVER = resolve_bootstrap_host_name
-end
+# if CONFIG['ec2_options'] && CONFIG['ec2_options']['elb'] && CONFIG['ec2_options']['elb'] == true
+#   CHEF_SERVER =  fog.get_elb_dns_name(elb_name)
+# else
+#   CHEF_SERVER = resolve_bootstrap_host_name
+# end
 # chef_server_url = "https://#{chef_server}/organizations/#{chef_org}"
 HARNESS_KNIFE_CONFIG = ::File.join(harness_dir, '.chef', 'knife.rb')
 BERKS_CONFIG_DIR = ::File.join(harness_dir, 'berks_configs')
